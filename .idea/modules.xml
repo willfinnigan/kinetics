@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Kinetics.iml" filepath="$PROJECT_DIR$/.idea/Kinetics.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../modelling_paper/.idea/modelling_paper.iml" filepath="$PROJECT_DIR$/../modelling_paper/.idea/modelling_paper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/new_modelling.iml" filepath="$PROJECT_DIR$/.idea/new_modelling.iml" />
+    </modules>
+  </component>
+</project>
