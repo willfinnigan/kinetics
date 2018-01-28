@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import integrate
+import datetime
 """
 The model class, which derives from a list.  
 The list is a list of the reaction functions.  
@@ -21,7 +22,6 @@ class Model(list):
         self.species_starting_values = []
 
         self.parameters = {}
-
 
     def set_time(self, start, end, steps, mxsteps=10000):
         self.start = start
@@ -63,6 +63,9 @@ class Model(list):
 
         return y
 
+
+
+
 """Functions for formatting species and parameters dicts to the correct format"""
 def get_species_positions(species):
     species_names = []
@@ -98,6 +101,10 @@ def set_species_defaults(species_with_error):
 
     return species
 
+
+
+
+
 """Functions to add or substract the rate from yprime at the correct index's"""
 def yprime_plus(y_prime, rate, substrates, s_names):
 
@@ -111,6 +118,10 @@ def yprime_minus(y_prime, rate, substrates, s_names):
         y_prime[s_names.index(name)] -= rate
 
     return y_prime
+
+
+
+
 
 """Functions to output basic model output (with only 1 set of y values)"""
 def print_model_output(y, time, species_names, names_to_output):
@@ -127,3 +138,50 @@ def print_model_output(y, time, species_names, names_to_output):
         for name in names_to_output:
             print(str(y[i][species_names.index(name)]) + ", ", end="")
         print()
+
+def save_model_ouput(y, model, names_to_output, filename=''):
+    import os
+    directory = os.path.dirname('output/')
+
+    try:
+        os.stat(directory)
+    except:
+        os.mkdir(directory)
+
+    if filename == '':
+        filename = os.path.basename(__file__)
+        filename = filename[0:-3] + '.txt'
+
+    filename = directory + "/" + filename
+
+    file = open(filename, "w")
+
+    file.write("Date: " + str(datetime.datetime.now()) + str("\n"))
+    file.write("\n")
+
+    file.write("---Species concentrations--- \n")
+    for i in range(len(model.species_names)):
+        file.write(str(model.species_names[i]) + " : " + str(model.species_starting_values[i]) + "\n")
+
+    file.write("\n")
+
+    file.write("--- Parameters --- \n")
+    for name in model.parameters:
+        file.write(name + " : " + str(model.parameters[name]) + "\n")
+
+    file.write("\n")
+
+    file.write("Time" + ", ")
+
+    for name in names_to_output:
+        file.write(str(name) + ", ")
+    file.write("\n")
+
+    for i in range(len(model.time)):
+        file.write(str(model.time[i]) + ", ")
+
+        for name in names_to_output:
+            file.write(str(y[i][model.species_names.index(name)]) + ", ")
+        file.write("\n")
+
+    file.close()

@@ -1,10 +1,9 @@
 from SALib.sample import latin, saltelli
 from SALib.analyze import sobol
-from Kinetics.kinetics import *
+from Kinetics.Model import *
 import numpy as np
 
 """ Setup the bounds for uncertainty or sensitivity analsyis"""
-
 
 def setup_bounds_lists(dict_with_bounds):
     names_list = []
@@ -55,8 +54,10 @@ def get_bounds_from_pc_error(dict_with_pc_error):
     return dict_with_bounds
 
 
-""" Sampling - returns a list of ordered lists containing sampled parameters and sampled species concentrations"""
 
+
+
+""" Sampling - returns a list of ordered lists containing sampled parameters and sampled species concentrations"""
 
 def compile_params_species(parameter_names_list, parameter_bounds_list, species_names_list, species_bounds_list):
     names_list = []
@@ -96,32 +97,35 @@ def make_samples_for_sobal(parameter_names_list, parameter_bounds_list, species_
     return sampled_inputs, problem
 
 
+
+
+
 """ Run uncertainty analysis or sensitivity analysis"""
 
-
-def unpack_sampled_params_and_species(sample_list, parameter_names_list, species_names_list):
-    parameters = {}
-    count = 0
-    for i in range(len(parameter_names_list)):
-        name = parameter_names_list[i]
-        parameters[name] = sample_list[i]
-        count += 1
-
-    species = {}
-    for i in range(count, len(species_names_list) + count):
-        name = species_names_list[i - count]
-        species[name] = sample_list[i]
-
-    return parameters, species
-
 def parse_samples_to_run(samples, parameter_names, species_names):
-    param_species_samples = []
+    parsed_samples = []
+
+    def unpack_sampled_params_and_species(sample_list, parameter_names_list, species_names_list):
+        parameters = {}
+        count = 0
+        for i in range(len(parameter_names_list)):
+            name = parameter_names_list[i]
+            parameters[name] = sample_list[i]
+            count += 1
+
+        species = {}
+        for i in range(count, len(species_names_list) + count):
+            name = species_names_list[i - count]
+            species[name] = sample_list[i]
+
+        return parameters, species
+
     for sampled in samples:
         parameters, species = unpack_sampled_params_and_species(sampled, parameter_names, species_names)
-        param_species_samples.append([parameters, species])
+        parsed_samples.append([parameters, species])
 
     # returns a list of tuples containing [(parameter_dict, species_dict), ] for each sample
-    return param_species_samples
+    return parsed_samples
 
 def run_all_models(parsed_samples, model):
     ua_sa_output = []
@@ -143,10 +147,11 @@ def run_all_models(parsed_samples, model):
     return ua_sa_output
 
 
+
+
 """ Process uncertainty analysis"""
 
-
-def find_quartiles(ys_for_single_substrate, name, quartile=95):
+def return_quartiles(ys_for_single_substrate, name, quartile=95):
     quartiles = [["Time"], [str(name) + " High"], [str(name) + " Low"], [str(name) + " Mean"]]
 
     for i in range(len(ys_for_single_substrate)):
@@ -158,9 +163,7 @@ def find_quartiles(ys_for_single_substrate, name, quartile=95):
         quartiles[2].append(np.percentile(output_at_t[1:], 100 - quartile))
         quartiles[3].append(np.mean(output_at_t[1:]))
 
-    final_output = quartiles
-
-    return final_output
+    return quartiles
 
 def collect_runs_for_substrate(time, list_y, species_names, name):
     """
@@ -182,46 +185,6 @@ def collect_runs_for_substrate(time, list_y, species_names, name):
         collected_output.append(timepoint)
 
     return collected_output
-
-def process_ua_output(ua_output, time, species_names, quartile_range=95):
-    output = {}
-
-    for name in species_names:
-        collected_runs = collect_runs_for_substrate(time, ua_output, species_names, name)
-        quartiles = find_quartiles(collected_runs, name, quartile=quartile_range)
-
-        output[name] = quartiles
-
-    return output
-
-
-""" Process sensitivity analysis"""
-
-
-def get_outputs_for_sobal(ua_sa_output, species_names, name, time_point, time):
-    closest_timepoint = min(time, key=lambda x: abs(x - time_point))
-    index = list(time).index(closest_timepoint)
-
-    outputs = []
-    for y in ua_sa_output:
-        output = y[index][species_names.index(name)]
-        outputs.append(output)
-
-    return np.array(outputs)
-
-def analyse_satelli_sobol(problem, outputs,
-                          second_order=False, conf_level=0.95, num_resample=100):
-    return sobol.analyze(problem,
-                         outputs,
-                         calc_second_order=second_order,
-                         num_resamples=num_resample,
-                         conf_level=conf_level,
-                         print_to_console=True,
-                         parallel=False,
-                         n_processors=None)
-
-
-
 
 
 
@@ -248,9 +211,10 @@ class UA():
         self.problem = 0
 
         self.ua_output = []
+        self.quartile_output = {}
 
-    def make_lhc_samples(self):
 
+    def analyse_number_of_samples_vs_parameters(self):
         # Code for text output
         num_params = len(self.parameter_names)
         num_specs = len(self.species_names)
@@ -262,6 +226,8 @@ class UA():
         print(total, "^2 =", total_pw)
         print(str(self.latin_hypercube_samples), "samples made by lhc")
         print("")
+
+    def make_lhc_samples(self):
 
         # Code for making samples
         self.samples, self.problem = make_samples_latin_hypercube(self.parameter_names, self.parameter_bounds,
@@ -278,12 +244,14 @@ class UA():
 
         return self.ua_output
 
-    def calculate_quartiles(self, quartile_range=0):
-        if quartile_range != 0:
-            self.quartile_range=quartile_range
+    def calculate_quartiles(self, quartile_range=95):
 
-        self.quartile_output = process_ua_output(self.ua_output, self.model.time, self.model.species_names,
-                                                 quartile_range=self.quartile_range)
+        for name in self.model.species_names:
+            collected_runs = collect_runs_for_substrate(self.model.time, self.ua_output, self.model.species_names, name)
+            quartiles = return_quartiles(collected_runs, name, quartile=quartile_range)
+
+            self.quartile_output[name] = quartiles
+
         print("quartiles calculated")
 
         return self.quartile_output
@@ -294,11 +262,55 @@ class UA():
             print()
             print("--- " + str(name) + " Uncertainty Analysis Quartiles ---")
             for i in range(len(self.quartile_output[name][0])):
-                for j in range(len(output[name])):
-                    print(str(output[name][j][i]) + ", ", end="")
+                for j in range(len(self.quartile_output[name])):
+                    print(str(self.quartile_output[name][j][i]) + ", ", end="")
                 print()
             print()
 
+    def save_ua_quartile_output(self, names_to_show, filename=''):
+
+        import os
+        directory = os.path.dirname('output/')
+
+        try:
+            os.stat(directory)
+        except:
+            os.mkdir(directory)
+
+        if filename == '':
+            filename = os.path.basename(__file__)
+            filename = filename[0:-3] + '.txt'
+
+        filename = directory + "/" + filename
+
+        file = open(filename, "w")
+
+        file.write("Date: " + str(datetime.datetime.now()) + str("\n"))
+        file.write("\n")
+
+        file.write("---Species concentration bounds--- \n")
+        for i in range(len(self.species_names)):
+            file.write(str(self.species_names[i]) + " : " + str(self.species_bounds[i]) + "\n")
+
+        file.write("\n")
+
+        file.write("--- Parameters --- \n")
+        for i in range(len(self.parameter_bounds)):
+            file.write(str(self.parameter_names[i]) + " : " + str(self.parameter_bounds[i]) + "\n")
+
+        file.write("\n")
+
+        for name in names_to_show:
+            file.write("\n")
+            file.write("--- " + str(name) + " Uncertainty Analysis Quartiles ---")
+            file.write("\n")
+            for i in range(len(self.quartile_output[name][0])):
+                for j in range(len(self.quartile_output[name])):
+                    file.write(str(self.quartile_output[name][j][i]) + ", ")
+                file.write("\n")
+            file.write("\n")
+
+        file.close()
 
 class SA():
     def __init__(self,
@@ -330,9 +342,10 @@ class SA():
 
         self.samples = []
         self.parsed_samples = []
-        self.problem = 0
+        self.problem = {}
 
         self.output = []
+        self.output_at_timepoint = []
         self.analysis = []
 
     def make_saltelli_samples(self):
@@ -354,12 +367,97 @@ class SA():
                                      self.model)
         return self.output
 
+    def get_outputs_at_timepoint(self):
+
+        closest_timepoint = min(self.model.time, key=lambda x: abs(x - self.timepoint_for_analysis))
+        index = list(self.model.time).index(closest_timepoint)
+
+        outputs = []
+        for y in self.output:
+            output = y[index][self.model.species_names.index(self.substrate_for_analysis)]
+            outputs.append(output)
+
+        self.output_at_timepoint = np.array(outputs)
+
+        return self.output_at_timepoint
+
     def analyse_sobal_sensitivity(self):
-        self.analysis = analyse_satelli_sobol(self.problem,
-                                              self.output,
-                                              second_order=self.second_order,
-                                              conf_level=self.conf_level,
-                                              num_resample=self.num_resample)
+
+        self.output_at_timepoint = self.get_outputs_at_timepoint()
+
+        self.analysis = sobol.analyze(self.problem,
+                         self.output_at_timepoint,
+                         calc_second_order=self.second_order,
+                         num_resamples=self.num_resample,
+                         conf_level=self.conf_level,
+                         print_to_console=True,
+                         parallel=False,
+                         n_processors=None)
 
         return self.analysis
+
+    def get_interquartile_of_output_at_timepoint(self, quartile=95):
+
+        upper = np.percentile(self.output_at_timepoint[1:], quartile)
+        lower = np.percentile(self.output_at_timepoint[1:], 100 - quartile)
+
+        return lower, upper
+
+    def save_sa_quartile_output(self, filename=''):
+
+        import os
+        directory = os.path.dirname('output/')
+
+        try:
+            os.stat(directory)
+        except:
+            os.mkdir(directory)
+
+        if filename == '':
+            filename = os.path.basename(__file__)
+            filename = filename[0:-3] + '.txt'
+
+        filename = directory + "/" + filename
+
+        file = open(filename, "w")
+
+        file.write("Date: " + str(datetime.datetime.now()) + str("\n"))
+        file.write("\n")
+
+        file.write("---Species concentration bounds--- \n")
+        for i in range(len(self.species_names)):
+            file.write(str(self.species_names[i]) + " : " + str(self.species_bounds[i]) + "\n")
+
+        file.write("\n")
+
+        file.write("--- Parameters --- \n")
+        for i in range(len(self.parameter_bounds)):
+            file.write(str(self.parameter_names[i]) + " : " + str(self.parameter_bounds[i]) + "\n")
+
+        file.write("\n")
+
+        file.write("--- Sensitivity Analysis Parameters --- \n")
+        file.write("Timepoint for analysis: " + str(self.timepoint_for_analysis) + "\n")
+        file.write("Substrate for analysis: " + str(self.substrate_for_analysis) + "\n")
+
+        file.write("\n")
+
+        lower, upper = self.get_interquartile_of_output_at_timepoint()
+        file.write("5th and 95th quartiles = " + str(lower) + " : " + str(upper))
+
+        file.write("\n")
+        file.write("\n")
+
+        file.write("Parameter, S1, S1_conf, ST, ST conf")
+        file.write("\n")
+        for i in range(len(self.problem['names'])):
+            file.write(self.problem['names'][i] + ", ")
+            file.write(str(self.analysis['S1'][i]) + ", ")
+            file.write(str(self.analysis['S1_conf'][i]) + ", ")
+            file.write(str(self.analysis['ST'][i]) + ", ")
+            file.write(str(self.analysis['ST_conf'][i]))
+            file.write("\n")
+
+        file.close()
+
 
