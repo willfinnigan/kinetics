@@ -42,8 +42,7 @@ model.set_species(species_defaults)
 model.set_time(start, end, number_steps, mxsteps=max_steps)
 
 # Add the reaction functions
-from rate_functions import *
-
+from example.reaction_functions import *
 model.append(esterase_r1)
 
 """ --- Run the model as an uncertainty analysis and sensitivity analysis --- """

@@ -23,6 +23,8 @@ def two_substrate_pingpong_irr(kcat, enz, kma, kmb, a, b):
 
     rate = (kcat * enz * a * b) / ((kmb * a) + (kma * b) + (a * b))
 
+    return rate
+
 def three_substrate_irreversible_ter_ordered(kcat, enz, kma, kmb, kia, kmc, a, b, c):
     rate = (kcat * enz * a * b * c) / ((kia * c) + (kmc * a * b) + (kmb * a * c) + (kma * b * c) + (a * b * c))
 
