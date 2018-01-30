@@ -1,19 +1,21 @@
 import numpy as np
 from scipy import integrate
 import datetime
+
 """
 The model class, which derives from a list.  
 The list is a list of the reaction functions.  
 When the model is run each reaction is modelled in turn and the output added to yprime"""
-class Model(list):
 
+
+class Model(list):
     def __init__(self):
         super(Model, self).__init__()
 
-        self.start=0
-        self.end=100
-        self.steps=100
-        self.mxsteps=10000
+        self.start = 0
+        self.end = 100
+        self.steps = 100
+        self.mxsteps = 10000
 
         self.time = np.linspace(self.start, self.end, self.steps)
 
@@ -31,18 +33,14 @@ class Model(list):
 
         self.time = np.linspace(self.start, self.end, self.steps)
 
-
     def set_parameters(self, parameters):
-
         self.parameters = parameters
 
     def update_parameters(self, parameters):
         self.parameters.update(parameters)
 
-
     def set_species(self, species_defaults):
-
-        #Just encase species with error is entered instead
+        # Just encase species with error is entered instead
         self.species_defaults = set_species_defaults(species_defaults)
 
         self.species_names, self.species_starting_values = get_species_positions(self.species_defaults)
@@ -51,7 +49,6 @@ class Model(list):
         self.species_defaults.update(species_dict)
 
         self.species_names, self.species_starting_values = get_species_positions(self.species_defaults)
-
 
     def deriv(self, y, t):
         yprime = 0
@@ -68,9 +65,9 @@ class Model(list):
         return y
 
 
-
-
 """Functions for formatting species and parameters dicts to the correct format"""
+
+
 def get_species_positions(species):
     species_names = []
     species_starting_values = []
@@ -82,20 +79,18 @@ def get_species_positions(species):
         else:
             species_starting_values.append(species[name])
 
-
-
     return species_names, species_starting_values
 
-def set_parameter_defaults(parameters_with_error):
 
+def set_parameter_defaults(parameters_with_error):
     parameters = {}
     for name in parameters_with_error:
         parameters[name] = parameters_with_error[name][0]
 
     return parameters
 
-def set_species_defaults(species_with_error):
 
+def set_species_defaults(species_with_error):
     species = {}
     for name in species_with_error:
         if type(species_with_error[name]) == list or type(species_with_error[name]) == tuple:
@@ -106,16 +101,15 @@ def set_species_defaults(species_with_error):
     return species
 
 
-
-
-
 """Functions to add or substract the rate from yprime at the correct index's"""
-def yprime_plus(y_prime, rate, substrates, s_names):
 
+
+def yprime_plus(y_prime, rate, substrates, s_names):
     for name in substrates:
         y_prime[s_names.index(name)] += rate
 
     return y_prime
+
 
 def yprime_minus(y_prime, rate, substrates, s_names):
     for name in substrates:
@@ -124,12 +118,10 @@ def yprime_minus(y_prime, rate, substrates, s_names):
     return y_prime
 
 
-
-
-
 """Functions to output basic model output (with only 1 set of y values)"""
-def print_model_output(y, time, species_names, names_to_output):
 
+
+def print_model_output(y, time, species_names, names_to_output):
     print("Time" + ", ", end="")
 
     for name in names_to_output:
@@ -142,6 +134,7 @@ def print_model_output(y, time, species_names, names_to_output):
         for name in names_to_output:
             print(str(y[i][species_names.index(name)]) + ", ", end="")
         print()
+
 
 def save_model_ouput(y, model, names_to_output, filename=''):
     import os

@@ -15,6 +15,7 @@ def setup_bounds_lists(dict_with_bounds):
 
     return names_list, bounds_list
 
+
 def get_bounds_from_std_error(dict_with_std_error):
     dict_with_bounds = {}
 
@@ -32,6 +33,7 @@ def get_bounds_from_std_error(dict_with_std_error):
             dict_with_bounds[name] = 0
 
     return dict_with_bounds
+
 
 def get_bounds_from_pc_error(dict_with_pc_error):
     dict_with_bounds = {}
@@ -56,7 +58,6 @@ def get_bounds_from_pc_error(dict_with_pc_error):
 """ Set up the problem dict which will be used for sampling"""
 def setup_problem(parameter_names, parameter_bounds,
                   species_names, species_bounds):
-
     names_list = []
     names_list.extend(parameter_names)
     names_list.extend(species_names)
@@ -66,8 +67,8 @@ def setup_problem(parameter_names, parameter_bounds,
     bounds.extend(species_bounds)
 
     problem = {'num_vars': len(names_list),
-                    'names': names_list,
-                    'bounds': bounds}
+               'names': names_list,
+               'bounds': bounds}
 
     return problem
 
@@ -98,6 +99,7 @@ def parse_samples_to_run(samples, parameter_names, species_names):
     # returns a list of tuples containing [(parameter_dict, species_dict), ] for each sample
     return parsed_samples
 
+
 def run_all_models(parsed_samples, model):
     ua_sa_output = []
     count = 0
@@ -118,7 +120,6 @@ def run_all_models(parsed_samples, model):
     return ua_sa_output
 
 
-
 """ Process multiple model outputs for uncertainty analysis"""
 def return_quartiles(ys_for_single_substrate, name, quartile=95):
     quartiles = [["Time"], [str(name) + " High"], [str(name) + " Low"], [str(name) + " Mean"]]
@@ -133,6 +134,7 @@ def return_quartiles(ys_for_single_substrate, name, quartile=95):
         quartiles[3].append(np.mean(output_at_t[1:]))
 
     return quartiles
+
 
 def collect_runs_for_substrate(time, list_y, species_names, name):
     """
@@ -156,11 +158,7 @@ def collect_runs_for_substrate(time, list_y, species_names, name):
     return collected_output
 
 
-
-
-
 """Classes to do UA or SA"""
-
 class UA():
     def __init__(self, parameters_with_bounds, species_with_bounds, model,
                  num_samples=1000, quartile_range=95):
@@ -181,7 +179,6 @@ class UA():
 
         self.ua_output = []
         self.quartile_output = {}
-
 
     def analyse_number_of_samples_vs_parameters(self):
         # Code for text output
@@ -281,7 +278,6 @@ class UA():
         file.write(str(total) + "^3 = " + str(total * total * total) + "\n")
         file.write(str(self.num_samples) + " samples made by lhc" + "\n")
 
-
         file.write("\n")
 
         for name in names_to_show:
@@ -295,6 +291,7 @@ class UA():
             file.write("\n")
 
         file.close()
+
 
 class SA():
     def __init__(self,
@@ -368,13 +365,13 @@ class SA():
         self.output_for_analysis = self.get_outputs_at_timepoint()
 
         self.analysis = sobol.analyze(self.problem,
-                         self.output_for_analysis,
-                         calc_second_order=self.second_order,
-                         num_resamples=self.num_resample,
-                         conf_level=self.conf_level,
-                         print_to_console=True,
-                         parallel=False,
-                         n_processors=None)
+                                      self.output_for_analysis,
+                                      calc_second_order=self.second_order,
+                                      num_resamples=self.num_resample,
+                                      conf_level=self.conf_level,
+                                      print_to_console=True,
+                                      parallel=False,
+                                      n_processors=None)
 
         return self.analysis
 
