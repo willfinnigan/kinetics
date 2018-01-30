@@ -102,7 +102,7 @@ def run_all_models(parsed_samples, model):
     ua_sa_output = []
     count = 0
     for ua_parameters, ua_species in parsed_samples:
-        model.update_species_names_and_starting_values(ua_species)
+        model.update_species(ua_species)
         model.update_parameters(ua_parameters)
         count += 1
 
@@ -441,5 +441,3 @@ class SA():
             file.write("\n")
 
         file.close()
-
-

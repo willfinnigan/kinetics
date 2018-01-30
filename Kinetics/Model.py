@@ -31,6 +31,7 @@ class Model(list):
 
         self.time = np.linspace(self.start, self.end, self.steps)
 
+
     def set_parameters(self, parameters):
 
         self.parameters = parameters
@@ -38,16 +39,19 @@ class Model(list):
     def update_parameters(self, parameters):
         self.parameters.update(parameters)
 
-    def set_species_names_and_starting_values(self, species_with_error):
 
-        self.species_defaults = set_species_defaults(species_with_error)
+    def set_species(self, species_defaults):
+
+        #Just encase species with error is entered instead
+        self.species_defaults = set_species_defaults(species_defaults)
 
         self.species_names, self.species_starting_values = get_species_positions(self.species_defaults)
 
-    def update_species_names_and_starting_values(self, species_dict):
+    def update_species(self, species_dict):
         self.species_defaults.update(species_dict)
 
         self.species_names, self.species_starting_values = get_species_positions(self.species_defaults)
+
 
     def deriv(self, y, t):
         yprime = 0

@@ -1,5 +1,4 @@
 import Kinetics
-from rate_functions import *
 
 """ ------------------- SUBSTRATE AND ENZYME STARTING CONDITIONS  ------------------- """
 
@@ -13,20 +12,24 @@ species_with_pc_error = {"Ester": (2800, 0.05),
 
                          }
 
-# This makes species_default a dictionary without the error.  eg {"Ester" : 1000, "Acid" : 0}
+# From species_with_pc_error make two other dictionaries
+# species_defaults to set the default values for the model (ie species that wont change)
+# species_bounds to make a dict which contains the upper and lower bounds (calculated from the percentage error)
 species_defaults = Kinetics.set_species_defaults(species_with_pc_error)
 species_bounds = Kinetics.get_bounds_from_pc_error(species_with_pc_error)
 
 """ ------------------- PARAMETERS  ------------------- """
 
-parameters_with_error = {"afest_km_ester": (1500, 200),
+parameters_with_std_error = {"afest_km_ester": (1500, 200),
                          "afest_kcat": (6, 1),
 
                          }
 
-# This makes parameters_default a dictionary without the error.  eg {"kcat_est" : 1, "km_est" : 0.5}
-parameter_defaults = Kinetics.set_parameter_defaults(parameters_with_error)
-parameter_bounds = Kinetics.get_bounds_from_std_error(parameters_with_error)
+# From parameters_with_std_error make two other dictionaries
+# parameter_defaults to set the default values for the model (ie species that wont change)
+# parameter_bounds to make a dict which contains the upper and lower bounds (calculated from the std error)
+parameter_defaults = Kinetics.set_parameter_defaults(parameters_with_std_error)
+parameter_bounds = Kinetics.get_bounds_from_std_error(parameters_with_std_error)
 
 """ ------------------- MODEL TIME SETTINGS  ------------------- """
 start = 0
@@ -38,10 +41,11 @@ max_steps = 10000
 # Make an instance of the Model class containing the ordered species names and the parameters
 model = Kinetics.Model()
 model.set_parameters(parameter_defaults)
-model.set_species_names_and_starting_values(species_with_pc_error)
+model.set_species(species_defaults)
 model.set_time(start, end, number_steps, mxsteps=max_steps)
 
 # Add the reaction functions
+from rate_functions import *
 model.append(esterase_r1)
 
 
