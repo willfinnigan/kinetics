@@ -4,7 +4,6 @@ from Kinetics.Model import *
 import numpy as np
 
 """ Setup the bounds for uncertainty or sensitivity analsyis"""
-
 def setup_bounds_lists(dict_with_bounds):
     names_list = []
     bounds_list = []
@@ -54,54 +53,26 @@ def get_bounds_from_pc_error(dict_with_pc_error):
     return dict_with_bounds
 
 
+""" Set up the problem dict which will be used for sampling"""
+def setup_problem(parameter_names, parameter_bounds,
+                  species_names, species_bounds):
 
-
-
-""" Sampling - returns a list of ordered lists containing sampled parameters and sampled species concentrations"""
-
-def compile_params_species(parameter_names_list, parameter_bounds_list, species_names_list, species_bounds_list):
     names_list = []
-    names_list.extend(parameter_names_list)
-    names_list.extend(species_names_list)
+    names_list.extend(parameter_names)
+    names_list.extend(species_names)
 
     bounds = []
-    bounds.extend(parameter_bounds_list)
-    bounds.extend(species_bounds_list)
-
-    return names_list, bounds
-
-def make_samples_latin_hypercube(parameter_names_list, parameter_bounds_list, species_names_list, species_bounds_list,
-                                 number):
-    names_list, bounds = compile_params_species(parameter_names_list, parameter_bounds_list,
-                                                species_names_list, species_bounds_list)
+    bounds.extend(parameter_bounds)
+    bounds.extend(species_bounds)
 
     problem = {'num_vars': len(names_list),
-               'names': names_list,
-               'bounds': bounds}
+                    'names': names_list,
+                    'bounds': bounds}
 
-    sampled_inputs = latin.sample(problem, number)
-
-    return sampled_inputs, problem
-
-def make_samples_for_sobal(parameter_names_list, parameter_bounds_list, species_names_list, species_bounds_list,
-                           number=500, second_order=False):
-    names_list, bounds = compile_params_species(parameter_names_list, parameter_bounds_list,
-                                                species_names_list, species_bounds_list)
-
-    problem = {'num_vars': len(names_list),
-               'names': names_list,
-               'bounds': bounds}
-
-    sampled_inputs = saltelli.sample(problem, number, calc_second_order=second_order)
-
-    return sampled_inputs, problem
+    return problem
 
 
-
-
-
-""" Run uncertainty analysis or sensitivity analysis"""
-
+""" Run the models for the uncertainty analysis or sensitivity analysis"""
 def parse_samples_to_run(samples, parameter_names, species_names):
     parsed_samples = []
 
@@ -148,9 +119,7 @@ def run_all_models(parsed_samples, model):
 
 
 
-
-""" Process uncertainty analysis"""
-
+""" Process multiple model outputs for uncertainty analysis"""
 def return_quartiles(ys_for_single_substrate, name, quartile=95):
     quartiles = [["Time"], [str(name) + " High"], [str(name) + " Low"], [str(name) + " Mean"]]
 
@@ -228,11 +197,11 @@ class UA():
         print("")
 
     def make_lhc_samples(self):
+        self.problem = setup_problem(self.parameter_names, self.parameter_bounds,
+                                     self.species_names, self.species_bounds)
 
-        # Code for making samples
-        self.samples, self.problem = make_samples_latin_hypercube(self.parameter_names, self.parameter_bounds,
-                                                                  self.species_names, self.species_bounds,
-                                                                  self.num_samples)
+        self.samples = latin.sample(self.problem, self.num_samples)
+
         self.parsed_samples = parse_samples_to_run(self.samples, self.parameter_names, self.species_names)
 
         return self.parsed_samples
@@ -360,16 +329,14 @@ class SA():
         self.problem = {}
 
         self.output = []
-        self.output_at_timepoint = []
+        self.output_for_analysis = []
         self.analysis = []
 
     def make_saltelli_samples(self):
-        self.samples, self.problem = make_samples_for_sobal(self.parameter_names,
-                                                            self.parameter_bounds,
-                                                            self.species_names,
-                                                            self.species_bounds,
-                                                            number=self.number_samples,
-                                                            second_order=self.second_order)
+        self.problem = setup_problem(self.parameter_names, self.parameter_bounds,
+                                     self.species_names, self.species_bounds)
+
+        self.samples = saltelli.sample(self.problem, self.number_samples, calc_second_order=self.second_order)
 
         self.parsed_samples = parse_samples_to_run(self.samples,
                                                    self.parameter_names,
@@ -392,13 +359,13 @@ class SA():
             output = y[index][self.model.species_names.index(self.substrate_for_analysis)]
             outputs.append(output)
 
-        self.output_at_timepoint = np.array(outputs)
+        self.output_for_analysis = np.array(outputs)
 
-        return self.output_at_timepoint
+        return self.output_for_analysis
 
     def analyse_sobal_sensitivity(self):
 
-        self.output_at_timepoint = self.get_outputs_at_timepoint()
+        self.output_for_analysis = self.get_outputs_at_timepoint()
 
         self.analysis = sobol.analyze(self.problem,
                          self.output_at_timepoint,
