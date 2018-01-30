@@ -46,6 +46,7 @@ from example.reaction_functions import *
 model.append(esterase_r1)
 
 """ --- Run the model as an uncertainty analysis and sensitivity analysis --- """
+model_name = 'esterase_only'
 substrates_to_show_ua = ["Ester", "Acid"]
 substrate_for_sa_analysis = 'Acid'
 timepoint_for_sa_analysis = model.time[-1]
@@ -60,7 +61,7 @@ ua.make_lhc_samples()
 ua.run_models()
 ua.calculate_quartiles()
 ua.print_ua_quartile_output(substrates_to_show_ua)
-ua.save_ua_quartile_output(substrates_to_show_ua, filename='uncertainty_analysis.txt')
+ua.save_ua_quartile_output(substrates_to_show_ua, filename=(model_name + ' uncertainty_analysis.txt'))
 
 print("---Sensitivity Analysis---")
 sa = kinetics.SA(parameter_bounds,
@@ -76,4 +77,4 @@ sa = kinetics.SA(parameter_bounds,
 sa.make_saltelli_samples()
 sa.run_models()
 sa.analyse_sobal_sensitivity()
-sa.save_sa_quartile_output(filename='sensitivity_analysis.txt')
+sa.save_sa_quartile_output(filename=(model_name + ' sensitivity_analysis.txt'))
