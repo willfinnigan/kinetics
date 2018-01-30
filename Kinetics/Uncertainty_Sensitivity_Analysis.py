@@ -194,7 +194,7 @@ def collect_runs_for_substrate(time, list_y, species_names, name):
 
 class UA():
     def __init__(self, parameters_with_bounds, species_with_bounds, model,
-                 latin_hypercube_samples=1000, quartile_range=95):
+                 num_samples=1000, quartile_range=95):
 
         self.parameters_with_bounds = parameters_with_bounds
         self.species_with_bounds = species_with_bounds
@@ -203,7 +203,7 @@ class UA():
         self.species_names, self.species_bounds = setup_bounds_lists(species_with_bounds)
 
         self.model = model
-        self.latin_hypercube_samples = latin_hypercube_samples
+        self.num_samples = num_samples
         self.quartile_range = quartile_range
 
         self.samples = []
@@ -224,7 +224,7 @@ class UA():
         print(num_params, 'parameters and', num_specs, "species in uncertainty analysis")
         print(total, "variables in total")
         print(total, "^2 =", total_pw)
-        print(str(self.latin_hypercube_samples), "samples made by lhc")
+        print(str(self.num_samples), "samples made by lhc")
         print("")
 
     def make_lhc_samples(self):
@@ -232,7 +232,7 @@ class UA():
         # Code for making samples
         self.samples, self.problem = make_samples_latin_hypercube(self.parameter_names, self.parameter_bounds,
                                                                   self.species_names, self.species_bounds,
-                                                                  self.latin_hypercube_samples)
+                                                                  self.num_samples)
         self.parsed_samples = parse_samples_to_run(self.samples, self.parameter_names, self.species_names)
 
         return self.parsed_samples
@@ -297,6 +297,21 @@ class UA():
         file.write("--- Parameters --- \n")
         for i in range(len(self.parameter_bounds)):
             file.write(str(self.parameter_names[i]) + " : " + str(self.parameter_bounds[i]) + "\n")
+
+        file.write("\n")
+
+        file.write("Quartile range = " + str(self.quartile_range) + "\n")
+        file.write("Number of samples = " + str(self.num_samples) + "\n")
+        file.write("\n")
+        num_params = len(self.parameter_names)
+        num_specs = len(self.species_names)
+        total = num_params + num_specs
+        file.write(str(num_params) + ' parameters and ' + str(num_specs) + " species in uncertainty analysis" + "\n")
+        file.write(str(total) + " variables in total" + "\n")
+        file.write(str(total) + "^2 = " + str(total * total) + "\n")
+        file.write(str(total) + "^3 = " + str(total * total * total) + "\n")
+        file.write(str(self.num_samples) + " samples made by lhc" + "\n")
+
 
         file.write("\n")
 

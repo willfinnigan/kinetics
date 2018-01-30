@@ -1,0 +1,21 @@
+Date: 2018-01-28 20:32:16.281736
+
+---Species concentration bounds--- 
+Ester : (2660.0, 2940.0)
+afEst2 : (9.5, 10.5)
+
+--- Parameters --- 
+afest_km_ester : (1300, 1700)
+afest_kcat : (5, 7)
+
+--- Sensitivity Analysis Parameters --- 
+Timepoint for analysis: 240.0
+Substrate for analysis: Acid
+
+5th and 95th quartiles = 2672.09705766 : 2923.65834154
+
+Parameter, S1, S1_conf, ST, ST conf
+afest_km_ester, 0.00107496044495, 0.0683671864086, 0.000269266139958, 6.19501822165e-05
+afest_kcat, 0.00614743076713, 0.104144841994, 0.000537185349043, 9.0038277074e-05
+Ester, 1.10810638903, 3.72666495796, 0.992141144042, 0.0902727791997
+afEst2, 0.00356079328909, 0.035727183073, 7.52793169301e-05, 1.91640663879e-05
