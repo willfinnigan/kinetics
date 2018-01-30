@@ -368,7 +368,7 @@ class SA():
         self.output_for_analysis = self.get_outputs_at_timepoint()
 
         self.analysis = sobol.analyze(self.problem,
-                         self.output_at_timepoint,
+                         self.output_for_analysis,
                          calc_second_order=self.second_order,
                          num_resamples=self.num_resample,
                          conf_level=self.conf_level,
@@ -380,8 +380,8 @@ class SA():
 
     def get_interquartile_of_output_at_timepoint(self, quartile=95):
 
-        upper = np.percentile(self.output_at_timepoint[1:], quartile)
-        lower = np.percentile(self.output_at_timepoint[1:], 100 - quartile)
+        upper = np.percentile(self.output_for_analysis[1:], quartile)
+        lower = np.percentile(self.output_for_analysis[1:], 100 - quartile)
 
         return lower, upper
 
