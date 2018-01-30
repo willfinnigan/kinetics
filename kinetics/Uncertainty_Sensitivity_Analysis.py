@@ -1,6 +1,6 @@
 from SALib.sample import latin, saltelli
 from SALib.analyze import sobol
-from Kinetics.Model import *
+from kinetics.Model import *
 import numpy as np
 
 """ Setup the bounds for uncertainty or sensitivity analsyis"""
