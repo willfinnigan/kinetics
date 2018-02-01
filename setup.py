@@ -6,7 +6,7 @@ here = path.abspath(path.dirname(__file__))
 
 setup(
     name='kinetics',  # Required
-    version='0.9.0',  # Required
+    version='0.9.1',  # Required
     description='Python code to run kinetic models of enzyme reactions',
     url='https://github.com/willfinnigan/kinetics',
     author='William Finnigan',
