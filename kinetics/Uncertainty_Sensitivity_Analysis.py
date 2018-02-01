@@ -186,10 +186,12 @@ class UA():
         num_specs = len(self.species_names)
         total = num_params + num_specs
         total_pw = total * total
+        total_pw3 = total * total * total
         print("")
         print(num_params, 'parameters and', num_specs, "species in uncertainty analysis")
         print(total, "variables in total")
         print(total, "^2 =", total_pw)
+        print(total, "^3 =", total_pw3)
         print(str(self.num_samples), "samples made by lhc")
         print("")
 
@@ -422,9 +424,9 @@ class SA():
         file.write("\n")
 
         lower, upper = self.get_interquartile_of_output_at_timepoint()
-        file.write("5th and 95th quartiles = " + str(lower) + " : " + str(upper))
+        file.write("5th and 95th quartiles = " + str(lower) + " : " + str(upper) + "\n")
+        file.write("Number of samples = " + str(self.number_samples) + "\n")
 
-        file.write("\n")
         file.write("\n")
 
         file.write("Parameter, S1, S1_conf, ST, ST conf")

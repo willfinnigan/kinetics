@@ -1,4 +1,5 @@
 import kinetics
+import numpy as np
 
 """ ------------------- SUBSTRATE AND ENZYME STARTING CONDITIONS  ------------------- """
 
@@ -42,11 +43,32 @@ model.set_species(species_defaults)
 model.set_time(start, end, number_steps, mxsteps=max_steps)
 
 # Add the reaction functions
-from example.reaction_functions import *
+def esterase_r1(y, s_names, params):
+    # Substrate values
+    ester = y[s_names.index("Ester")]
+    esterase = y[s_names.index("afEst2")]
+
+    # Parameters
+    km_ester = params["afest_km_ester"]
+    kcat_esterase = params["afest_kcat"]
+
+    # Calculate the rate
+    rate = kinetics.one_substrate_mm(kcat_esterase, esterase, ester, km_ester)
+
+    # Return the change in substrate concentration
+    # This section += or -= yprime at the correct index by the rate for the substrates and products listed
+    substrates = ["Ester"]
+    products = ["Acid", "Methanol"]
+    yprime = np.zeros(len(y))
+    yprime = kinetics.yprime_minus(yprime, rate, substrates, s_names)
+    yprime = kinetics.yprime_plus(yprime, rate, products, s_names)
+
+    return yprime
+
 model.append(esterase_r1)
 
 """ --- Run the model as an uncertainty analysis and sensitivity analysis --- """
-model_name = 'esterase_only'
+model_name = 'esterase_example'
 substrates_to_show_ua = ["Ester", "Acid"]
 substrate_for_sa_analysis = 'Acid'
 timepoint_for_sa_analysis = model.time[-1]
