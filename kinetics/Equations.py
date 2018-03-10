@@ -3,7 +3,7 @@ Equation functions to be used by the reactions
 """
 
 """ Irreversible"""
-def one_substrate_mm(kcat, enz, a, km_a):
+def one_substrate_mm(kcat, km_a, enz, a):
     rate = kcat * enz * (a / (km_a + a))
     return rate
 
@@ -33,22 +33,10 @@ def three_substrate_irreversible_ter_ordered(kcat, enz, kma, kmb, kia, kmc, a, b
 
 
 """ Reversible"""
-def two_substrate_ord_rev(kcatf, kcatr, enz, kma, kmb, kia, kib, kmp, kmq, kip, a, b, p, q):
-    Vf = enz * kcatf
-    Vr = enz * kcatr
+def two_substrate_ord_rev(kcatf, kcatr, enz, kmb, kia, kib, kmp, kip, kiq, a, b, p, q):
+    numerator = ((enz*kcatf*a*b) / (kia*kmb)) - ((enz*kcatr*p*q) / (kmp*kiq))
 
-    keq = (kcatf * kip * kmq) / (kcatr * kib * kma)
-
-    numerator = Vf * ((a * b) - (p * q / keq))
-
-    denominator = (a * b * (1 + (p / kip))) \
-                  + (kma * b) \
-                  + (kmb * (a + kia)) \
-                  + (Vf / (Vr * keq)) * (kmq * p * (1 + (a / kia))) \
-                  + (q * (kmp * (1 + ((kma * b) / (kia * kmb)))))\
-                  + (p * (1 + (b / kia)))
-
-
+    denominator = 1 + (a/kia) + (b/kib) + (q/kiq) + (p/kip) + ((a*b)/(kia*kmb)) + ((p*q) / (kmp*kiq))
 
     return (numerator / denominator)
 

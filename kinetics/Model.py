@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import integrate
 import datetime
+import copy
 
 """
 The model class, which derives from a list.  
@@ -20,9 +21,11 @@ class Model(list):
         self.time = np.linspace(self.start, self.end, self.steps)
 
         self.species_defaults = {}
+        self.species = {}
         self.species_names = []
         self.species_starting_values = []
 
+        self.parameter_defaults = {}
         self.parameters = {}
 
     def set_time(self, start, end, steps, mxsteps=10000):
@@ -33,22 +36,23 @@ class Model(list):
 
         self.time = np.linspace(self.start, self.end, self.steps)
 
-    def set_parameters(self, parameters):
+    def set_parameter_defaults(self, parameters):
         self.parameters = parameters
+        self.parameter_defaults = copy.deepcopy(parameters)
+
 
     def update_parameters(self, parameters):
         self.parameters.update(parameters)
 
-    def set_species(self, species_defaults):
-        # Just encase species with error is entered instead
-        self.species_defaults = set_species_defaults(species_defaults)
+    def set_species_defaults(self, species_defaults):
+        self.species_defaults = copy.deepcopy(species_defaults)
+        self.species = species_defaults
+        self.species_names, self.species_starting_values = get_species_positions(self.species)
 
-        self.species_names, self.species_starting_values = get_species_positions(self.species_defaults)
 
     def update_species(self, species_dict):
-        self.species_defaults.update(species_dict)
-
-        self.species_names, self.species_starting_values = get_species_positions(self.species_defaults)
+        self.species.update(species_dict)
+        self.species_names, self.species_starting_values = get_species_positions(self.species)
 
     def deriv(self, y, t):
         yprime = 0
@@ -63,6 +67,11 @@ class Model(list):
         y = integrate.odeint(self.deriv, y0, self.time, mxstep=self.mxsteps)
 
         return y
+
+    def reset_model(self):
+        self.species = self.species_defaults
+        self.species_names, self.species_starting_values = get_species_positions(self.species)
+        self.parameters = self.parameter_defaults
 
 
 """Functions for formatting species and parameters dicts to the correct format"""
@@ -110,16 +119,24 @@ def yprime_plus(y_prime, rate, substrates, s_names):
 
     return y_prime
 
-
 def yprime_minus(y_prime, rate, substrates, s_names):
     for name in substrates:
         y_prime[s_names.index(name)] -= rate
 
     return y_prime
 
+def calculate_yprime(y, rate, substrates, products, substrate_names):
+    y_prime = np.zeros(len(y))
+
+    for name in substrates:
+        y_prime[substrate_names.index(name)] -= rate
+
+    for name in products:
+        y_prime[substrate_names.index(name)] += rate
+
+    return y_prime
 
 """Functions to output basic model output (with only 1 set of y values)"""
-
 
 def print_model_output(y, time, species_names, names_to_output):
     print("Time" + ", ", end="")
@@ -134,7 +151,6 @@ def print_model_output(y, time, species_names, names_to_output):
         for name in names_to_output:
             print(str(y[i][species_names.index(name)]) + ", ", end="")
         print()
-
 
 def save_model_ouput(y, model, names_to_output, filename=''):
     import os
