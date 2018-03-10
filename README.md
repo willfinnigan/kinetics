@@ -7,9 +7,15 @@ It does this by taking species and parameters as dictionaries for which the orde
 
 The rate of each enzyme reaction can then be determined in turn, and the change in each substrate concentration altered using the index position of the substrate name for yprime.
 
-This module also uses SALib to carry out uncertainty and sensitivity analysis.
+This also makes it much easier to carry out uncertainty and sensitivity analysis
 
-The outputs from the modelling runs are saved in txt documents which can easily be copied into software such as excel or graphpad.
+This module uses SALib to carry out uncertainty and sensitivity analysis, with a class provided for each.
+
+The outputs are saved as pandas dataframes.   
+
+This module works well using a jupyter notebook or jupyter lab.  Please see the example.
+
+
 
 
 
