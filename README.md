@@ -13,7 +13,7 @@ This module uses SALib to carry out uncertainty and sensitivity analysis, with a
 
 The outputs are saved as pandas dataframes.   
 
-This module works well using a jupyter notebook or jupyter lab.  Please see the example.
+This module works well using a jupyter notebook or jupyter lab.  Please see 'esterase_only.ipynb' in the example folder
 
 
 
