@@ -18,3 +18,5 @@ def set_graph_settings():
     mpl.rcParams['ytick.major.width'] = 1.5
     mpl.rcParams["errorbar.capsize"] = 5
     
+
+    

@@ -3,7 +3,7 @@ from SALib.analyze import sobol
 from kinetics.Model import *
 import numpy as np
 import pandas as pd
-from tqdm import tqdm, tqdm_notebook
+from tqdm import tqdm
 import time
 
 
@@ -164,14 +164,16 @@ def return_quartiles(ys_for_single_substrate, name, quartile=95):
 
 """Classes to do UA or SA"""
 class UA():
-    def __init__(self, parameters_with_bounds, species_with_bounds, model,
-                 num_samples=1000, quartile_range=95):
+    def __init__(self,
+                 model,
+                 num_samples=1000,
+                 quartile_range=95):
 
-        self.parameters_with_bounds = parameters_with_bounds
-        self.species_with_bounds = species_with_bounds
+        self.parameters_with_bounds = model.parameter_bounds
+        self.species_with_bounds = model.species_bounds
 
-        self.parameter_names, self.parameter_bounds = setup_bounds_lists(parameters_with_bounds)
-        self.species_names, self.species_bounds = setup_bounds_lists(species_with_bounds)
+        self.parameter_names, self.parameter_bounds = setup_bounds_lists(self.parameters_with_bounds)
+        self.species_names, self.species_bounds = setup_bounds_lists(self.species_with_bounds)
 
         self.model = model
         self.num_samples = num_samples
@@ -284,8 +286,6 @@ class UA():
 
 class SA():
     def __init__(self,
-                 parameters_with_bounds,
-                 species_with_bounds,
                  model,
                  number_samples=500,
                  second_order=False,
@@ -299,11 +299,11 @@ class SA():
         self.conf_level = conf_level
         self.num_resample = num_resample
 
-        self.parameters_with_bounds = parameters_with_bounds
-        self.species_with_bounds = species_with_bounds
+        self.parameters_with_bounds = model.parameter_bounds
+        self.species_with_bounds = model.species_bounds
 
-        self.parameter_names, self.parameter_bounds = setup_bounds_lists(parameters_with_bounds)
-        self.species_names, self.species_bounds = setup_bounds_lists(species_with_bounds)
+        self.parameter_names, self.parameter_bounds = setup_bounds_lists(self.parameters_with_bounds)
+        self.species_names, self.species_bounds = setup_bounds_lists(self.species_with_bounds)
 
         self.model = model
 
