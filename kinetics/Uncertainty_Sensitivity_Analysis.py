@@ -2,6 +2,11 @@ from SALib.sample import latin, saltelli
 from SALib.analyze import sobol
 from kinetics.Model import *
 import numpy as np
+import pandas as pd
+from tqdm import tqdm
+import time
+
+
 
 """ Setup the bounds for uncertainty or sensitivity analsyis"""
 def setup_bounds_lists(dict_with_bounds):
@@ -99,44 +104,27 @@ def parse_samples_to_run(samples, parameter_names, species_names):
     # returns a list of tuples containing [(parameter_dict, species_dict), ] for each sample
     return parsed_samples
 
-
 def run_all_models(parsed_samples, model):
     ua_sa_output = []
-    count = 0
-    for ua_parameters, ua_species in parsed_samples:
+
+    for ua_parameters, ua_species in tqdm(parsed_samples):
         model.update_species(ua_species)
         model.update_parameters(ua_parameters)
-        count += 1
-
-        if count % 50 == 0:
-            print(count, "out of", len(parsed_samples), "complete")
 
         y = model.run_model()
 
         ua_sa_output.append(y)
 
-    # ua_output will be a list like [y1, y2, y3, ect...]
 
+    model.reset_model()
+
+    # ua_output will be a list like [y1, y2, y3, ect...]
     return ua_sa_output
 
 
+
 """ Process multiple model outputs for uncertainty analysis"""
-def return_quartiles(ys_for_single_substrate, name, quartile=95):
-    quartiles = [["Time"], [str(name) + " High"], [str(name) + " Low"], [str(name) + " Mean"]]
-
-    for i in range(len(ys_for_single_substrate)):
-        # output_at_t will be a array.  i=0 is time, after than the substrate values at that time.
-        output_at_t = np.array(ys_for_single_substrate[i])
-
-        quartiles[0].append(output_at_t[0])
-        quartiles[1].append(np.percentile(output_at_t[1:], quartile))
-        quartiles[2].append(np.percentile(output_at_t[1:], 100 - quartile))
-        quartiles[3].append(np.mean(output_at_t[1:]))
-
-    return quartiles
-
-
-def collect_runs_for_substrate(time, list_y, species_names, name):
+def return_ys_for_a_single_substrate(time, list_y, species_names, name):
     """
     Collect all the runs for a single substrate (name)
 
@@ -157,17 +145,35 @@ def collect_runs_for_substrate(time, list_y, species_names, name):
 
     return collected_output
 
+def return_quartiles(ys_for_single_substrate, name, quartile=95):
+    quartiles = {"Time": [], "High": [], "Low": [], "Mean": []}
+
+    for i in range(len(ys_for_single_substrate)):
+        # output_at_t will be a array.  i=0 is time, after than the substrate values at that time.
+        output_at_t = ys_for_single_substrate[i]
+
+        quartiles["Time"].append(output_at_t[0])
+        quartiles["High"].append(np.percentile(output_at_t[1:], quartile))
+        quartiles["Low"].append(np.percentile(output_at_t[1:], 100 - quartile))
+        quartiles["Mean"].append(np.mean(output_at_t[1:]))
+
+    return quartiles
+
+
+
 
 """Classes to do UA or SA"""
 class UA():
-    def __init__(self, parameters_with_bounds, species_with_bounds, model,
-                 num_samples=1000, quartile_range=95):
+    def __init__(self,
+                 model,
+                 num_samples=1000,
+                 quartile_range=95):
 
-        self.parameters_with_bounds = parameters_with_bounds
-        self.species_with_bounds = species_with_bounds
+        self.parameters_with_bounds = model.parameter_bounds
+        self.species_with_bounds = model.species_bounds
 
-        self.parameter_names, self.parameter_bounds = setup_bounds_lists(parameters_with_bounds)
-        self.species_names, self.species_bounds = setup_bounds_lists(species_with_bounds)
+        self.parameter_names, self.parameter_bounds = setup_bounds_lists(self.parameters_with_bounds)
+        self.species_names, self.species_bounds = setup_bounds_lists(self.species_with_bounds)
 
         self.model = model
         self.num_samples = num_samples
@@ -179,6 +185,8 @@ class UA():
 
         self.ua_output = []
         self.quartile_output = {}
+
+        self.substrate_dataframes = {}
 
     def analyse_number_of_samples_vs_parameters(self):
         # Code for text output
@@ -207,119 +215,95 @@ class UA():
 
     def run_models(self):
         print("running all models")
+        time.sleep(0.5)
         self.ua_output = run_all_models(self.parsed_samples, self.model)
         print("samples run")
+        self.model.reset_model()
 
         return self.ua_output
+
+    def quartiles_to_dataframe(self):
+        self.substrate_dataframes = {}
+        for substrate in self.model.species_names:
+            df = pd.DataFrame(self.quartile_output[substrate], columns=["Time", "High", "Low", "Mean"])
+            self.substrate_dataframes[substrate] = df
+
+        return self.substrate_dataframes
 
     def calculate_quartiles(self, quartile_range=95):
 
         for name in self.model.species_names:
-            collected_runs = collect_runs_for_substrate(self.model.time, self.ua_output, self.model.species_names, name)
+            collected_runs = return_ys_for_a_single_substrate(self.model.time, self.ua_output, self.model.species_names, name)
             quartiles = return_quartiles(collected_runs, name, quartile=quartile_range)
 
             self.quartile_output[name] = quartiles
 
         print("quartiles calculated")
 
-        return self.quartile_output
+        self.quartiles_to_dataframe()
 
-    def print_ua_quartile_output(self, names_to_show):
+        print('saved as dataframes in a dict self.substrate_dataframes:  {"substrate" : dateframe}')
 
-        for name in names_to_show:
-            print()
-            print("--- " + str(name) + " Uncertainty Analysis Quartiles ---")
-            for i in range(len(self.quartile_output[name][0])):
-                for j in range(len(self.quartile_output[name])):
-                    print(str(self.quartile_output[name][j][i]) + ", ", end="")
-                print()
-            print()
+        return self.substrate_dataframes
 
-    def save_ua_quartile_output(self, names_to_show, filename=''):
+    def return_ua_info(self):
+        info = "--- Species Defaults in Reaction --- \n"
+        for name in self.model.species_names:
+            if self.model.species_defaults[name] > 0:
+                info += (str(name) + " : " + str(self.model.species_defaults[name]) + "\n")
 
-        import os
-        directory = os.path.dirname('output/')
-
-        try:
-            os.stat(directory)
-        except:
-            os.mkdir(directory)
-
-        if filename == '':
-            filename = os.path.basename(__file__)
-            filename = filename[0:-3] + '.txt'
-
-        filename = directory + "/" + filename
-
-        file = open(filename, "w")
-
-        file.write("Date: " + str(datetime.datetime.now()) + str("\n"))
-        file.write("\n")
-
-        file.write("---Species concentration bounds--- \n")
+        info += "\n ---Species Concentration bounds--- \n"
         for i in range(len(self.species_names)):
-            file.write(str(self.species_names[i]) + " : " + str(self.species_bounds[i]) + "\n")
+            info += (str(self.species_names[i]) + " : " + str(self.species_bounds[i]) + "\n")
 
-        file.write("\n")
+        info += ("\n")
 
-        file.write("--- Parameters --- \n")
+        info += ("--- Parameters Defaults--- \n")
+        for name in self.model.parameters:
+            info += (str(name) + " : " + str(self.model.parameters[name]) + "\n")
+
+        info += ("\n")
+
+        info += ("--- Parameters Bounds--- \n")
         for i in range(len(self.parameter_bounds)):
-            file.write(str(self.parameter_names[i]) + " : " + str(self.parameter_bounds[i]) + "\n")
+            info += (str(self.parameter_names[i]) + " : " + str(self.parameter_bounds[i]) + "\n")
 
-        file.write("\n")
+        info += ("\n")
 
-        file.write("Quartile range = " + str(self.quartile_range) + "\n")
-        file.write("Number of samples = " + str(self.num_samples) + "\n")
-        file.write("\n")
+        info += ("Quartile range = " + str(self.quartile_range) + "%" + "\n")
+        info += ("Number of samples = " + str(self.num_samples) + "\n")
+        info += ("\n")
         num_params = len(self.parameter_names)
         num_specs = len(self.species_names)
         total = num_params + num_specs
-        file.write(str(num_params) + ' parameters and ' + str(num_specs) + " species in uncertainty analysis" + "\n")
-        file.write(str(total) + " variables in total" + "\n")
-        file.write(str(total) + "^2 = " + str(total * total) + "\n")
-        file.write(str(total) + "^3 = " + str(total * total * total) + "\n")
-        file.write(str(self.num_samples) + " samples made by lhc" + "\n")
+        info += (str(num_params) + ' parameters and ' + str(num_specs) + " species in uncertainty analysis" + "\n")
+        info += (str(total) + " variables in total" + "\n")
+        info += (str(total) + "^2 = " + str(total * total) + "\n")
+        info += (str(total) + "^3 = " + str(total * total * total) + "\n")
+        info += (str(self.num_samples) + " samples made by lhc" + "\n")
 
-        file.write("\n")
-
-        for name in names_to_show:
-            file.write("\n")
-            file.write("--- " + str(name) + " Uncertainty Analysis Quartiles ---")
-            file.write("\n")
-            for i in range(len(self.quartile_output[name][0])):
-                for j in range(len(self.quartile_output[name])):
-                    file.write(str(self.quartile_output[name][j][i]) + ", ")
-                file.write("\n")
-            file.write("\n")
-
-        file.close()
-
+        return info
 
 class SA():
     def __init__(self,
-                 parameters_with_bounds,
-                 species_with_bounds,
                  model,
-                 timepoint_for_analysis,
-                 substrate_for_analysis,
                  number_samples=500,
                  second_order=False,
                  conf_level=0.95,
                  num_resample=100):
 
-        self.timepoint_for_analysis = timepoint_for_analysis
-        self.substrate_for_analysis = substrate_for_analysis
+
 
         self.number_samples = number_samples
         self.second_order = second_order
         self.conf_level = conf_level
         self.num_resample = num_resample
 
-        self.parameters_with_bounds = parameters_with_bounds
-        self.species_with_bounds = species_with_bounds
+        self.parameters_with_bounds = model.parameter_bounds
+        self.species_with_bounds = model.species_bounds
 
-        self.parameter_names, self.parameter_bounds = setup_bounds_lists(parameters_with_bounds)
-        self.species_names, self.species_bounds = setup_bounds_lists(species_with_bounds)
+        self.parameter_names, self.parameter_bounds = setup_bounds_lists(self.parameters_with_bounds)
+        self.species_names, self.species_bounds = setup_bounds_lists(self.species_with_bounds)
 
         self.model = model
 
@@ -330,6 +314,10 @@ class SA():
         self.output = []
         self.output_for_analysis = []
         self.analysis = []
+
+        self.dataframe_output = 0
+
+        self.analysis_info = ''
 
     def make_saltelli_samples(self):
         self.problem = setup_problem(self.parameter_names, self.parameter_bounds,
@@ -346,97 +334,79 @@ class SA():
     def run_models(self):
         self.output = run_all_models(self.parsed_samples,
                                      self.model)
+
+        self.model.reset_model()
+
         return self.output
 
-    def get_outputs_at_timepoint(self):
+    def get_outputs_at_timepoint(self, t, substrate):
 
-        closest_timepoint = min(self.model.time, key=lambda x: abs(x - self.timepoint_for_analysis))
+        closest_timepoint = min(self.model.time, key=lambda x: abs(x - t))
         index = list(self.model.time).index(closest_timepoint)
 
         outputs = []
         for y in self.output:
-            output = y[index][self.model.species_names.index(self.substrate_for_analysis)]
+            output = y[index][self.model.species_names.index(substrate)]
             outputs.append(output)
 
         self.output_for_analysis = np.array(outputs)
 
         return self.output_for_analysis
 
-    def analyse_sobal_sensitivity(self):
+    def analyse_sobal_sensitivity_substrate_concentration_at_t(self, t, substrate):
 
-        self.output_for_analysis = self.get_outputs_at_timepoint()
+        self.output_for_analysis = self.get_outputs_at_timepoint(t, substrate)
 
         self.analysis = sobol.analyze(self.problem,
                                       self.output_for_analysis,
                                       calc_second_order=self.second_order,
                                       num_resamples=self.num_resample,
                                       conf_level=self.conf_level,
-                                      print_to_console=True,
+                                      print_to_console=False,
                                       parallel=False,
                                       n_processors=None)
 
-        return self.analysis
+        rows = self.problem['names']
+        self.dataframe_output = pd.DataFrame(self.analysis, index=rows)
+
+
+
+        print("Saved as dataframe in self.dataframe_output")
+
+        self.analysis_info = " --- Analysis mode = Uncertainty in substrate at timepoint --- \n"
+        self.analysis_info += "Timepoint = " + str(t) + "\n"
+        self.analysis_info += "Substrate = " + str(substrate) + "\n"
+
+        lower, upper, max_out, min_out = self.get_interquartile_of_output_at_timepoint()
+        self.analysis_info += ("\n 95 % Quartiles at t = " + str(lower) + " : " + str(upper) + "\n")
+        self.analysis_info += ("Min at t = " + str(min_out) + ",  Max at t = " + str(max_out) + "\n")
+
+        return self.dataframe_output
 
     def get_interquartile_of_output_at_timepoint(self, quartile=95):
 
         upper = np.percentile(self.output_for_analysis[1:], quartile)
         lower = np.percentile(self.output_for_analysis[1:], 100 - quartile)
+        max_out = np.max(self.output_for_analysis[1:])
+        min_out = np.min(self.output_for_analysis[1:])
 
-        return lower, upper
+        return lower, upper, max_out, min_out
 
-    def save_sa_quartile_output(self, filename=''):
+    def return_sa_info(self):
+        info = ""
 
-        import os
-        directory = os.path.dirname('output/')
-
-        try:
-            os.stat(directory)
-        except:
-            os.mkdir(directory)
-
-        if filename == '':
-            filename = os.path.basename(__file__)
-            filename = filename[0:-3] + '.txt'
-
-        filename = directory + "/" + filename
-
-        file = open(filename, "w")
-
-        file.write("Date: " + str(datetime.datetime.now()) + str("\n"))
-        file.write("\n")
-
-        file.write("---Species concentration bounds--- \n")
+        info += ("---Species concentration bounds--- \n")
         for i in range(len(self.species_names)):
-            file.write(str(self.species_names[i]) + " : " + str(self.species_bounds[i]) + "\n")
+            info += (str(self.species_names[i]) + " : " + str(self.species_bounds[i]) + "\n")
 
-        file.write("\n")
+        info += ("\n")
 
-        file.write("--- Parameters --- \n")
+        info += "--- Parameters --- \n"
         for i in range(len(self.parameter_bounds)):
-            file.write(str(self.parameter_names[i]) + " : " + str(self.parameter_bounds[i]) + "\n")
+            info += (str(self.parameter_names[i]) + " : " + str(self.parameter_bounds[i]) + "\n")
 
-        file.write("\n")
+        info += "\n"
 
-        file.write("--- Sensitivity Analysis Parameters --- \n")
-        file.write("Timepoint for analysis: " + str(self.timepoint_for_analysis) + "\n")
-        file.write("Substrate for analysis: " + str(self.substrate_for_analysis) + "\n")
+        info += self.analysis_info
 
-        file.write("\n")
-
-        lower, upper = self.get_interquartile_of_output_at_timepoint()
-        file.write("5th and 95th quartiles = " + str(lower) + " : " + str(upper) + "\n")
-        file.write("Number of samples = " + str(self.number_samples) + "\n")
-
-        file.write("\n")
-
-        file.write("Parameter, S1, S1_conf, ST, ST conf")
-        file.write("\n")
-        for i in range(len(self.problem['names'])):
-            file.write(self.problem['names'][i] + ", ")
-            file.write(str(self.analysis['S1'][i]) + ", ")
-            file.write(str(self.analysis['S1_conf'][i]) + ", ")
-            file.write(str(self.analysis['ST'][i]) + ", ")
-            file.write(str(self.analysis['ST_conf'][i]))
-            file.write("\n")
-
-        file.close()
+        return info
