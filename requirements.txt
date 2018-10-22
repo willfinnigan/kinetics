@@ -2,3 +2,4 @@ Kinetics
 scipy >= 0.19.1
 numpy >= 1.11.3
 SALib >= 0.7.1
+tqdm >= 4.23.4

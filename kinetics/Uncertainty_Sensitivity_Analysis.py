@@ -206,7 +206,7 @@ def parse_samples_to_run(samples, parameter_names, species_names):
     return parsed_samples
 
 
-def run_all_models(parsed_samples, model):
+def run_all_models(parsed_samples, model, logging=True):
     """
     Run all the models for a set of parsed samples. Return the outputs
 
@@ -221,13 +221,20 @@ def run_all_models(parsed_samples, model):
 
     output = []
 
-    for parameters, species in tqdm(parsed_samples):
-        model.update_species(species)
-        model.update_parameters(parameters)
+    if logging==True:
+        for parameters, species in tqdm(parsed_samples):
+            model.update_species(species)
+            model.update_parameters(parameters)
+            y = model.run_model()
+            output.append(y)
 
-        y = model.run_model()
+    elif logging==False:
+        for parameters, species in parsed_samples:
+            model.update_species(species)
+            model.update_parameters(parameters)
 
-        output.append(y)
+            y = model.run_model()
+            output.append(y)
 
     # Reset the model back to the default values
     model.reset_model()
@@ -265,7 +272,6 @@ def return_ys_for_a_single_substrate(model, run_all_models_ouput, substrate_name
 
     return collected_output
 
-
 def return_quartiles(ys_for_single_substrate, quartile=95):
     """
     Takes ys_for_single_substrate and returns only the quartiles
@@ -297,7 +303,6 @@ def return_quartiles(ys_for_single_substrate, quartile=95):
         quartiles["Mean"].append(np.mean(output_at_t[1:]))
 
     return quartiles
-
 
 def random_sample(problem, number_of_samples):
     """
@@ -339,7 +344,7 @@ def random_sample(problem, number_of_samples):
 
 
 class UA(object):
-    def __init__(self, model, num_samples=1000, quartile_range=95):
+    def __init__(self, model, num_samples=1000, quartile_range=95, logging=True):
 
         self.parameters_with_bounds = model.parameter_bounds
         self.species_with_bounds = model.species_bounds
@@ -359,6 +364,10 @@ class UA(object):
         self.quartile_output = {}
 
         self.substrate_dataframes = {}
+
+        self.all_runs_substrate_dataframes = {}
+
+        self.logging = logging
 
     def analyse_number_of_samples_vs_parameters(self):
         # Code for text output
@@ -383,7 +392,8 @@ class UA(object):
 
         self.parsed_samples = parse_samples_to_run(self.samples, self.parameter_names, self.species_names)
 
-        print("self.problem, self.samples and self.parsed_samples set by lhc")
+        if self.logging==True:
+            print("self.problem, self.samples and self.parsed_samples set by lhc")
 
         return self.parsed_samples
 
@@ -396,10 +406,15 @@ class UA(object):
         self.parsed_samples = parse_samples_to_run(self.samples, self.parameter_names, self.species_names)
 
     def run_models(self):
-        print("running all models")
+        if self.logging == True:
+            print("running all models")
+
         time.sleep(0.5)
-        self.output = run_all_models(self.parsed_samples, self.model)
-        print("samples run, model outputs saved in self.output")
+        self.output = run_all_models(self.parsed_samples, self.model, logging=self.logging)
+
+        if self.logging == True:
+            print("samples run, model outputs saved in self.output")
+
         self.model.reset_model()
 
         return self.output
@@ -410,7 +425,8 @@ class UA(object):
             df = pd.DataFrame(self.quartile_output[substrate], columns=["Time", "High", "Low", "Mean"])
             self.substrate_dataframes[substrate] = df
 
-        print("Quartiles for each substrate saved to self.substrate_dataframes")
+        if self.logging == True:
+            print("Quartiles for each substrate saved to self.substrate_dataframes")
         return self.substrate_dataframes
 
     def calculate_quartiles(self, quartile_range=95):
@@ -421,11 +437,37 @@ class UA(object):
 
             self.quartile_output[name] = quartiles
 
-        print("quartiles calculated, saved in self.quartile_output")
+        if self.logging == True:
+            print("quartiles calculated, saved in self.quartile_output")
 
         self.quartiles_to_dataframe()
 
         return self.substrate_dataframes
+
+    def calculate_all_runs_substrate_dataframes(self):
+
+        for name in self.model.species_names:
+            # format: [[t0, r1, r2, r3], [t1, r1, r2, r3]..]
+            collected_runs = return_ys_for_a_single_substrate(self.model, self.output, name)
+            all_runs = {"Time": []}
+            column_titles = ['Time']
+
+            for i in range(1,len(collected_runs[0])):
+                all_runs[str(i)] = []
+                column_titles.append(str(i))
+
+            for timepoint in collected_runs:
+                all_runs['Time'].append(timepoint[0])
+
+                for i in range(1,len(timepoint)):
+                    all_runs[str(i)].append(timepoint[i])
+
+            df = pd.DataFrame(all_runs, columns=column_titles)
+
+            self.all_runs_substrate_dataframes[name] = df
+
+        return self.all_runs_substrate_dataframes
+
 
     def return_ua_info(self):
         info = "--- Species Defaults in Reaction --- \n"
@@ -529,10 +571,36 @@ class SA(object):
 
         return self.output_for_analysis
 
-    def get_times_to_reach_substrate_concentration(self, substrate_name, substrate_concentration):
-        pass
+    def get_times_to_reach_substrate_concentration(self, substrate_name, substrate_concentration, mode='<='):
 
-    def analyse_sobal_sensitivity_substrate_concentration_at_t(self, t, substrate):
+
+
+        list_of_times = []
+
+        for y in self.output:
+            y = np.transpose(y)
+
+            substrate_index = self.model.species_names.index(substrate_name)
+            y_substrate = y[substrate_index]
+
+            if mode == '<=':
+                index_for_conc = np.where(y_substrate <= substrate_concentration)
+            elif mode == '>=':
+                index_for_conc = np.where(y_substrate >= substrate_concentration)
+
+            if len(index_for_conc[0]) == 0:
+                time = self.model.time[-1]
+            else:
+                index_for_conc = index_for_conc[0][0]
+                time = self.model.time[index_for_conc]
+
+            list_of_times.append(time)
+
+
+        list_of_times = np.array(list_of_times)
+        return list_of_times
+
+    def analyse_sobal_sensitivity_substrate_concentration_at_t(self, t, substrate, ):
 
         self.output_for_analysis = self.get_outputs_at_timepoint(t, substrate)
 
@@ -559,6 +627,32 @@ class SA(object):
         lower, upper, max_out, min_out = self.get_interquartile_of_output_at_timepoint()
         self.analysis_info += ("\n 95 % Quartiles at t = " + str(lower) + " : " + str(upper) + "\n")
         self.analysis_info += ("Min at t = " + str(min_out) + ",  Max at t = " + str(max_out) + "\n")
+
+        return self.dataframe_output
+
+    def analysis_sobal_sensitivity_time_to_concentration(self, substrate_name, substrate_concentration, mode='<='):
+
+        self.output_for_analysis = self.get_times_to_reach_substrate_concentration(substrate_name,
+                                                                                   substrate_concentration,
+                                                                                   mode=mode)
+
+        self.analysis = sobol.analyze(self.problem,
+                                      self.output_for_analysis,
+                                      calc_second_order=self.second_order,
+                                      num_resamples=self.num_resample,
+                                      conf_level=self.conf_level,
+                                      print_to_console=False,
+                                      parallel=False,
+                                      n_processors=None)
+
+        rows = self.problem['names']
+
+        print("self.analysis updated with sobal sensitivity analysis output")
+
+        self.dataframe_output = pd.DataFrame(self.analysis, index=rows)
+        print("Sobal sensitivity analysis saved as dataframe in self.dataframe_output")
+
+        self.analysis_info = " --- Analysis mode = Uncertainty in time to target substrate conc --- \n"
 
         return self.dataframe_output
 

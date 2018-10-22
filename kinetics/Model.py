@@ -62,6 +62,8 @@ class Model(list):
         """
         self.parameters = {}
 
+        self.y = 0
+
     # Time
     def set_time(self, start, end, steps, mxsteps=10000):
         """
@@ -144,6 +146,30 @@ class Model(list):
         self.species.update(species_dict)
         self.species_names, self.species_starting_values = get_species_positions(self.species)
 
+    def set_species_defaults_to_mean_of_bounds(self):
+        for name in self.species_bounds:
+            lower = self.species_bounds[name][0]
+            upper = self.species_bounds[name][1]
+            mean_value = (lower+upper)/2
+            self.species_defaults[name] = mean_value
+
+        return self.species_defaults
+
+    def set_parameters_defaults_to_mean_of_bounds(self):
+        for name in self.parameter_bounds:
+            if type(self.parameter_bounds[name]) == int:
+                print(name)
+
+            lower = self.parameter_bounds[name][0]
+            upper = self.parameter_bounds[name][1]
+            mean_value = (lower+upper)/2
+            self.parameter_defaults[name] = mean_value
+            self.parameters = self.parameter_defaults
+
+        return self.parameter_defaults
+
+
+
     # Run the model
     def deriv(self, y, t):
         """
@@ -183,9 +209,9 @@ class Model(list):
         :return: y - a numpy array of 2 dimensions. Time by substrate.
         """
         y0 = np.array(self.species_starting_values)
-        y = integrate.odeint(self.deriv, y0, self.time, mxstep=self.mxsteps)
+        self.y = integrate.odeint(self.deriv, y0, self.time, mxstep=self.mxsteps)
 
-        return y
+        return self.y
 
     # Reset the model back to default settings
     def reset_model(self):
@@ -340,3 +366,4 @@ def calculate_yprime(y, rate, substrates, products, substrate_names):
         y_prime[substrate_names.index(name)] += rate
 
     return y_prime
+

@@ -29,14 +29,38 @@ def two_substrate_pingpong_irr(kcat=None, kma=None, kmb=None, enz=None, a=None, 
 
     return rate
 
-def three_substrate_irreversible_ter_ordered(kcat=None, kma=None, kmb=None, kia=None, kmc=None, enz=None, a=None, b=None, c=None):
-    rate = (kcat * enz * a * b * c) / ((kia * c) + (kmc * a * b) + (kmb * a * c) + (kma * b * c) + (a * b * c))
+def two_substrate_seq_steady_kma_smaller_ki(kcat=None, kma=None, kmb=None, kia=None, enz=None, a=None, b=None):
+    # sequential steady state mechanism in which Kma << Kia.
+
+    rate = (kcat * enz * a * b) / ((kia * kmb) + (kmb * a) + (a * b))
 
     return rate
 
 
 
+
+def three_substrate_irreversible_ter_ordered(kcat=None, kma=None, kmb=None, kia=None, kmc=None, enz=None, a=None, b=None, c=None):
+    rate = (kcat * enz * a * b * c) / ((kia * c) + (kmc * a * b) + (kmb * a * c) + (kma * b * c) + (a * b * c))
+
+    return rate
+
+def three_substrate_irreversible_sequential(kcat=None, kma=None, kmb=None, kmc=None, kia=None, kib=None, enz=None, a=None, b=None, c=None):
+    numerator = kcat*enz*a*b*c
+
+    denominator = (kia*kib*kmc) + (kib*kmc*a) + (kia*kmb*c) + (kmc*a*b) + (kmb*a*c) + (kma*b*c) + (a*b*c)
+
+    rate = numerator / denominator
+
+    return rate
+
 """ Reversible"""
+def one_substrate_one_product_rev(kcat_fwd=None, kcat_rev=None, km_a=None, km_p=None, enz=None, a=None, p=None):
+
+    rate = ((kcat_fwd*enz*a)-(kcat_rev*enz*p)) / (1+(a/km_a)+(p/km_p))
+
+    return rate
+
+
 def two_substrate_ord_rev(kcatf=None, kcatr=None, kmb=None, kia=None, kib=None, kmp=None, kip=None, kiq=None, enz=None, a=None, b=None, p=None, q=None):
 
     numerator = ((enz*kcatf*a*b) / (kia*kmb)) - ((enz*kcatr*p*q) / (kmp*kiq))
