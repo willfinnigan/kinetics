@@ -2,7 +2,7 @@ Please drop me an email if you're interested in this python package.  I'm also o
 
 wjafinnigan@gmail.com
 
-More active development will be pushed once our paper using this software is out (soon hopefully).
+More active development will be pushed once our paper using this software is out (soon hopefully) - 22Jan19
 
 
 # Kinetics
