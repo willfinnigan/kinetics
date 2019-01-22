@@ -1,3 +1,10 @@
+Please drop me an email if you're interested in this python package.  I'm also open to collaborating on developing this package further.  
+
+wjafinnigan@gmail.com
+
+More active development will be pushed once our paper using this software is out (soon hopefully).
+
+
 # Kinetics
 The core of this module uses the scipy.integrate.odeint to solve ordinary differential equations to model enzyme reactions
 
