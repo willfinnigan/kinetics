@@ -1,4 +1,4 @@
-Please drop me an email if you're interested in this python package.  I'm also open to collaborating on developing this package further.  
+Please drop me an email if you're interested in this python package.
 
 wjafinnigan@gmail.com
 
