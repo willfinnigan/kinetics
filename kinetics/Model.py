@@ -1,7 +1,10 @@
 import numpy as np
+import pandas as pd
 from scipy import integrate
 import copy
 import time
+from kinetics.Uncertainty_Sensitivity_Analysis import get_bounds_from_pc_error
+
 
 class Model(list):
     """
@@ -35,6 +38,9 @@ class Model(list):
         self.mxsteps = 10000
         self.time = np.linspace(self.start, self.end, self.steps)
 
+        """ Holds species dictionary with percentage error, used to load species_defaults and species_bounds"""
+        self.reaction_species = {}
+
         """ Species - used to reset the model, or as the bounds to run ua/sa """
         self.species_defaults = {}
         self.species_bounds = {}
@@ -62,7 +68,10 @@ class Model(list):
         """
         self.parameters = {}
 
-        self.y = 0
+        self.y = []
+
+        self.mw_dict = {}
+        self.vol = 1
 
     # Time
     def set_time(self, start, end, steps, mxsteps=10000):
@@ -113,6 +122,9 @@ class Model(list):
         self.parameter_bounds = {}
 
         for reaction_class in self:
+            if reaction_class.parameter_defaults == {}:
+                reaction_class.set_parameter_defaults_to_mean_of_bounds()
+
             self.parameters.update(reaction_class.parameter_defaults)
             self.parameter_defaults.update(copy.deepcopy(reaction_class.parameter_defaults))
             self.parameter_bounds.update(reaction_class.parameter_bounds)
@@ -128,15 +140,6 @@ class Model(list):
         self.species = copy.deepcopy(species_defaults)
         self.update_species(species_defaults)
 
-    def set_species_bounds(self, species_bounds):
-        """
-        Set self.species_bounds
-
-        :param species_bounds: dictionary - {"species_name" : (lower_bound, upper_bound), ..}
-        """
-
-        self.species_bounds = species_bounds
-
     def update_species(self, species_dict):
         """
         Set the ordered lists self.species_names and self.species_starting_values - used to run the model
@@ -146,8 +149,32 @@ class Model(list):
         self.species.update(species_dict)
         self.species_names, self.species_starting_values = get_species_positions(self.species)
 
+    def load_species(self):
+        self.species_bounds = get_bounds_from_pc_error(self.reaction_species)
+        species_defaults = set_species_defaults(self.reaction_species)
+        self.set_species_defaults(species_defaults)
+
+    def load_species_pc_error_from_reactions(self):
+
+        for reaction in self:
+            for substrate in reaction.substrates:
+                if substrate not in self.reaction_species:
+                    self.reaction_species[substrate] = (0,0)
+                    print("Loaded species '" + str(substrate) + "' as (0,0)")
+
+            for product in reaction.products:
+                if product not in self.reaction_species:
+                    self.reaction_species[product] = (0, 0)
+                    print("Loaded species '" + str(product) + "' as (0,0)")
+
+            for species in reaction.reaction_substrate_names:
+                if species not in self.reaction_species:
+                    self.reaction_species[species] = (0, 0)
+                    print("Loaded species '" + str(species) + "' as (0,0)")
+
     def set_species_defaults_to_mean_of_bounds(self):
         for name in self.species_bounds:
+            print(self.species_bounds[name])
             lower = self.species_bounds[name][0]
             upper = self.species_bounds[name][1]
             mean_value = (lower+upper)/2
@@ -168,6 +195,10 @@ class Model(list):
 
         return self.parameter_defaults
 
+    def setup_model(self):
+        self.load_species_pc_error_from_reactions()
+        self.load_species()
+        self.set_parameters_from_reactions()
 
 
     # Run the model
@@ -210,10 +241,16 @@ class Model(list):
         """
         y0 = np.array(self.species_starting_values)
         self.y = integrate.odeint(self.deriv, y0, self.time, mxstep=self.mxsteps)
+        self.reset_reactions()
 
         return self.y
 
     # Reset the model back to default settings
+
+    def reset_reactions(self):
+        for reaction_class in self:
+            reaction_class.reset_reaction()
+
     def reset_model(self):
         """
         Reset the model back to the default settings
@@ -223,10 +260,75 @@ class Model(list):
           back to the original default settings.  These the variables used to run the model.
         """
 
-        time.sleep(1)
         self.species = self.species_defaults
         self.species_names, self.species_starting_values = get_species_positions(self.species)
         self.parameters = self.parameter_defaults
+        self.y = []
+
+
+    # Export results as dataframe
+
+    def results_dataframe(self):
+        ys_at_t = {'Time' : self.time}
+
+        for i in range(len(self.species_names)):
+            name = self.species_names[i]
+            ys_at_t[name] = []
+
+            for t in range(len(self.time)):
+                ys_at_t[name].append(self.y[t][i])
+
+        df = pd.DataFrame(ys_at_t)
+
+        return df
+
+    # Calculate metrics
+    def e_factor(self, product_name, include_h2o=True):
+
+        g_waste = 0
+        g_product = 0
+
+        df = self.results_dataframe()
+
+        for substrate in df:
+            if substrate in self.mw_dict:
+                mol_substrate = ((df[substrate].iloc[-1] * self.vol) / 1000000)
+                g_substrate = mol_substrate * self.mw_dict[substrate]
+            else:
+                g_substrate = 0
+
+            if substrate == product_name:
+                g_product = g_substrate
+            else:
+                if (substrate != 'H2O') or (include_h2o == True):
+                    g_waste += g_substrate
+
+        e_factor = g_waste / g_product
+
+        return e_factor
+
+    def pc_conversion(self, substrate_name, product_name):
+        index_substrate = self.species_names.index(substrate_name)
+        index_product = self.species_names.index(product_name)
+
+        start_conc = self.y[0][index_substrate]
+        end_conc = self.y[-1][index_product]
+
+        pc_conversion = (end_conc / start_conc)
+
+        return pc_conversion
+
+    def total_enzyme(self, enzyme_names):
+
+        total = 0
+
+        for enzyme in enzyme_names:
+            conc = self.species_defaults[enzyme]
+            mol_enzyme = (conc / 1000000) * self.vol
+            g_enzyme = mol_enzyme * self.mw_dict[enzyme]
+            total += g_enzyme
+
+        return total
 
 
 """Functions for formatting species and parameters dicts to the correct format"""

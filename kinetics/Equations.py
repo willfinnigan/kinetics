@@ -89,6 +89,17 @@ def two_substrate_substituted_enzyme_rev(kcatf=None, kma=None, kmb=None, kia=Non
 
     return num/den
 
+def two_substrate_ordered_bi_rev_keq(kcatf=None, kcatr=None, kma=None, kmb=None, kia=None, kib=None,
+                                     kmp=None, kmq=None, kip=None, keq=None,
+                                     enz=None, a=None, b=None, p=None, q=None):
+
+    vf = kcatf*enz
+    vr = kcatr*enz
+
+    num = kcatf * ( (a*b) - ((p*q)/keq) )
+
+    den = a*b*(1+(p/kip)) + kma*b*(a+kia) + (vf/(vr*keq))
+
 
 """ Inhibition """
 def competitive_inhibition(km=None, ki=None, i=None):
@@ -102,3 +113,9 @@ def mixed_model_inhibition(kcat=None, km=None, ki=None, alpha=None, i=None):
 
     return kcat_app, km_app
 
+
+''' O2 Diffusion'''
+
+def o2_diffusion(kl=None, area=None, o2sat=None, o2aq=None):
+    rate = -kl * area * (o2aq - o2sat)
+    return rate

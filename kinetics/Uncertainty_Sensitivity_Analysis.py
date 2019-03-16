@@ -8,8 +8,6 @@ import time
 import random
 
 """ Setup the bounds for uncertainty or sensitivity analsyis"""
-
-
 def setup_bounds_lists(dict_with_bounds):
     """
     Converts a dict with bounds to two ordered lists
@@ -32,7 +30,6 @@ def setup_bounds_lists(dict_with_bounds):
             bounds_list.append(dict_with_bounds[name])
 
     return names_list, bounds_list
-
 
 def get_bounds_from_std_error(dict_with_std_error):
     """
@@ -62,7 +59,6 @@ def get_bounds_from_std_error(dict_with_std_error):
             dict_with_bounds[name] = 0
 
     return dict_with_bounds
-
 
 def get_bounds_from_pc_error(dict_with_pc_error):
     """
@@ -96,8 +92,6 @@ def get_bounds_from_pc_error(dict_with_pc_error):
 
 
 """ Set up the problem dict which will be used for sampling"""
-
-
 def setup_problem(parameter_names, parameter_bounds,
                   species_names, species_bounds):
     """
@@ -143,8 +137,6 @@ def setup_problem(parameter_names, parameter_bounds,
 
 
 """ Run the models for the uncertainty analysis or sensitivity analysis"""
-
-
 def parse_samples_to_run(samples, parameter_names, species_names):
     """
     Takes a list of samples and converts this to a list of tuples of dictionaries
@@ -244,8 +236,6 @@ def run_all_models(parsed_samples, model, logging=True):
 
 
 """ Process multiple model outputs for uncertainty analysis"""
-
-
 def return_ys_for_a_single_substrate(model, run_all_models_ouput, substrate_name):
     """
     From run_all_models_ouput, return only the outputs for substrate_name
@@ -332,8 +322,12 @@ def random_sample(problem, number_of_samples):
 
     return samples
 
-
-
+def check_bounds(bounds_names, bounds_tuples):
+    for name, tuple in zip(bounds_names, bounds_tuples):
+        try:
+            assert tuple[0] < tuple[1]
+        except AssertionError as error:
+            print(str(name) + ' bounds are incorrect, check smaller bound is first')
 
 
 
@@ -369,6 +363,14 @@ class UA(object):
 
         self.logging = logging
 
+    def load_species_and_parameters_from_model(self):
+        self.parameters_with_bounds = self.model.parameter_bounds
+        self.species_with_bounds = self.model.species_bounds
+
+        self.parameter_names, self.parameter_bounds = setup_bounds_lists(self.parameters_with_bounds)
+        self.species_names, self.species_bounds = setup_bounds_lists(self.species_with_bounds)
+
+
     def analyse_number_of_samples_vs_parameters(self):
         # Code for text output
         num_params = len(self.parameter_names)
@@ -385,6 +387,9 @@ class UA(object):
         print("")
 
     def make_lhc_samples(self):
+        check_bounds(self.parameter_names, self.parameter_bounds)
+        check_bounds(self.species_names, self.species_bounds)
+
         self.problem = setup_problem(self.parameter_names, self.parameter_bounds,
                                      self.species_names, self.species_bounds)
 
@@ -468,6 +473,19 @@ class UA(object):
 
         return self.all_runs_substrate_dataframes
 
+    def run_standard_ua(self, output=None):   #output = 'all' or 'quartiles' or 'None'
+        self.make_lhc_samples()
+        self.run_models()
+        self.calculate_all_runs_substrate_dataframes()
+        self.calculate_quartiles()
+
+        if output == 'all':
+            return self.all_runs_substrate_dataframes
+        elif output == 'quartiles':
+            return self.substrate_dataframes
+        else:
+            return None
+
 
     def return_ua_info(self):
         info = "--- Species Defaults in Reaction --- \n"
@@ -495,7 +513,6 @@ class UA(object):
         info += (str(self.num_samples) + " samples made by lhc" + "\n")
 
         return info
-
 
 class SA(object):
     def __init__(self,
@@ -600,7 +617,7 @@ class SA(object):
         list_of_times = np.array(list_of_times)
         return list_of_times
 
-    def analyse_sobal_sensitivity_substrate_concentration_at_t(self, t, substrate, ):
+    def analyse_sobal_sensitivity_substrate_concentration_at_t(self, t, substrate):
 
         self.output_for_analysis = self.get_outputs_at_timepoint(t, substrate)
 

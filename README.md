@@ -11,11 +11,6 @@ This also makes it much easier to carry out uncertainty and sensitivity analysis
 
 This module uses SALib to carry out uncertainty and sensitivity analysis, with a class provided for each.
 
-The outputs are saved as pandas dataframes.   
-
-This module works well using a jupyter notebook or jupyter lab.  Please see 'example.ipynb' in the example folder
-
-
-
+The outputs are saved as pandas dataframes.  
 
 
