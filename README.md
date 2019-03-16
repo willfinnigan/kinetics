@@ -1,3 +1,10 @@
+Please drop me an email if you're interested in this python package.
+
+wjafinnigan@gmail.com
+
+More active development will be pushed once our paper using this software is out (soon hopefully) - 22Jan19
+
+
 # Kinetics
 The core of this module uses the scipy.integrate.odeint to solve ordinary differential equations to model enzyme reactions
 
@@ -11,6 +18,9 @@ This also makes it much easier to carry out uncertainty and sensitivity analysis
 
 This module uses SALib to carry out uncertainty and sensitivity analysis, with a class provided for each.
 
-The outputs are saved as pandas dataframes.  
+The outputs are saved as pandas dataframes.   
+
+
+
 
 
