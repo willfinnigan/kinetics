@@ -24,8 +24,8 @@ setup(
   author = 'William Finnigan',
   author_email = 'wjafinnigan@gmail.com',
   url = 'https://github.com/willfinnigan/kinetics',
-  download_url = 'https://github.com/willfinnigan/Kinetics/archive/1.0.zip',    # I explain this later on
-  keywords = ['enzyme', 'kinetics', 'modelling'],   # Keywords that define your package best
+  download_url = 'https://github.com/willfinnigan/Kinetics/archive/1.0b.tar.gz',
+  keywords = ['enzyme', 'kinetics', 'modelling'],
   install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas'],
   classifiers=[
     'Development Status :: 3 - Alpha',
