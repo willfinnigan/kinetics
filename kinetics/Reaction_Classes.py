@@ -102,7 +102,6 @@ class Reaction():
 
         return y_prime
 
-
 class One_irr(Reaction):
 
     def __init__(self,
@@ -413,8 +412,6 @@ class FirstOrderRate(Reaction):
         k = parameters[0]
 
         return k*a
-
-
 
 
 class Modifier():

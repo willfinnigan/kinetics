@@ -14,4 +14,22 @@ setup(
     packages=find_packages())
 
 
-
+from distutils.core import setup
+setup(
+  name = 'kinetics',
+  packages = ['kinetics'],
+  version = '1.0',
+  license='MIT',
+  description = 'Python code to run kinetic models of enzyme reactions',
+  author = 'William Finnigan',
+  author_email = 'wjafinnigan@gmail.com',
+  url = 'https://github.com/willfinnigan/kinetics',
+  download_url = 'https://github.com/willfinnigan/Kinetics/archive/1.0.zip',    # I explain this later on
+  keywords = ['enzyme', 'kinetics', 'modelling'],   # Keywords that define your package best
+  install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas'],
+  classifiers=[
+    'Development Status :: 3 - Alpha',
+    'Topic :: Science :: Tools',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3'],
+)

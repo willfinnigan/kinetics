@@ -53,7 +53,6 @@ def calc_e_factor(model, mw_dict, vol, product_name):
 
     return e_factor
 
-
 def total_enzyme(model, mw_dict, vol, enzymes):
 
     total = 0
