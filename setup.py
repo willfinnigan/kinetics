@@ -8,9 +8,9 @@ setup(
   author = 'William Finnigan',
   author_email = 'wjafinnigan@gmail.com',
   url = 'https://github.com/willfinnigan/kinetics',
-  download_url = 'https://github.com/willfinnigan/Kinetics/archive/1.0c.tar.gz',
+  download_url = 'https://github.com/willfinnigan/Kinetics/archive/1.0d.tar.gz',
   keywords = ['enzyme', 'kinetics', 'modelling'],
-  install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas'],
+  install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas', 'deap'],
   classifiers=[
     'Development Status :: 3 - Alpha',
     'License :: OSI Approved :: MIT License',
