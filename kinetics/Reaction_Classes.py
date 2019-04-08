@@ -129,6 +129,37 @@ class One_irr(Reaction):
 
         return rate
 
+class Two_bi_irr(Reaction):
+
+    def __init__(self,
+                 kcat=None, kma=None, kmb=None,
+                 a=None, b=None, enz=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a,b,enz]
+        self.parameter_names=[kcat, kma, kmb]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        enz = substrates[2]
+
+        # Parameters
+        kcat = parameters[0]
+        kma = parameters[1]
+        kmb = parameters[2]
+
+        # Rate equation
+        rate =  (kcat * enz) * (a / (kma + a)) * (b / (kmb + b))
+
+        return rate
+
 class Two_ordered_irr(Reaction):
 
     def __init__(self,
@@ -298,6 +329,29 @@ class Three_ter_ord_irr(Reaction):
                                                                   enz=enz, a=a, b=b, c=c)
         return rate
 
+class FirstOrderRate(Reaction):
+
+    def __init__(self,
+                 k=None, a=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a]
+        self.parameter_names=[k]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+
+        # Parameters
+        k = parameters[0]
+
+        return k*a
+
 class OxygenDiffusion(Reaction):
 
     def __init__(self,
@@ -324,6 +378,7 @@ class OxygenDiffusion(Reaction):
 
         rate = Equations.o2_diffusion(kl=kl, area=area, o2sat=o2sat, o2aq=o2aq)
         return rate
+
 
 class Flow(Reaction):
 
@@ -390,28 +445,7 @@ class Flow(Reaction):
 
         return y_prime
 
-class FirstOrderRate(Reaction):
 
-    def __init__(self,
-                 k=None, a=None,
-                 substrates=[], products=[]):
-
-        super().__init__()
-
-        self.reaction_substrate_names = [a]
-        self.parameter_names=[k]
-
-        self.substrates = substrates
-        self.products = products
-
-    def calculate_rate(self, substrates, parameters):
-        # Substrates
-        a = substrates[0]
-
-        # Parameters
-        k = parameters[0]
-
-        return k*a
 
 
 class Modifier():
