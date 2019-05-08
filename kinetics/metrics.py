@@ -31,9 +31,7 @@ def calc_e_factor_from_ua(ua, mw_dict, vol, product_name, round_to=2):
     return e, std_dev
 
 
-
-
-class Metrics():
+class Metrics(object):
 
     def __init__(self, model):
 
