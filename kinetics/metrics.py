@@ -44,6 +44,9 @@ class Metrics():
         self.enzyme_mws = {}
         self.species_mws = {}
 
+        self.model.load_species()
+        self.model.run_model()
+
     def total_enzyme(self):
 
         total = 0
