@@ -7,11 +7,10 @@ class GA_Base_Class(object):
 
     def __init__(self, model=None, ua=None):
 
-        self.bounds = {}
+        self.names_list = []
+        self.bounds_list = []
+        self.bounds_dict = {}
         self.weights = (1,)
-
-        self.names = []
-        self.bounds = []
 
         self.indpb_mate = 0.5
         self.mu=0
@@ -25,9 +24,6 @@ class GA_Base_Class(object):
 
         self.model = model
         self.ua = ua
-        self.enzyme_names = []
-        self.substrate = ''
-        self.product = ''
 
         if self.ua != None:
             self.ua.logging = False
@@ -48,8 +44,8 @@ class GA_Base_Class(object):
         self.indpb_mutate = indpb_mutate
 
     def setup(self):
-        self.names = list(self.bounds.keys())
-        self.bounds = list(self.bounds.values())
+        self.names_list = list(self.bounds_dict.keys())
+        self.bounds_list = list(self.bounds_dict.values())
 
         creator.create("FitnessMax", base.Fitness, weights=self.weights)
         creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -94,8 +90,8 @@ class GA_Base_Class(object):
                 return self.low_fitness()
 
         # Update model species with the concentrations in ind
-        for i in range(len(self.names)):
-            name = self.names[i]
+        for i in range(len(self.names_list)):
+            name = self.names_list[i]
             if name == 'Time':
                 self.model.end = ind[i]
             else:
@@ -119,8 +115,8 @@ class GA_Base_Class(object):
                 return ind.fitness.values
 
         # Update ua species with the concentrations in ind
-        for i in range(len(self.names)):
-            name = self.names[i]
+        for i in range(len(self.names_list)):
+            name = self.names_list[i]
             old_conc, error = self.model.reaction_species[name]
             self.ua.model.reaction_species[name] = [ind[i], error]
 
