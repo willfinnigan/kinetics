@@ -379,7 +379,6 @@ class OxygenDiffusion(Reaction):
         rate = Equations.o2_diffusion(kl=kl, area=area, o2sat=o2sat, o2aq=o2aq)
         return rate
 
-
 class Flow(Reaction):
 
     def __init__(self,
