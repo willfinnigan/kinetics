@@ -33,14 +33,16 @@ def calc_e_factor_from_ua(ua, mw_dict, vol, product_name, round_to=2):
 
 class Metrics(object):
 
-    def __init__(self, model):
+    def __init__(self, model,
+                 substrate='', product='', reaction_volume=0,
+                 enzyme_mws={}, species_mws={}):
 
         self.model = model
-        self.substrate = ''
-        self.product = ''
-        self.reaction_volume = 0
-        self.enzyme_mws = {}
-        self.species_mws = {}
+        self.substrate = substrate
+        self.product = product
+        self.reaction_volume = reaction_volume
+        self.enzyme_mws = enzyme_mws
+        self.species_mws = species_mws
 
         self.model.load_species()
         self.model.run_model()
@@ -55,6 +57,11 @@ class Metrics(object):
             total += g_enzyme
 
         return total
+
+    def total_enzyme_concentration(self):
+
+        conc = self.total_enzyme() / self.reaction_volume
+        return conc
 
     def e_factor(self):
         g_waste = 0
@@ -88,11 +95,12 @@ class Metrics(object):
         mol_product = ((df[self.product].iloc[-1] * self.reaction_volume) / 1000000)
         g_product = mol_product * self.species_mws[self.product]
 
-        reaction_time = self.model.end
+        reaction_time = self.model.end / 60 # time in hours
 
-        sty = (g_product / self.reaction_volume) / reaction_time
+        sty_per_hr = (g_product / self.reaction_volume) / reaction_time
+        sty_per_day = sty_per_hr*24
 
-        return sty
+        return sty_per_day
 
     def biocatalyst_productivity(self):
 

@@ -1,5 +1,5 @@
 from kinetics.Model import set_species_defaults,set_parameter_defaults
-from kinetics.Model import Model, Metrics_test
+from kinetics.Model import Model
 from kinetics.Model import yprime_plus, yprime_minus, calculate_yprime
 
 from kinetics.Equations import *
@@ -13,5 +13,6 @@ from kinetics.Initial_Rates import calc_initial_rates_ua, fit_mm, concentrations
 
 from kinetics.ga import GA_Base_Class
 
+from kinetics.metrics import Metrics
 
 
