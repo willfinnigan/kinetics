@@ -88,16 +88,19 @@ class GA_Base_Class(object):
         return fit
 
     def evaluate(self, ind):
-        # Check that the GA hasn't evolved towards negative substrate
 
+        # Check that the GA hasn't evolved towards negative substrate
         if self.check_neg_substrate(ind) == True:
                 return self.low_fitness()
 
         # Update model species with the concentrations in ind
         for i in range(len(self.names)):
             name = self.names[i]
-            old_conc, error = self.model.reaction_species[name]
-            self.model.reaction_species[name] = [ind[i], error]
+            if name == 'Time':
+                self.model.end = ind[i]
+            else:
+                old_conc, error = self.model.reaction_species[name]
+                self.model.reaction_species[name] = [ind[i], error]
 
         # Run the model
         self.model.load_species()
