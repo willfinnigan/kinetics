@@ -1,5 +1,5 @@
 from kinetics.Model import set_species_defaults,set_parameter_defaults
-from kinetics.Model import Model, Metrics
+from kinetics.Model import Model, Metrics_test
 from kinetics.Model import yprime_plus, yprime_minus, calculate_yprime
 
 from kinetics.Equations import *

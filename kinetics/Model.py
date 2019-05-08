@@ -337,7 +337,7 @@ class Model(list):
 
         return total
 
-class Metrics(object):
+class Metrics_test(object):
 
     def __init__(self, model):
 
