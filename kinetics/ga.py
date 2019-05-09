@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 class GA_Base_Class(object):
 
-    def __init__(self, model=None, ua=None):
+    def __init__(self, model=None, ua=None, metrics=None):
 
         self.names_list = []
         self.bounds_list = []
@@ -24,6 +24,8 @@ class GA_Base_Class(object):
 
         self.model = model
         self.ua = ua
+
+        self.metrics=metrics
 
         if self.ua != None:
             self.ua.logging = False
