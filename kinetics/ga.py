@@ -98,7 +98,7 @@ class GA_Base_Class(object):
         for i in range(len(self.names_list)):
             name = self.names_list[i]
             if name == 'Time':
-                self.model.end = ind[i]
+                self.model.set_end_time(ind[i])
             else:
                 old_conc, error = self.model.reaction_species[name]
                 self.model.reaction_species[name] = [ind[i], error]

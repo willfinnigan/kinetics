@@ -76,7 +76,7 @@ class Model(list):
         self.logging = logging
 
     # Time
-    def set_time(self, start, end, steps, mxsteps=10000):
+    def set_time(self, start, end, steps):
         """
         This function sets all the time parameters for the model.
 
@@ -88,8 +88,10 @@ class Model(list):
         self.start = start
         self.end = end
         self.steps = steps
-        self.mxsteps = mxsteps
+        self.time = np.linspace(self.start, self.end, self.steps)
 
+    def set_end_time(self, end):
+        self.end=end
         self.time = np.linspace(self.start, self.end, self.steps)
 
     # Parameters
