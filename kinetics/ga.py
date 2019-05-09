@@ -53,7 +53,7 @@ class GA_Base_Class(object):
         creator.create("FitnessMax", base.Fitness, weights=self.weights)
         creator.create("Individual", list, fitness=creator.FitnessMax)
 
-        self.toolbox.register("make_ind", self.make_ind, self.bounds)
+        self.toolbox.register("make_ind", self.make_ind, self.bounds_list)
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.make_ind)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
         self.toolbox.register("mate", tools.cxUniform, indpb=self.indpb_mate)
@@ -67,6 +67,8 @@ class GA_Base_Class(object):
 
         ind = []
         for tuple in bounds:
+            print(bounds)
+            print(tuple[0])
             selection = random.uniform(tuple[0], tuple[1])
             ind.append(selection)
 
