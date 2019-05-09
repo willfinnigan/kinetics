@@ -5,12 +5,11 @@ from tqdm import tqdm
 
 class GA_Base_Class(object):
 
-    def __init__(self, model=None, ua=None, metrics=None):
+    def __init__(self, model=None, ua=None, metrics=None, weights=(1,)):
 
         self.names_list = []
         self.bounds_list = []
         self.bounds_dict = {}
-        self.weights = (1,)
 
         self.indpb_mate = 0.5
         self.mu=0
@@ -26,6 +25,8 @@ class GA_Base_Class(object):
         self.ua = ua
 
         self.metrics=metrics
+
+        self.weights = weights
 
         if self.ua != None:
             self.ua.logging = False
