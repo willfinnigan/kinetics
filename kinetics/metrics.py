@@ -135,6 +135,6 @@ class Metrics(object):
 
         substrate_start = df[self.substrate].iloc[0]
         product_end = df[self.product].iloc[-1]
-        final_yield = product_end/substrate_start
+        final_yield = (product_end/substrate_start)*100
 
         return final_yield
