@@ -5,11 +5,11 @@ from tqdm import tqdm
 
 class GA_Base_Class(object):
 
-    def __init__(self, model=None, ua=None, metrics=None, weights=(1,)):
+    def __init__(self, model=None, ua=None, metrics=None, weights=(1,), bounds={}):
 
         self.names_list = []
         self.bounds_list = []
-        self.bounds_dict = {}
+        self.bounds_dict = bounds
 
         self.indpb_mate = 0.5
         self.mu=0
@@ -49,6 +49,8 @@ class GA_Base_Class(object):
     def setup(self):
         self.names_list = list(self.bounds_dict.keys())
         self.bounds_list = list(self.bounds_dict.values())
+        print(self.bounds_dict)
+        print(self.bounds_list)
 
         creator.create("FitnessMax", base.Fitness, weights=self.weights)
         creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -67,8 +69,6 @@ class GA_Base_Class(object):
 
         ind = []
         for tuple in bounds:
-            print(bounds)
-            print(tuple[0])
             selection = random.uniform(tuple[0], tuple[1])
             ind.append(selection)
 
