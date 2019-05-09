@@ -138,3 +138,6 @@ class Metrics(object):
         final_yield = (product_end/substrate_start)*100
 
         return final_yield
+
+    def reaction_time(self):
+        return self.model.end
