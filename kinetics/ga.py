@@ -49,8 +49,6 @@ class GA_Base_Class(object):
     def setup(self):
         self.names_list = list(self.bounds_dict.keys())
         self.bounds_list = list(self.bounds_dict.values())
-        print(self.bounds_dict)
-        print(self.bounds_list)
 
         creator.create("FitnessMax", base.Fitness, weights=self.weights)
         creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -88,12 +86,7 @@ class GA_Base_Class(object):
 
         return fit
 
-    def evaluate(self, ind):
-
-        # Check that the GA hasn't evolved towards negative substrate
-        if self.check_neg_substrate(ind) == True:
-                return self.low_fitness()
-
+    def update_model_for_evaluation(self, ind):
         # Update model species with the concentrations in ind
         for i in range(len(self.names_list)):
             name = self.names_list[i]
@@ -103,9 +96,13 @@ class GA_Base_Class(object):
                 old_conc, error = self.model.reaction_species[name]
                 self.model.reaction_species[name] = [ind[i], error]
 
-        # Dont need to run the model is using metrics class
-        #self.model.load_species()
-        #self.model.run_model()
+    def evaluate(self, ind):
+
+        # Check that the GA hasn't evolved towards negative substrate
+        if self.check_neg_substrate(ind) == True:
+                return self.low_fitness()
+
+        self.update_model_for_evaluation(ind)
 
         # Calculate fitness
         fitness = self.fitness()
