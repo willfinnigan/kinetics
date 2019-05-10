@@ -428,7 +428,7 @@ class UA(object):
     def quartiles_to_dataframe(self):
         self.substrate_dataframes = {}
         for substrate in self.model.species_names:
-            df = pd.DataFrame(self.quartile_output[substrate], columns=["Time", "High", "Low", "Mean"])
+            c
             self.substrate_dataframes[substrate] = df
 
         if self.logging == True:
@@ -449,6 +449,16 @@ class UA(object):
         self.quartiles_to_dataframe()
 
         return self.substrate_dataframes
+
+    def calculate_df_quartiles_single_substrate(self, substrate):
+        collected_runs = return_ys_for_a_single_substrate(self.model, self.output, substrate)
+        quartiles = return_quartiles(collected_runs, quartile=self.quartile_range)
+
+        df = pd.DataFrame(quartiles, columns=["Time", "High", "Low", "Mean"])
+
+        return df
+
+
 
     def calculate_all_runs_substrate_dataframes(self):
 

@@ -143,14 +143,13 @@ class Metrics(object):
     def reaction_time(self):
         return self.model.end
 
-    def uncertainty(self, ci=95):
-        ua = UA(self.model, num_samples=500, quartile_range=ci)
-        ua.run_standard_ua()
-        product_df = ua.calculate_quartiles()[self.product]
+    def uncertainty(self, ci=95, num_samples=100, logging=False):
+        ua = UA(self.model, num_samples=num_samples, quartile_range=ci, logging=logging)
+        ua.make_lhc_samples()
+        ua.run_models()
+        product_df = ua.calculate_df_quartiles_single_substrate(self.product)
 
-        high_end = product_df['High'][-1]
-        low_end = product_df['Low'][-1]
-        
-        uncertainty = high_end-low_end
+        high_end = product_df['High'].iloc[-1]
+        low_end = product_df['Low'].iloc[-1]
 
-        return uncertainty
+        return high_end-low_end
