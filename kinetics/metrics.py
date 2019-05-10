@@ -45,6 +45,9 @@ class Metrics(object):
         self.enzyme_mws = enzyme_mws
         self.species_mws = species_mws
 
+        self.refresh_metrics()
+
+    def refresh_metrics(self):
         self.model.load_species()
         self.model.run_model()
 
@@ -132,6 +135,9 @@ class Metrics(object):
 
     def pc_yield(self):
 
+        if self.model.y == []:
+            self.refresh_metrics()
+
         df = self.model.results_dataframe()
 
         substrate_start = df[self.substrate].iloc[0]
@@ -144,6 +150,9 @@ class Metrics(object):
         return self.model.end
 
     def uncertainty(self, ci=95, num_samples=100, logging=False):
+        if self.model.y == []:
+            self.refresh_metrics()
+
         ua = UA(self.model, num_samples=num_samples, quartile_range=ci, logging=logging)
         ua.make_lhc_samples()
         ua.run_models()
