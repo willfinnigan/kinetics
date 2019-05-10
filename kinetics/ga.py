@@ -103,6 +103,8 @@ class GA_Base_Class(object):
                 return self.low_fitness()
 
         self.update_model_for_evaluation(ind)
+        self.model.load_species()
+        self.model.run_model()
 
         # Calculate fitness
         fitness = self.fitness()
