@@ -1,4 +1,5 @@
 import numpy as np
+from kinetics.Uncertainty_Sensitivity_Analysis import UA
 
 def calc_e_factor_from_ua(ua, mw_dict, vol, product_name, round_to=2):
     e_factors = []
@@ -141,3 +142,15 @@ class Metrics(object):
 
     def reaction_time(self):
         return self.model.end
+
+    def uncertainty(self, ci=95):
+        ua = UA(self.model, num_samples=500, quartile_range=ci)
+        ua.run_standard_ua()
+        product_df = ua.calculate_quartiles()[self.product]
+
+        high_end = product_df['High'][-1]
+        low_end = product_df['Low'][-1]
+        
+        uncertainty = high_end-low_end
+
+        return uncertainty
