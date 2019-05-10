@@ -338,6 +338,7 @@ def check_bounds(bounds_names, bounds_tuples):
 
 
 class UA(object):
+
     def __init__(self, model, num_samples=1000, quartile_range=95, logging=True):
 
         self.parameters_with_bounds = model.parameter_bounds
@@ -434,11 +435,11 @@ class UA(object):
             print("Quartiles for each substrate saved to self.substrate_dataframes")
         return self.substrate_dataframes
 
-    def calculate_quartiles(self, quartile_range=95):
+    def calculate_quartiles(self):
 
         for name in self.model.species_names:
             collected_runs = return_ys_for_a_single_substrate(self.model, self.output, name)
-            quartiles = return_quartiles(collected_runs, quartile=quartile_range)
+            quartiles = return_quartiles(collected_runs, quartile=self.quartile_range)
 
             self.quartile_output[name] = quartiles
 
@@ -485,7 +486,6 @@ class UA(object):
             return self.substrate_dataframes
         else:
             return None
-
 
     def return_ua_info(self):
         info = "--- Species Defaults in Reaction --- \n"
