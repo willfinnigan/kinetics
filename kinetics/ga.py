@@ -103,9 +103,9 @@ class GA_Base_Class(object):
                 old_conc, error = self.model.reaction_species[name]
                 self.model.reaction_species[name] = [ind[i], error]
 
-        # Run the model
-        self.model.load_species()
-        self.model.run_model()
+        # Dont need to run the model is using metrics class
+        #self.model.load_species()
+        #self.model.run_model()
 
         # Calculate fitness
         fitness = self.fitness()
