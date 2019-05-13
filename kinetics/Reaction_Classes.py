@@ -355,6 +355,37 @@ class FirstOrderRate(Reaction):
 
         return k*a
 
+class Binding(Reaction):
+
+    def __init__(self, kd=None, k1=None,
+                 a=None, b=None, c=None):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b, c]
+        self.parameter_names=[kd, k1]
+
+        self.substrates = [a, b]
+        self.products = [c]
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        c = substrates[2]
+
+        # Parameters
+        kd = parameters[0]
+        k1 = parameters[1]
+
+        kminus1 = kd*k1
+
+        rate = (k1*a*b) - (kminus1*c)
+
+        return rate
+
+
+
 class OxygenDiffusion(Reaction):
 
     def __init__(self,
