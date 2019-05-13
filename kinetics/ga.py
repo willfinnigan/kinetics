@@ -135,8 +135,11 @@ class GA_Base_Class(object):
     def fitness(self):
         return 1
 
-    def run_ga(self):
-        population = self.toolbox.population(n=self.initial_pop_size)
+    def run_ga(self, initial_pop=False):
+        if initial_pop != False:
+            population = initial_pop
+        else:
+            population = self.toolbox.population(n=self.initial_pop_size)
 
         fitnesses = list(map(self.toolbox.evaluate, population))
         for ind, fit in zip(population, fitnesses):

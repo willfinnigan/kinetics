@@ -91,7 +91,6 @@ class Reaction():
             if modifier.parameter_indexes == []:
                 modifier.get_parameter_indexes(self.parameter_names)
 
-
         substrates = self.get_substrates(y)
 
         substrates, parameters = self.calculate_modifiers(substrates, copy.copy(self.parameters))
@@ -99,7 +98,11 @@ class Reaction():
         rate = self.calculate_rate(substrates, parameters)
 
         y_prime = calculate_yprime(y, rate, self.substrates, self.products, substrate_names)
+        y_prime = self.modify_product(y_prime)
 
+        return y_prime
+
+    def modify_product(self, y_prime):
         return y_prime
 
 class One_irr(Reaction):
@@ -443,8 +446,6 @@ class Flow(Reaction):
             y_prime[index] += rate
 
         return y_prime
-
-
 
 
 class Modifier():

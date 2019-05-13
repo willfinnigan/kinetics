@@ -35,7 +35,7 @@ def calc_e_factor_from_ua(ua, mw_dict, vol, product_name, round_to=2):
 class Metrics(object):
 
     def __init__(self, model,
-                 substrate='', product='', reaction_volume=0,
+                 substrate='', product='', reaction_volume=1,
                  enzyme_mws={}, species_mws={}):
 
         self.model = model
