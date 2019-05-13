@@ -2,7 +2,7 @@ from deap import creator, base, tools, algorithms
 import random
 from tqdm import tqdm
 
-
+#test
 class GA_Base_Class(object):
 
     def __init__(self, model=None, ua=None, metrics=None, weights=(1,), bounds={}):
