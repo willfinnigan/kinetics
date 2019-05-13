@@ -428,7 +428,7 @@ class UA(object):
     def quartiles_to_dataframe(self):
         self.substrate_dataframes = {}
         for substrate in self.model.species_names:
-            c
+            df = pd.DataFrame(self.quartile_output[substrate], columns=["Time", "High", "Low", "Mean"])
             self.substrate_dataframes[substrate] = df
 
         if self.logging == True:
