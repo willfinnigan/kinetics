@@ -20,6 +20,8 @@ class Reaction():
 
         self.modifiers = []
 
+        self.check_positive = False
+
     def set_substrates_and_products(self, substrates, products):
         self.substrates = substrates
         self.products = products
@@ -100,7 +102,8 @@ class Reaction():
         y_prime = calculate_yprime(y, rate, self.substrates, self.products, substrate_names)
         y_prime = self.modify_product(y_prime, substrate_names)
 
-        y_prime = check_positive(y_prime)
+        if self.check_positive == True:
+            y_prime = check_positive(y_prime)
 
         return y_prime
 
