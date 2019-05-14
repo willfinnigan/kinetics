@@ -206,6 +206,44 @@ class Two_ordered_irr(Reaction):
 
         return rate
 
+class Two_random_irr(Reaction):
+
+    def __init__(self,
+                 kcat=None, kma=None, kmb=None, kia=None,
+                 a=None, b=None, enz=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a,b,enz]
+        self.parameter_names=[kcat, kma, kmb, kia]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        enz = substrates[2]
+
+        # Parameters
+        kcat = parameters[0]
+        kma = parameters[1]
+        kmb = parameters[2]
+        kia = parameters[3]
+
+        # Rate equation
+        rate = Equations.two_substrate_ordered_irreversible(kcat=kcat,
+                                                  kma=kma,
+                                                  kmb=kmb,
+                                                  kia=kia,
+                                                  enz=enz,
+                                                  a=a,
+                                                  b=b)
+
+        return rate
+
 class Two_steady_state_small_kma(Reaction):
 
     def __init__(self,
@@ -390,16 +428,18 @@ class Binding(Reaction):
 
         return rate
 
+class BiBi_Ordered_rev(Reaction):
 
-class Two_bi_irr_mg_mod(Reaction):
     def __init__(self,
-                 kcat=None, kma=None, kmb=None,
-                 a=None, b=None, enz=None,
+                 kcatf=None, kcatr=None,
+                 kmb=None, kia=None, kib=None, kmp=None, kip=None, kiq=None,
+                 enz=None, a=None, b=None, p=None, q=None,
                  substrates=[], products=[]):
+
         super().__init__()
 
-        self.reaction_substrate_names = [a, b, enz]
-        self.parameter_names = [kcat, kma, kmb]
+        self.reaction_substrate_names = [a,b,p,q,enz]
+        self.parameter_names=[kcatf, kcatr, kmb, kia, kib, kmp, kip, kiq]
 
         self.substrates = substrates
         self.products = products
@@ -408,22 +448,27 @@ class Two_bi_irr_mg_mod(Reaction):
         # Substrates
         a = substrates[0]
         b = substrates[1]
-        enz = substrates[2]
+        p = substrates[2]
+        q = substrates[3]
+        enz = substrates[4]
 
         # Parameters
-        kcat = parameters[0]
-        kma = parameters[1]
+        kcatf = parameters[0]
+        kcatr = parameters[1]
         kmb = parameters[2]
+        kia = parameters[3]
+        kib = parameters[4]
+        kmp = parameters[5]
+        kip = parameters[6]
+        kiq = parameters[7]
 
         # Rate equation
-        rate = (kcat * enz) * (a / (kma + a)) * (b / (kmb + b))
+        numerator = ((enz * kcatf * a * b) / (kia * kmb)) - ((enz * kcatr * p * q) / (kmp * kiq))
+        denominator = 1 + (a / kia) + (b / kib) + (q / kiq) + (p / kip) + ((a * b) / (kia * kmb)) + ((p * q) / (kmp * kiq))
 
-        return rate
+        return (numerator / denominator)
 
-    def modify_product(self, y_prime, substrate_names):
-        y_prime[substrate_names.index('Mg')] *= 0.25
 
-        return y_prime
 
 
 class OxygenDiffusion(Reaction):
