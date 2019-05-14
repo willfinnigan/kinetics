@@ -1,5 +1,5 @@
 from kinetics import Equations
-from kinetics.Model import calculate_yprime
+from kinetics.Model import calculate_yprime, check_positive
 import numpy as np
 import copy
 
@@ -99,6 +99,8 @@ class Reaction():
 
         y_prime = calculate_yprime(y, rate, self.substrates, self.products, substrate_names)
         y_prime = self.modify_product(y_prime, substrate_names)
+
+        y_prime = check_positive(y_prime)
 
         return y_prime
 

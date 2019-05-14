@@ -478,3 +478,11 @@ def calculate_yprime(y, rate, substrates, products, substrate_names):
 
     return y_prime
 
+def check_positive(y_prime):
+
+    for i in range(len(y_prime)):
+        if y_prime[i] < 0:
+            y_prime[i] = 0
+
+    return y_prime
+
