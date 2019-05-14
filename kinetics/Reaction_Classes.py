@@ -98,11 +98,11 @@ class Reaction():
         rate = self.calculate_rate(substrates, parameters)
 
         y_prime = calculate_yprime(y, rate, self.substrates, self.products, substrate_names)
-        y_prime = self.modify_product(y_prime)
+        y_prime = self.modify_product(y_prime, substrate_names)
 
         return y_prime
 
-    def modify_product(self, y_prime):
+    def modify_product(self, y_prime, substrate_names):
         return y_prime
 
 class One_irr(Reaction):
@@ -358,15 +358,16 @@ class FirstOrderRate(Reaction):
 class Binding(Reaction):
 
     def __init__(self, kd=None, k1=None,
-                 a=None, b=None, c=None):
+                 a=None, b=None, c=None,
+                 substrates=[], products=[]):
 
         super().__init__()
 
         self.reaction_substrate_names = [a, b, c]
         self.parameter_names=[kd, k1]
 
-        self.substrates = [a, b]
-        self.products = [c]
+        self.substrates = substrates
+        self.products = products
 
     def calculate_rate(self, substrates, parameters):
         # Substrates
@@ -384,6 +385,40 @@ class Binding(Reaction):
 
         return rate
 
+
+class Two_bi_irr_mg_mod(Reaction):
+    def __init__(self,
+                 kcat=None, kma=None, kmb=None,
+                 a=None, b=None, enz=None,
+                 substrates=[], products=[]):
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b, enz]
+        self.parameter_names = [kcat, kma, kmb]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        enz = substrates[2]
+
+        # Parameters
+        kcat = parameters[0]
+        kma = parameters[1]
+        kmb = parameters[2]
+
+        # Rate equation
+        rate = (kcat * enz) * (a / (kma + a)) * (b / (kmb + b))
+
+        return rate
+
+    def modify_product(self, y_prime, substrate_names):
+        y_prime[substrate_names.index('Mg')] *= 0.25
+
+        return y_prime
 
 
 class OxygenDiffusion(Reaction):
