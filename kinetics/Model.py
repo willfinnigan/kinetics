@@ -27,7 +27,7 @@ class Model(list):
 
     """
 
-    def __init__(self):
+    def __init__(self, logging=True):
         # Model inherits from list - reaction classes are held in this self list.
         super(Model, self).__init__()
 
@@ -73,8 +73,10 @@ class Model(list):
         self.mw_dict = {}
         self.vol = 1
 
+        self.logging = logging
+
     # Time
-    def set_time(self, start, end, steps, mxsteps=10000):
+    def set_time(self, start, end, steps):
         """
         This function sets all the time parameters for the model.
 
@@ -86,8 +88,10 @@ class Model(list):
         self.start = start
         self.end = end
         self.steps = steps
-        self.mxsteps = mxsteps
+        self.time = np.linspace(self.start, self.end, self.steps)
 
+    def set_end_time(self, end):
+        self.end=end
         self.time = np.linspace(self.start, self.end, self.steps)
 
     # Parameters
@@ -160,21 +164,25 @@ class Model(list):
             for substrate in reaction.substrates:
                 if substrate not in self.reaction_species:
                     self.reaction_species[substrate] = (0,0)
-                    print("Loaded species '" + str(substrate) + "' as (0,0)")
+                    if self.logging == True:
+                        print("Loaded species '" + str(substrate) + "' as (0,0)")
 
             for product in reaction.products:
                 if product not in self.reaction_species:
                     self.reaction_species[product] = (0, 0)
-                    print("Loaded species '" + str(product) + "' as (0,0)")
+                    if self.logging == True:
+                        print("Loaded species '" + str(product) + "' as (0,0)")
 
             for species in reaction.reaction_substrate_names:
                 if species not in self.reaction_species:
                     self.reaction_species[species] = (0, 0)
-                    print("Loaded species '" + str(species) + "' as (0,0)")
+                    if self.logging == True:
+                        print("Loaded species '" + str(species) + "' as (0,0)")
 
     def set_species_defaults_to_mean_of_bounds(self):
         for name in self.species_bounds:
-            print(self.species_bounds[name])
+            if self.logging == True:
+                print(self.species_bounds[name])
             lower = self.species_bounds[name][0]
             upper = self.species_bounds[name][1]
             mean_value = (lower+upper)/2
@@ -185,7 +193,8 @@ class Model(list):
     def set_parameters_defaults_to_mean_of_bounds(self):
         for name in self.parameter_bounds:
             if type(self.parameter_bounds[name]) == int:
-                print(name)
+                if self.logging == True:
+                    print(name)
 
             lower = self.parameter_bounds[name][0]
             upper = self.parameter_bounds[name][1]
@@ -466,6 +475,14 @@ def calculate_yprime(y, rate, substrates, products, substrate_names):
 
     for name in products:
         y_prime[substrate_names.index(name)] += rate
+
+    return y_prime
+
+def check_positive(y_prime):
+
+    for i in range(len(y_prime)):
+        if y_prime[i] < 0:
+            y_prime[i] = 0
 
     return y_prime
 

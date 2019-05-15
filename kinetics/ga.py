@@ -2,16 +2,14 @@ from deap import creator, base, tools, algorithms
 import random
 from tqdm import tqdm
 
-
+#test
 class GA_Base_Class(object):
 
-    def __init__(self, model=None, ua=None):
+    def __init__(self, model=None, ua=None, metrics=None, weights=(1,), bounds={}):
 
-        self.bounds = {}
-        self.weights = (1,)
-
-        self.names = []
-        self.bounds = []
+        self.names_list = []
+        self.bounds_list = []
+        self.bounds_dict = bounds
 
         self.indpb_mate = 0.5
         self.mu=0
@@ -25,9 +23,10 @@ class GA_Base_Class(object):
 
         self.model = model
         self.ua = ua
-        self.enzyme_names = []
-        self.substrate = ''
-        self.product = ''
+
+        self.metrics=metrics
+
+        self.weights = weights
 
         if self.ua != None:
             self.ua.logging = False
@@ -48,13 +47,13 @@ class GA_Base_Class(object):
         self.indpb_mutate = indpb_mutate
 
     def setup(self):
-        self.names = list(self.bounds.keys())
-        self.bounds = list(self.bounds.values())
+        self.names_list = list(self.bounds_dict.keys())
+        self.bounds_list = list(self.bounds_dict.values())
 
         creator.create("FitnessMax", base.Fitness, weights=self.weights)
         creator.create("Individual", list, fitness=creator.FitnessMax)
 
-        self.toolbox.register("make_ind", self.make_ind, self.bounds)
+        self.toolbox.register("make_ind", self.make_ind, self.bounds_list)
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.make_ind)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
         self.toolbox.register("mate", tools.cxUniform, indpb=self.indpb_mate)
@@ -87,19 +86,23 @@ class GA_Base_Class(object):
 
         return fit
 
-    def evaluate(self, ind):
-        # Check that the GA hasn't evolved towards negative substrate
+    def update_model_for_evaluation(self, ind):
+        # Update model species with the concentrations in ind
+        for i in range(len(self.names_list)):
+            name = self.names_list[i]
+            if name == 'Time':
+                self.model.set_end_time(ind[i])
+            else:
+                old_conc, error = self.model.reaction_species[name]
+                self.model.reaction_species[name] = [ind[i], error]
 
+    def evaluate(self, ind):
+
+        # Check that the GA hasn't evolved towards negative substrate
         if self.check_neg_substrate(ind) == True:
                 return self.low_fitness()
 
-        # Update model species with the concentrations in ind
-        for i in range(len(self.names)):
-            name = self.names[i]
-            old_conc, error = self.model.reaction_species[name]
-            self.model.reaction_species[name] = [ind[i], error]
-
-        # Run the model
+        self.update_model_for_evaluation(ind)
         self.model.load_species()
         self.model.run_model()
 
@@ -116,8 +119,8 @@ class GA_Base_Class(object):
                 return ind.fitness.values
 
         # Update ua species with the concentrations in ind
-        for i in range(len(self.names)):
-            name = self.names[i]
+        for i in range(len(self.names_list)):
+            name = self.names_list[i]
             old_conc, error = self.model.reaction_species[name]
             self.ua.model.reaction_species[name] = [ind[i], error]
 
@@ -132,8 +135,11 @@ class GA_Base_Class(object):
     def fitness(self):
         return 1
 
-    def run_ga(self):
-        population = self.toolbox.population(n=self.initial_pop_size)
+    def run_ga(self, initial_pop=False):
+        if initial_pop != False:
+            population = initial_pop
+        else:
+            population = self.toolbox.population(n=self.initial_pop_size)
 
         fitnesses = list(map(self.toolbox.evaluate, population))
         for ind, fit in zip(population, fitnesses):

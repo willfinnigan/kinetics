@@ -1,5 +1,5 @@
 from kinetics import Equations
-from kinetics.Model import calculate_yprime
+from kinetics.Model import calculate_yprime, check_positive
 import numpy as np
 import copy
 
@@ -19,6 +19,8 @@ class Reaction():
         self.parameters = []
 
         self.modifiers = []
+
+        self.check_positive = False
 
     def set_substrates_and_products(self, substrates, products):
         self.substrates = substrates
@@ -91,7 +93,6 @@ class Reaction():
             if modifier.parameter_indexes == []:
                 modifier.get_parameter_indexes(self.parameter_names)
 
-
         substrates = self.get_substrates(y)
 
         substrates, parameters = self.calculate_modifiers(substrates, copy.copy(self.parameters))
@@ -99,7 +100,14 @@ class Reaction():
         rate = self.calculate_rate(substrates, parameters)
 
         y_prime = calculate_yprime(y, rate, self.substrates, self.products, substrate_names)
+        y_prime = self.modify_product(y_prime, substrate_names)
 
+        if self.check_positive == True:
+            y_prime = check_positive(y_prime)
+
+        return y_prime
+
+    def modify_product(self, y_prime, substrate_names):
         return y_prime
 
 class One_irr(Reaction):
@@ -129,7 +137,76 @@ class One_irr(Reaction):
 
         return rate
 
+class Two_bi_irr(Reaction):
+
+    def __init__(self,
+                 kcat=None, kma=None, kmb=None,
+                 a=None, b=None, enz=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a,b,enz]
+        self.parameter_names=[kcat, kma, kmb]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        enz = substrates[2]
+
+        # Parameters
+        kcat = parameters[0]
+        kma = parameters[1]
+        kmb = parameters[2]
+
+        # Rate equation
+        rate =  (kcat * enz) * (a / (kma + a)) * (b / (kmb + b))
+
+        return rate
+
 class Two_ordered_irr(Reaction):
+
+    def __init__(self,
+                 kcat=None, kma=None, kmb=None, kia=None,
+                 a=None, b=None, enz=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a,b,enz]
+        self.parameter_names=[kcat, kma, kmb, kia]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        enz = substrates[2]
+
+        # Parameters
+        kcat = parameters[0]
+        kma = parameters[1]
+        kmb = parameters[2]
+        kia = parameters[3]
+
+        # Rate equation
+        rate = Equations.two_substrate_ordered_irreversible(kcat=kcat,
+                                                  kma=kma,
+                                                  kmb=kmb,
+                                                  kia=kia,
+                                                  enz=enz,
+                                                  a=a,
+                                                  b=b)
+
+        return rate
+
+class Two_random_irr(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, kia=None,
@@ -298,6 +375,102 @@ class Three_ter_ord_irr(Reaction):
                                                                   enz=enz, a=a, b=b, c=c)
         return rate
 
+class FirstOrderRate(Reaction):
+
+    def __init__(self,
+                 k=None, a=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a]
+        self.parameter_names=[k]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+
+        # Parameters
+        k = parameters[0]
+
+        return k*a
+
+class Binding(Reaction):
+
+    def __init__(self, kd=None, k1=None,
+                 a=None, b=None, c=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b, c]
+        self.parameter_names=[kd, k1]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        c = substrates[2]
+
+        # Parameters
+        kd = parameters[0]
+        k1 = parameters[1]
+
+        kminus1 = kd*k1
+
+        rate = (k1*a*b) - (kminus1*c)
+
+        return rate
+
+class BiBi_Ordered_rev(Reaction):
+
+    def __init__(self,
+                 kcatf=None, kcatr=None,
+                 kmb=None, kia=None, kib=None, kmp=None, kip=None, kiq=None,
+                 enz=None, a=None, b=None, p=None, q=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a,b,p,q,enz]
+        self.parameter_names=[kcatf, kcatr, kmb, kia, kib, kmp, kip, kiq]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        p = substrates[2]
+        q = substrates[3]
+        enz = substrates[4]
+
+        # Parameters
+        kcatf = parameters[0]
+        kcatr = parameters[1]
+        kmb = parameters[2]
+        kia = parameters[3]
+        kib = parameters[4]
+        kmp = parameters[5]
+        kip = parameters[6]
+        kiq = parameters[7]
+
+        # Rate equation
+        numerator = ((enz * kcatf * a * b) / (kia * kmb)) - ((enz * kcatr * p * q) / (kmp * kiq))
+        denominator = 1 + (a / kia) + (b / kib) + (q / kiq) + (p / kip) + ((a * b) / (kia * kmb)) + ((p * q) / (kmp * kiq))
+
+        return (numerator / denominator)
+
+
+
+
 class OxygenDiffusion(Reaction):
 
     def __init__(self,
@@ -389,29 +562,6 @@ class Flow(Reaction):
             y_prime[index] += rate
 
         return y_prime
-
-class FirstOrderRate(Reaction):
-
-    def __init__(self,
-                 k=None, a=None,
-                 substrates=[], products=[]):
-
-        super().__init__()
-
-        self.reaction_substrate_names = [a]
-        self.parameter_names=[k]
-
-        self.substrates = substrates
-        self.products = products
-
-    def calculate_rate(self, substrates, parameters):
-        # Substrates
-        a = substrates[0]
-
-        # Parameters
-        k = parameters[0]
-
-        return k*a
 
 
 class Modifier():

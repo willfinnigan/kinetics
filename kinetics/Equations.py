@@ -37,8 +37,6 @@ def two_substrate_seq_steady_kma_smaller_ki(kcat=None, kma=None, kmb=None, kia=N
     return rate
 
 
-
-
 def three_substrate_irreversible_ter_ordered(kcat=None, kma=None, kmb=None, kia=None, kmc=None, enz=None, a=None, b=None, c=None):
     rate = (kcat * enz * a * b * c) / ((kia * c) + (kmc * a * b) + (kmb * a * c) + (kma * b * c) + (a * b * c))
 
