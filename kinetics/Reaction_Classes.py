@@ -138,7 +138,7 @@ class One_irr(Reaction):
 
         return rate
 
-class Two_bi_irr(Reaction):
+class Two_irr(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None,
