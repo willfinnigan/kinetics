@@ -378,7 +378,6 @@ class Two_Ordered_rev(Reaction):
 
         return (numerator / denominator)
 
-
 """ Other rate equations """
 class FirstOrderRate(Reaction):
 
