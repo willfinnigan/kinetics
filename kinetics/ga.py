@@ -96,6 +96,8 @@ class GA_Base_Class(object):
                 old_conc, error = self.model.reaction_species[name]
                 self.model.reaction_species[name] = [ind[i], error]
 
+        self.metrics.refresh_metrics(model=self.model)
+
     def evaluate(self, ind):
 
         # Check that the GA hasn't evolved towards negative substrate
@@ -103,8 +105,6 @@ class GA_Base_Class(object):
                 return self.low_fitness()
 
         self.update_model_for_evaluation(ind)
-        self.model.load_species()
-        self.model.run_model()
 
         # Calculate fitness
         fitness = self.fitness()

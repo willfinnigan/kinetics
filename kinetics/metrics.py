@@ -47,7 +47,10 @@ class Metrics(object):
 
         self.refresh_metrics()
 
-    def refresh_metrics(self):
+    def refresh_metrics(self, model=False):
+        if model!=False:
+            self.model=model
+
         self.model.load_species()
         self.model.run_model()
 
