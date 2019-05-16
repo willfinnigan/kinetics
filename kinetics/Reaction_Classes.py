@@ -110,6 +110,7 @@ class Reaction():
     def modify_product(self, y_prime, substrate_names):
         return y_prime
 
+""" Michaelis-Menten irreversible equations """
 class One_irr(Reaction):
 
     def __init__(self,
@@ -133,7 +134,7 @@ class One_irr(Reaction):
         kcat = parameters[0]
         kma = parameters[1]
 
-        rate = Equations.one_substrate_mm(kcat=kcat, km_a=kma, enz=enz, a=a)
+        rate = kcat * enz * (a / (kma + a))
 
         return rate
 
@@ -168,7 +169,7 @@ class Two_bi_irr(Reaction):
 
         return rate
 
-class Two_ordered_irr(Reaction):
+class Two_ternary_complex_irr(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, kia=None,
@@ -195,83 +196,10 @@ class Two_ordered_irr(Reaction):
         kmb = parameters[2]
         kia = parameters[3]
 
-        # Rate equation
-        rate = Equations.two_substrate_ordered_irreversible(kcat=kcat,
-                                                  kma=kma,
-                                                  kmb=kmb,
-                                                  kia=kia,
-                                                  enz=enz,
-                                                  a=a,
-                                                  b=b)
+        num = kcat * enz * a * b
+        den = ((kia * kmb) + (kmb * a) + (kma * b) + (a * b))
 
-        return rate
-
-class Two_random_irr(Reaction):
-
-    def __init__(self,
-                 kcat=None, kma=None, kmb=None, kia=None,
-                 a=None, b=None, enz=None,
-                 substrates=[], products=[]):
-
-        super().__init__()
-
-        self.reaction_substrate_names = [a,b,enz]
-        self.parameter_names=[kcat, kma, kmb, kia]
-
-        self.substrates = substrates
-        self.products = products
-
-    def calculate_rate(self, substrates, parameters):
-        # Substrates
-        a = substrates[0]
-        b = substrates[1]
-        enz = substrates[2]
-
-        # Parameters
-        kcat = parameters[0]
-        kma = parameters[1]
-        kmb = parameters[2]
-        kia = parameters[3]
-
-        # Rate equation
-        rate = Equations.two_substrate_ordered_irreversible(kcat=kcat,
-                                                  kma=kma,
-                                                  kmb=kmb,
-                                                  kia=kia,
-                                                  enz=enz,
-                                                  a=a,
-                                                  b=b)
-
-        return rate
-
-class Two_steady_state_small_kma(Reaction):
-
-    def __init__(self,
-                 kcat=None, kmb=None, kia=None,
-                 a=None, b=None, enz=None,
-                 substrates=[], products=[]):
-
-        super().__init__()
-
-        self.reaction_substrate_names = [a,b,enz]
-        self.parameter_names=[kcat, kmb, kia]
-
-        self.substrates = substrates
-        self.products = products
-
-    def calculate_rate(self, substrates, parameters):
-        # Substrates
-        a = substrates[0]
-        b = substrates[1]
-        enz = substrates[2]
-
-        # Parameters
-        kcat = parameters[0]
-        kmb = parameters[1]
-        kia = parameters[2]
-
-        rate = (kcat * enz * a * b) / ((kia * kmb) + (kmb * a) + (a * b))
-
+        rate = num / den
 
         return rate
 
@@ -304,7 +232,8 @@ class Two_ping_pong_irr(Reaction):
 
         return rate
 
-class Three_seq_irr(Reaction):
+class Three_seq_irr_redam(Reaction):
+    # This is the mechanism RedAms use
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, kmc=None, kia=None, kib=None,
@@ -339,7 +268,8 @@ class Three_seq_irr(Reaction):
                                                                  enz=enz, a=a, b=b, c=c)
         return rate
 
-class Three_ter_ord_irr(Reaction):
+class Three_seq_irr_car(Reaction):
+    # This is the mechanism CARs use
 
     def __init__(self,
                  kcat=None,
@@ -375,6 +305,81 @@ class Three_ter_ord_irr(Reaction):
                                                                   enz=enz, a=a, b=b, c=c)
         return rate
 
+class Two_ternary_complex_small_kma(Reaction):
+
+    def __init__(self,
+                 kcat=None, kmb=None, kia=None,
+                 a=None, b=None, enz=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a,b,enz]
+        self.parameter_names=[kcat, kmb, kia]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        enz = substrates[2]
+
+        # Parameters
+        kcat = parameters[0]
+        kmb = parameters[1]
+        kia = parameters[2]
+
+        rate = (kcat * enz * a * b) / ((kia * kmb) + (kmb * a) + (a * b))
+
+
+        return rate
+
+
+""" Michaelis-Menten reversible equations """
+class Two_Ordered_rev(Reaction):
+
+    def __init__(self,
+                 kcatf=None, kcatr=None,
+                 kmb=None, kia=None, kib=None, kmp=None, kip=None, kiq=None,
+                 enz=None, a=None, b=None, p=None, q=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a,b,p,q,enz]
+        self.parameter_names=[kcatf, kcatr, kmb, kia, kib, kmp, kip, kiq]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        p = substrates[2]
+        q = substrates[3]
+        enz = substrates[4]
+
+        # Parameters
+        kcatf = parameters[0]
+        kcatr = parameters[1]
+        kmb = parameters[2]
+        kia = parameters[3]
+        kib = parameters[4]
+        kmp = parameters[5]
+        kip = parameters[6]
+        kiq = parameters[7]
+
+        # Rate equation
+        numerator = ((enz * kcatf * a * b) / (kia * kmb)) - ((enz * kcatr * p * q) / (kmp * kiq))
+        denominator = 1 + (a / kia) + (b / kib) + (q / kiq) + (p / kip) + ((a * b) / (kia * kmb)) + ((p * q) / (kmp * kiq))
+
+        return (numerator / denominator)
+
+
+""" Other rate equations """
 class FirstOrderRate(Reaction):
 
     def __init__(self,
@@ -427,49 +432,6 @@ class Binding(Reaction):
         rate = (k1*a*b) - (kminus1*c)
 
         return rate
-
-class BiBi_Ordered_rev(Reaction):
-
-    def __init__(self,
-                 kcatf=None, kcatr=None,
-                 kmb=None, kia=None, kib=None, kmp=None, kip=None, kiq=None,
-                 enz=None, a=None, b=None, p=None, q=None,
-                 substrates=[], products=[]):
-
-        super().__init__()
-
-        self.reaction_substrate_names = [a,b,p,q,enz]
-        self.parameter_names=[kcatf, kcatr, kmb, kia, kib, kmp, kip, kiq]
-
-        self.substrates = substrates
-        self.products = products
-
-    def calculate_rate(self, substrates, parameters):
-        # Substrates
-        a = substrates[0]
-        b = substrates[1]
-        p = substrates[2]
-        q = substrates[3]
-        enz = substrates[4]
-
-        # Parameters
-        kcatf = parameters[0]
-        kcatr = parameters[1]
-        kmb = parameters[2]
-        kia = parameters[3]
-        kib = parameters[4]
-        kmp = parameters[5]
-        kip = parameters[6]
-        kiq = parameters[7]
-
-        # Rate equation
-        numerator = ((enz * kcatf * a * b) / (kia * kmb)) - ((enz * kcatr * p * q) / (kmp * kiq))
-        denominator = 1 + (a / kia) + (b / kib) + (q / kiq) + (p / kip) + ((a * b) / (kia * kmb)) + ((p * q) / (kmp * kiq))
-
-        return (numerator / denominator)
-
-
-
 
 class OxygenDiffusion(Reaction):
 
@@ -562,6 +524,8 @@ class Flow(Reaction):
             y_prime[index] += rate
 
         return y_prime
+
+
 
 
 class Modifier():
