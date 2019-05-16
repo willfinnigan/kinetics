@@ -14,6 +14,14 @@ import kinetics
 #adh_fwd
 #adh_rev
 
+# ---- Esterase without water ----
+est_one_substrate = kinetics.One_irr(kcat="est_kcat", kma="est_km_ester",
+                                     a='Ester', enz='est',
+                                     substrates=['Ester'], products=['Acid'])
+
+est_one_substrate.parameter_bounds = {"est_km_ester": (1125, 1875),
+                                      "est_kcat": (4.5, 7.5)}
+
 # ---- Esterase with water ----
 est_fwd = kinetics.Two_ping_pong_irr(kcat="est_kcat_fwd", kma="est_km_ester", kmb='est_km_water',
                                      a='Ester', b='H2O', enz='est',
@@ -32,7 +40,7 @@ est_fwd.parameter_bounds = {"est_kcat_fwd": (4.5, 7.5),
 est_rev.parameter_bounds = {"est_kcat_rev": (1, 50),
                             "est_km_meoh": (1000, 100000),
                             "est_km_acid" : (100, 100000)}
-                                     
+# ---- CAR ----
 car = kinetics.Three_ter_ord_irr(kcat="car_kcat",
                                  kma="car_km_atp", kmb="car_km_acid", kmc="car_km_nadph", kia="car_kia_atp",
                                  enz='car', a='ATP', b='Acid', c='NADPH',
@@ -57,7 +65,8 @@ car.parameter_bounds = {"car_km_atp": (72, 128),
                         "car_ki_amp": (8200, 11800),
                         "car_ki_ppi_atp": (120, 320),
                         "car_alpha_ppi_atp": (0, 5.3)}
-                        
+
+# ---- Ppiase ----
 ppiase = kinetics.One_irr(kcat="ppi_kcat", kma="ppi_km",
                           a="PPi", enz="ppiase",
                           substrates=['PPi'], products=["PO4", "PO4"])
@@ -66,12 +75,14 @@ ppiase.parameter_bounds = {'ppi_kcat': (2200, 6600),
                            'ppi_km': (250, 750)}
                            
 
+# ---- Aldehyde Degradation ----
 aldehyde_degradation = kinetics.FirstOrderRate(k="aldehyde_degrad_k", a='Aldehyde',
                                                substrates=['Aldehyde'], products=['Aldehyde_Tris_product'])
 
 aldehyde_degradation.parameter_bounds = {"aldehyde_degrad_k": (0.001395, 0.004185)}
 
 
+# ---- PTDH ----
 ptdh_nad = kinetics.One_irr(kcat="ptdh_kcat_nad", kma="ptdh_km_nad",
                             a='NAD+', enz='ptdh',
                             substrates=['NAD+'], products=['NADH'])
@@ -98,13 +109,15 @@ pap_rev = kinetics.One_irr(kcat="pap_kcat_rev", kma="pap_adp_km",
                               a='ADP', enz='pap',
                               substrates=['ADP'], products=['AMP', 'PolyP'])
 
+# ---- PAP ----
 pap_fwd.parameter_bounds = {"pap_kcat_fwd": (125, 375),
                             "pap_amp_km": (140, 420),
                             "pap_polyp_km": (2000, 6000)}
 
 pap_rev.parameter_bounds = {"pap_adp_km": (4150, 12450),  # From ref "Polyphosphate synthetic activity of polyphosphate..."
                             "pap_kcat_rev": (1.7, 5.1)}
-                                                 
+
+# ---- AK ----
 ak_fwd = kinetics.Two_bi_irr(kcat="ak_ampatp_kcat", kma="ak_mgatp_km", kmb="ak_amp_km",
                               a='ATP', b='AMP', enz='ak',
                               substrates=['ATP', 'AMP'], products=['ADP', 'ADP'])
@@ -120,7 +133,8 @@ ak_fwd.parameter_bounds = {"ak_mgatp_km": (25.5, 76.5),
 ak_rev.parameter_bounds = {"ak_adp_km": (45.5, 136.5),
                            "ak_mgadp_km": (45.5, 136.5),
                            "ak_adp_kcat": (1170, 3510)}   
-                           
+
+# ---- ADH ----
 adh_fwd = kinetics.Two_ordered_irr(kcat="adh_kcat_fwd", kma="adh_km_nadh", kmb="adh_km_aldehyde", kia="adh_ki_nadh",
                                    a='NADH', b='Aldehyde', enz='adh',
                                    substrates=['NADH', 'Aldehyde'], products=['NAD+', 'Alcohol'])
@@ -138,7 +152,3 @@ adh_rev.parameter_bounds = {"adh_km_nad": (150, 190),
                             "adh_ki_nad": (92.5, 277.5),
                             "adh_km_alcohol": (50000, 150000),
                             "adh_kcat_rev": (0.85, 2.55)}      
-
-
-
-           
