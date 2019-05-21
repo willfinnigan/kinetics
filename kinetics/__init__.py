@@ -15,4 +15,4 @@ from kinetics.ga import GA_Base_Class
 
 from kinetics.metrics import Metrics
 
-
+__version__ = '1.1.6b'
