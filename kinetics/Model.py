@@ -339,6 +339,15 @@ class Model(list):
 
         return total
 
+    # Check parameters
+    def check_parameter_limits(self):
+        all_within_limits = True
+        for reaction_class in self:
+            if reaction_class.sampling_limits() == False:
+                all_within_limits = False
+        return all_within_limits
+
+
 
 """Functions for formatting species and parameters dicts to the correct format"""
 def get_species_positions(species):

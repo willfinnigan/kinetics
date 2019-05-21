@@ -110,6 +110,10 @@ class Reaction():
     def modify_product(self, y_prime, substrate_names):
         return y_prime
 
+    def sampling_limits(self):
+        # Return true if parameters within limits, false if not
+        return True
+
 """ Michaelis-Menten irreversible equations """
 class One_irr(Reaction):
 

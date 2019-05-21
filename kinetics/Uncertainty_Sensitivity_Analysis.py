@@ -411,6 +411,25 @@ class UA(object):
 
         self.parsed_samples = parse_samples_to_run(self.samples, self.parameter_names, self.species_names)
 
+    def check_parameter_limits(self):
+        if self.logging == True:
+            print('check parameter limits')
+
+        samples_which_pass = []
+
+        for list_of_sampled_parameters_and_species in self.samples:
+            parameters = list_of_sampled_parameters_and_species[0:len(self.parameter_names)]
+            self.model.update_parameters(parameters)
+
+            if self.model.check_parameter_limits() == True:
+                samples_which_pass.append(list_of_sampled_parameters_and_species)
+
+        self.samples = samples_which_pass
+
+        if self.logging == True:
+            print('Set of samples which passed = ' + str(len(self.samples)))
+        
+
     def run_models(self):
         if self.logging == True:
             print("running all models")
