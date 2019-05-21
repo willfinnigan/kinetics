@@ -408,7 +408,7 @@ class UA(object):
                                      self.species_names, self.species_bounds)
 
         self.samples = random_sample(self.problem, self.num_samples)
-        
+
         self.samples = self.check_parameter_limits()
 
         self.parsed_samples = parse_samples_to_run(self.samples, self.parameter_names, self.species_names)
