@@ -40,6 +40,9 @@ class GA_Base_Class(object):
 
         self.logging=True
 
+        self.flow = False
+
+
     def set_ga_settings(self, indpb_mate=0.5, mu=0, sigma=0.4, indpb_mutate=0.5):
         self.indpb_mate = indpb_mate
         self.mu=mu
@@ -105,7 +108,7 @@ class GA_Base_Class(object):
                 old_conc, error = self.model.reaction_species[name]
                 self.model.reaction_species[name] = [ind[i], error]
 
-        self.metrics.refresh_metrics(model=self.model)
+        self.metrics.refresh_metrics(model=self.model, flow=self.flow)
 
     def evaluate(self, ind):
 
