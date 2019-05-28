@@ -521,7 +521,7 @@ class OxygenDiffusion(Reaction):
         rate = Equations.o2_diffusion(kl=kl, area=area, o2sat=o2sat, o2aq=o2aq)
         return rate
 
-class Flow(Reaction):
+class Flow_old(Reaction):
 
     def __init__(self,
                  flow_rate=None, column_volume=None,
@@ -559,6 +559,12 @@ class Flow(Reaction):
         if self.parameters == []:
             self.parameters = self.get_parameters(parameter_dict)
 
+
+        fr_over_cv = self.parameters[0] / self.parameters[1]
+
+
+
+
         # Parameters (convert to L from ml)
         flow_rate = self.parameters[0] / 1000
         column_volume = self.parameters[1] / 1000
@@ -587,6 +593,58 @@ class Flow(Reaction):
         return y_prime
 
 
+class Flow(Reaction):
+    def __init__(self,
+                 flow_rate=None, column_volume=None,
+                 input_substrates=[], substrates=[],
+                 compartment_name=''):
+
+        super().__init__()
+
+        self.reaction_substrate_names = substrates
+        self.parameter_names = [flow_rate, column_volume]
+
+        self.substrates = substrates
+        self.input_substrates = input_substrates
+        self.input_substrates_indexes = []
+
+        self.compartment_name = compartment_name
+
+    def get_input_indexes(self, substrate_names):
+        self.input_substrates_indexes = []
+        for name in self.input_substrates:
+            self.input_substrates_indexes.append(substrate_names.index(name))
+
+    def reset_reaction(self):
+        self.substrate_indexes = []
+        self.input_substrates_indexes = []
+        self.parameters = []
+
+    def reaction(self, y, substrate_names, parameter_dict):
+        if self.substrate_indexes == []:
+            self.get_indexes(substrate_names)  # need to move this to the model
+
+        if self.input_substrates_indexes == []:
+            self.get_input_indexes(substrate_names)
+
+        if self.parameters == []:
+            self.parameters = self.get_parameters(parameter_dict)
+
+        fr_over_cv = self.parameters[0] / self.parameters[1]
+
+        y_prime = np.zeros(len(y))
+
+        for index, input_index in zip(self.substrate_indexes, self.input_substrates_indexes):
+            uM_initial = y[index]
+            uM_input = y[input_index]
+
+            rate_inflow = uM_input * fr_over_cv
+            rate_outflow = uM_initial * fr_over_cv
+            rate = rate_inflow - rate_outflow
+
+            y_prime[index] += rate
+
+        return y_prime
 
 class Modifier():
 
