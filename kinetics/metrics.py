@@ -47,9 +47,12 @@ class Metrics(object):
 
         self.refresh_metrics()
 
-    def refresh_metrics(self, model=False):
+    def refresh_metrics(self, model=False, flow_rate=False):
         if model!=False:
             self.model=model
+
+        if flow_rate != False:
+            self.reaction_volume = self.model.end * self.model.parameters[flow_rate]
 
         self.model.load_species()
         self.model.run_model()
