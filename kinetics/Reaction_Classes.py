@@ -568,15 +568,12 @@ class Flow(Reaction):
             umols_in_flow_leaving = uM_initial * flow_rate
             umols_in_flow_entering = uM_input * flow_rate
 
-            umol_change = umols_in_flow_entering - umols_in_flow_leaving
-            uM_change = umol_change / flow_rate
-
-            """umols_now_in_column = umols_initial - umols_in_flow_leaving + umols_in_flow_entering
+            umols_now_in_column = umols_initial - umols_in_flow_leaving + umols_in_flow_entering
             uM_now_in_column = umols_now_in_column / column_volume
 
-            uM_change_per_min = uM_now_in_column - uM_initial"""
+            uM_change_per_min = uM_now_in_column - uM_initial
 
-            return uM_change
+            return uM_change_per_min
 
         y_prime = np.zeros(len(y))
 
