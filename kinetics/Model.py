@@ -343,7 +343,7 @@ class Model(list):
     def check_parameter_limits(self):
         all_within_limits = True
         for reaction_class in self:
-            if reaction_class.sampling_limits() == False:
+            if reaction_class.sampling_limits(self.parameters) == False:
                 all_within_limits = False
         return all_within_limits
 

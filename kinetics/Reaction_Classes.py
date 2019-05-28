@@ -22,6 +22,8 @@ class Reaction():
 
         self.check_positive = False
 
+        self.check_limits_functions = []
+
     def set_substrates_and_products(self, substrates, products):
         self.substrates = substrates
         self.products = products
@@ -110,8 +112,12 @@ class Reaction():
     def modify_product(self, y_prime, substrate_names):
         return y_prime
 
-    def sampling_limits(self):
+    def sampling_limits(self, parameter_dict):
         # Return true if parameters within limits, false if not
+        for func in self.check_limits_functions:
+            if func(parameter_dict) == False:
+                return False
+
         return True
 
 """ Michaelis-Menten irreversible equations """
@@ -406,6 +412,30 @@ class FirstOrderRate(Reaction):
 
         return k*a
 
+class TwoSecondOrderRate(Reaction):
+
+    def __init__(self,
+                 k=None, a=None, b=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b]
+        self.parameter_names=[k]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+
+        # Parameters
+        k = parameters[0]
+
+        return k*a*b
+
 class Binding(Reaction):
 
     def __init__(self, kd=None, k1=None,
@@ -431,6 +461,34 @@ class Binding(Reaction):
         k1 = parameters[1]
 
         kminus1 = kd*k1
+
+        rate = (k1*a*b) - (kminus1*c)
+
+        return rate
+
+class Binding2(Reaction):
+
+    def __init__(self, k1=None, kminus1=None,
+                 a=None, b=None, c=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b, c]
+        self.parameter_names=[k1, kminus1]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        c = substrates[2]
+
+        # Parameters
+        k1 = parameters[0]
+        kminus1 = parameters[1]
 
         rate = (k1*a*b) - (kminus1*c)
 
@@ -510,12 +568,10 @@ class Flow(Reaction):
             umols_in_flow_leaving = uM_initial * flow_rate
             umols_in_flow_entering = uM_input * flow_rate
 
-            umols_now_in_column = umols_initial - umols_in_flow_leaving + umols_in_flow_entering
-            uM_now_in_column = umols_now_in_column / column_volume
+            umols_changing =  umols_in_flow_entering - umols_in_flow_leaving
+            uM_changing = umols_changing / flow_rate
 
-            uM_change_per_min = uM_now_in_column - uM_initial
-
-            return uM_change_per_min
+            return uM_changing
 
         y_prime = np.zeros(len(y))
 
@@ -607,3 +663,7 @@ class MixedInhibition(Modifier):
         parameters[self.parameter_indexes[1]] = km * (1 + i / ki) / (1 + i / (alpha * ki))
 
         return substrates, parameters
+
+
+
+

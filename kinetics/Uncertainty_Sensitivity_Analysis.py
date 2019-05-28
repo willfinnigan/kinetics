@@ -294,7 +294,7 @@ def return_quartiles(ys_for_single_substrate, quartile=95):
 
     return quartiles
 
-def random_sample(problem, number_of_samples):
+def random_sample(problem, number_of_samples, size_logspace=100000):
     """
     Generate model inputs using random sampling
 
@@ -314,8 +314,8 @@ def random_sample(problem, number_of_samples):
     for i in range(number_of_samples):
         new_sample = []
         for pair_of_bounds in problem['bounds']:
-            new_sample.append(random.uniform(pair_of_bounds[0], pair_of_bounds[1]))
-
+            logspace = np.geomspace(pair_of_bounds[0], pair_of_bounds[1], num=size_logspace)
+            new_sample.append(np.random.choice(logspace))
         samples.append(new_sample)
 
     samples = np.array(samples)
@@ -331,11 +331,7 @@ def check_bounds(bounds_names, bounds_tuples):
 
 
 
-
-
-
 """Classes to do UA or SA"""
-
 
 class UA(object):
 
@@ -403,34 +399,47 @@ class UA(object):
 
         return self.parsed_samples
 
-    def make_random_samples(self):
-        self.problem = setup_problem(self.parameter_names, self.parameter_bounds,
-                                     self.species_names, self.species_bounds)
+    def make_random_samples(self, max_iter=1000):
 
-        self.samples = random_sample(self.problem, self.num_samples)
+        self.samples = []
 
-        self.samples = self.check_parameter_limits()
+        # I should really make this so it doesn't run parsed_samples twice...
+        count = 0
+        while (len(self.samples) < self.num_samples) and (count < max_iter):
+            count += 1
+            self.problem = setup_problem(self.parameter_names, self.parameter_bounds,
+                                         self.species_names, self.species_bounds)
+
+            self.samples.extend(random_sample(self.problem, self.num_samples))
+            self.parsed_samples = parse_samples_to_run(self.samples, self.parameter_names, self.species_names)
+            self.samples = self.check_parameter_limits()
+
+            if count % 10 == 0:
+                print('Iterations = ' + str(count) + ' Samples = ' + str(len(self.samples)))
+
+            if count == max_iter:
+                print('WARNING MAX ITERATIONS REACHED')
 
         self.parsed_samples = parse_samples_to_run(self.samples, self.parameter_names, self.species_names)
 
-    def check_parameter_limits(self):
         if self.logging == True:
-            print('check parameter limits')
+            print('Num sampling iterations = ' + str(count))
+            print('Set of samples which passed = ' + str(len(self.samples)))
+
+    def check_parameter_limits(self):
 
         samples_which_pass = []
 
-        for list_of_sampled_parameters_and_species in self.samples:
-            parameters = list_of_sampled_parameters_and_species[0:len(self.parameter_names)]
-            self.model.update_parameters(parameters)
+        for i, list_of_sampled_parameters_and_species in enumerate(self.samples):
+
+            self.model.update_parameters(self.parsed_samples[i][0])
 
             if self.model.check_parameter_limits() == True:
                 samples_which_pass.append(list_of_sampled_parameters_and_species)
 
         self.samples = samples_which_pass
 
-        if self.logging == True:
-            print('Set of samples which passed = ' + str(len(self.samples)))
-
+        return self.samples
 
     def run_models(self):
         if self.logging == True:
@@ -478,8 +487,6 @@ class UA(object):
         df = pd.DataFrame(quartiles, columns=["Time", "High", "Low", "Mean"])
 
         return df
-
-
 
     def calculate_all_runs_substrate_dataframes(self):
 
