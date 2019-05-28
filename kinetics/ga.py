@@ -92,6 +92,14 @@ class GA_Base_Class(object):
             name = self.names_list[i]
             if name == 'Time':
                 self.model.set_end_time(ind[i])
+            elif 'Parameter_' in name:
+                parameter_name = name[10:]
+                old_param_lower, old_param_upper =  self.model.parameter_bounds[parameter_name]
+                mean_old_param = (old_param_lower + old_param_upper)/2
+                old_pc_error = (old_param_upper - mean_old_param) / mean_old_param
+                new_upper = ind[i] + (ind[i]*old_pc_error)
+                new_lower = ind[i] - (ind[i] * old_pc_error)
+                self.model.parameter_bounds[parameter_name] = (new_lower, new_upper)
             else:
                 old_conc, error = self.model.reaction_species[name]
                 self.model.reaction_species[name] = [ind[i], error]
