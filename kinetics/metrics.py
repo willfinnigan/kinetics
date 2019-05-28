@@ -42,6 +42,7 @@ class Metrics(object):
         self.substrate = substrate
         self.product = product
         self.reaction_volume = reaction_volume
+        self.total_volume = reaction_volume
         self.enzyme_mws = enzyme_mws
         self.species_mws = species_mws
 
@@ -52,7 +53,7 @@ class Metrics(object):
             self.model=model
 
         if flow_rate != False:
-            self.reaction_volume = self.model.end * self.model.parameters[flow_rate]
+            self.total_volume = self.model.end * self.model.parameters[flow_rate]
 
         self.model.load_species()
         self.model.run_model()
@@ -81,10 +82,10 @@ class Metrics(object):
 
         for substrate in df:
             if substrate in self.species_mws:
-                mol_substrate = ((df[substrate].iloc[-1] * self.reaction_volume) / 1000000)
+                mol_substrate = ((df[substrate].iloc[-1] * self.total_volume) / 1000000)
                 g_substrate = mol_substrate * self.species_mws[substrate]
             elif substrate in self.enzyme_mws:
-                mol_substrate = ((df[substrate].iloc[-1] * self.reaction_volume) / 1000000)
+                mol_substrate = ((df[substrate].iloc[-1] * self.total_volume) / 1000000)
                 g_substrate = mol_substrate * self.enzyme_mws[substrate]
             else:
                 g_substrate = 0
@@ -102,7 +103,7 @@ class Metrics(object):
         # g / L / day   eg 360 g/L/day
 
         df = self.model.results_dataframe()
-        mol_product = ((df[self.product].iloc[-1] * self.reaction_volume) / 1000000)
+        mol_product = ((df[self.product].iloc[-1] * self.total_volume) / 1000000)
         g_product = mol_product * self.species_mws[self.product]
 
         reaction_time = self.model.end / 60 # time in hours
@@ -115,7 +116,7 @@ class Metrics(object):
     def biocatalyst_productivity(self):
 
         df = self.model.results_dataframe()
-        mol_product = ((df[self.product].iloc[-1] * self.reaction_volume) / 1000000)
+        mol_product = ((df[self.product].iloc[-1] * self.total_volume) / 1000000)
         g_product = mol_product * self.species_mws[self.product]
 
         total_g_enzyme = 0

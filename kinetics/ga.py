@@ -98,7 +98,7 @@ class GA_Base_Class(object):
             elif 'Parameter_' in name:
                 parameter_name = name[10:]
                 # Get the pc error used to calculate bounds, and apply to new param.
-                old_param_lower, old_param_upper =  self.model.parameter_bounds[parameter_name]
+                old_param_lower, old_param_upper = self.model.parameter_bounds[parameter_name]
                 mean_old_param = (old_param_lower + old_param_upper)/2
                 old_pc_error = (old_param_upper - mean_old_param) / mean_old_param
                 new_upper = ind[i] + (ind[i]*old_pc_error)
