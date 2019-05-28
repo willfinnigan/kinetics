@@ -104,11 +104,13 @@ class GA_Base_Class(object):
                 new_upper = ind[i] + (ind[i]*old_pc_error)
                 new_lower = ind[i] - (ind[i] * old_pc_error)
                 self.model.parameter_bounds[parameter_name] = (new_lower, new_upper)
+                self.model.parameters[parameter_name] = ind[i]
+                self.model.parameter_defaults[parameter_name] = ind[i]
             else:
                 old_conc, error = self.model.reaction_species[name]
                 self.model.reaction_species[name] = [ind[i], error]
 
-        self.metrics.refresh_metrics(model=self.model, flow=self.flow)
+        self.metrics.refresh_metrics(model=self.model, flow_rate=self.flow)
 
     def evaluate(self, ind):
 
