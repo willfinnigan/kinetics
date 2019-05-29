@@ -113,11 +113,17 @@ class Metrics(object):
         return sty_per_day
 
     def total_product(self):
-        df = self.model.results_dataframe()
-        mol_product = ((df[self.product].iloc[-1] * self.total_volume) / 1000000)
+        mol_product = ((self.product_concentration_uM() * self.total_volume) / 1000000)
         g_product = mol_product * self.species_mws[self.product]
 
         return g_product
+
+    def product_concentration_uM(self):
+        df = self.model.results_dataframe()
+        conc = df[self.product].iloc[-1]
+
+        return conc
+
 
     def biocatalyst_productivity(self):
 
