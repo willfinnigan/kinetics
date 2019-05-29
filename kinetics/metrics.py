@@ -108,7 +108,7 @@ class Metrics(object):
 
         reaction_time = self.model.end / 60 # time in hours
 
-        sty_per_hr = (g_product / self.reaction_volume) / reaction_time
+        sty_per_hr = (g_product / self.total_volume) / reaction_time
         sty_per_day = sty_per_hr*24
 
         return sty_per_day
