@@ -58,6 +58,7 @@ class Metrics(object):
         self.model.load_species()
         self.model.run_model()
 
+
     def total_enzyme(self):
 
         total = 0
@@ -102,9 +103,7 @@ class Metrics(object):
     def space_time_yield(self):
         # g / L / day   eg 360 g/L/day
 
-        df = self.model.results_dataframe()
-        mol_product = ((df[self.product].iloc[-1] * self.total_volume) / 1000000)
-        g_product = mol_product * self.species_mws[self.product]
+        g_product = self.total_product()
 
         reaction_time = self.model.end / 60 # time in hours
 
@@ -112,6 +111,13 @@ class Metrics(object):
         sty_per_day = sty_per_hr*24
 
         return sty_per_day
+
+    def total_product(self):
+        df = self.model.results_dataframe()
+        mol_product = ((df[self.product].iloc[-1] * self.total_volume) / 1000000)
+        g_product = mol_product * self.species_mws[self.product]
+
+        return g_product
 
     def biocatalyst_productivity(self):
 
