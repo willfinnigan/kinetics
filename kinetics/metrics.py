@@ -113,7 +113,10 @@ class Metrics(object):
         return sty_per_day
 
     def total_product(self):
-        mol_product = ((self.product_concentration_uM() * self.total_volume) / 1000000)
+        conc_uM = self.product_concentration_uM()
+        conc_mM = conc_uM/1000
+        conc_M = conc_mM/1000
+        mol_product = (conc_M * self.total_volume)
         g_product = mol_product * self.species_mws[self.product]
 
         return g_product
