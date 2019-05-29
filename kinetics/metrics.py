@@ -104,11 +104,9 @@ class Metrics(object):
         # g / L / day   eg 360 g/L/day
 
         g_product = self.total_product()
+        time_taken_days = (self.model.end / (60*24)) # time in days
 
-        reaction_time = self.model.end / 60 # time in hours
-
-        sty_per_hr = (g_product / self.total_volume) / reaction_time
-        sty_per_day = sty_per_hr*24
+        sty_per_day = g_product / self.reaction_volume / time_taken_days
 
         return sty_per_day
 
