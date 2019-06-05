@@ -90,7 +90,6 @@ def get_bounds_from_pc_error(dict_with_pc_error):
 
     return dict_with_bounds
 
-
 """ Set up the problem dict which will be used for sampling"""
 def setup_problem(parameter_names, parameter_bounds,
                   species_names, species_bounds):
@@ -134,7 +133,6 @@ def setup_problem(parameter_names, parameter_bounds,
                'bounds': bounds}
 
     return problem
-
 
 """ Run the models for the uncertainty analysis or sensitivity analysis"""
 def parse_samples_to_run(samples, parameter_names, species_names):
@@ -197,7 +195,6 @@ def parse_samples_to_run(samples, parameter_names, species_names):
     # returns a list of tuples containing [(parameter_dict, species_dict), ] for each sample
     return parsed_samples
 
-
 def run_all_models(parsed_samples, model, logging=True):
     """
     Run all the models for a set of parsed samples. Return the outputs
@@ -233,7 +230,6 @@ def run_all_models(parsed_samples, model, logging=True):
 
     # ua_output will be a list like [y1, y2, y3, ect...]
     return output
-
 
 """ Process multiple model outputs for uncertainty analysis"""
 def return_ys_for_a_single_substrate(model, run_all_models_ouput, substrate_name):
@@ -367,21 +363,6 @@ class UA(object):
         self.parameter_names, self.parameter_bounds = setup_bounds_lists(self.parameters_with_bounds)
         self.species_names, self.species_bounds = setup_bounds_lists(self.species_with_bounds)
 
-
-    def analyse_number_of_samples_vs_parameters(self):
-        # Code for text output
-        num_params = len(self.parameter_names)
-        num_specs = len(self.species_names)
-        total = num_params + num_specs
-        total_pw = total * total
-        total_pw3 = total * total * total
-        print("")
-        print(num_params, 'parameters and', num_specs, "species in uncertainty analysis")
-        print(total, "variables in total")
-        print(total, "^2 =", total_pw)
-        print(total, "^3 =", total_pw3)
-        print(str(self.num_samples), "samples made by lhc")
-        print("")
 
     def make_lhc_samples(self):
         check_bounds(self.parameter_names, self.parameter_bounds)

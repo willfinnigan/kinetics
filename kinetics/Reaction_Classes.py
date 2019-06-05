@@ -14,7 +14,7 @@ class Reaction():
 
         self.parameter_names = []
         self.parameter_defaults = {}
-        self.parameter_bounds = {}
+        self.parameter_distributions = {}
 
         self.parameters = []
 
@@ -24,20 +24,9 @@ class Reaction():
 
         self.check_limits_functions = []
 
-    def set_substrates_and_products(self, substrates, products):
-        self.substrates = substrates
-        self.products = products
-
-    def set_parameters(self, parameter_defaults={}, parameter_bounds={}):
-        self.parameter_defaults = parameter_defaults
-        self.parameter_bounds = parameter_bounds
-
-    def set_parameter_defaults_to_mean_of_bounds(self):
-        for name in self.parameter_bounds:
-            lower = self.parameter_bounds[name][0]
-            upper = self.parameter_bounds[name][1]
-            mean_value = (lower + upper) / 2
-            self.parameter_defaults[name] = mean_value
+    def set_parameter_defaults_to_means(self):
+        for name in self.parameter_distributions:
+            self.parameter_defaults[name] = self.parameter_distributions[name].mean()
 
     def get_indexes(self, substrate_names):
         self.substrate_indexes = []
