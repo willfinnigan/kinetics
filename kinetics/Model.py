@@ -291,54 +291,6 @@ class Model(list):
 
         return df
 
-    # Calculate metrics
-    def e_factor(self, product_name, include_h2o=True):
-
-        g_waste = 0
-        g_product = 0
-
-        df = self.results_dataframe()
-
-        for substrate in df:
-            if substrate in self.mw_dict:
-                mol_substrate = ((df[substrate].iloc[-1] * self.vol) / 1000000)
-                g_substrate = mol_substrate * self.mw_dict[substrate]
-            else:
-                g_substrate = 0
-
-            if substrate == product_name:
-                g_product = g_substrate
-            else:
-                if (substrate != 'H2O') or (include_h2o == True):
-                    g_waste += g_substrate
-
-        e_factor = g_waste / g_product
-
-        return e_factor
-
-    def pc_conversion(self, substrate_name, product_name):
-        index_substrate = self.species_names.index(substrate_name)
-        index_product = self.species_names.index(product_name)
-
-        start_conc = self.y[0][index_substrate]
-        end_conc = self.y[-1][index_product]
-
-        pc_conversion = (end_conc / start_conc)
-
-        return pc_conversion
-
-    def total_enzyme(self, enzyme_names):
-
-        total = 0
-
-        for enzyme in enzyme_names:
-            conc = self.species_defaults[enzyme]
-            mol_enzyme = (conc / 1000000) * self.vol
-            g_enzyme = mol_enzyme * self.mw_dict[enzyme]
-            total += g_enzyme
-
-        return total
-
     # Check parameters
     def check_parameter_limits(self):
         all_within_limits = True
