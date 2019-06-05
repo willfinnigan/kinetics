@@ -125,6 +125,13 @@ class Metrics(object):
 
         return conc
 
+    def specific_productivity(self):
+        g_product = self.total_product()
+        g_enzyme = self.total_enzyme()
+        reaction_time = self.reaction_time() / 60 #in hours
+
+        return g_product / g_enzyme / reaction_time
+
 
     def biocatalyst_productivity(self):
 
