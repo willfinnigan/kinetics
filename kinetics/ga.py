@@ -1,6 +1,7 @@
 from deap import creator, base, tools, algorithms
 import random
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 #test
 class GA_Base_Class(object):
@@ -107,8 +108,7 @@ class GA_Base_Class(object):
                 self.model.parameters[parameter_name] = ind[i]
                 self.model.parameter_defaults[parameter_name] = ind[i]
             else:
-                old_conc, error = self.model.reaction_species[name]
-                self.model.reaction_species[name] = [ind[i], error]
+                self.model.species_defaults[name] = ind[i]
 
         self.metrics.refresh_metrics(model=self.model, flow_rate=self.flow)
 
@@ -122,7 +122,6 @@ class GA_Base_Class(object):
 
         # Calculate fitness
         fitness = self.fitness()
-        self.model.reset_model()
 
         return fitness
 
@@ -149,7 +148,7 @@ class GA_Base_Class(object):
     def fitness(self):
         return 1
 
-    def run_ga(self, initial_pop=False):
+    def run_ga(self, initial_pop=False, plot=False):
         if initial_pop != False:
             population = initial_pop
         else:
@@ -173,5 +172,10 @@ class GA_Base_Class(object):
 
             new_population = population + offspring
             population = self.toolbox.select(new_population, k=self.num_to_select)
+
+            if plot==True:
+                self.model.plot_substrate(self.metrics.substrate)
+                self.model.plot_substrate(self.metrics.product)
+                plt.show()
 
 

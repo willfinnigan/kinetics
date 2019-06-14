@@ -1,4 +1,4 @@
-from kinetics.Model import Model
+from kinetics.Model import Model, uM_to_mgml
 
 from kinetics.Reaction_Classes import *
 
@@ -12,4 +12,8 @@ from kinetics.ga import GA_Base_Class
 
 from kinetics.metrics import Metrics
 
-__version__ = '1.2.0'
+from kinetics import Uncertainty
+
+from kinetics import Enzymes
+
+__version__ = '1.2.3'

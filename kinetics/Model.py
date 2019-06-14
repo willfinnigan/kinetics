@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 from scipy import integrate
 import copy
-import time
-from kinetics.Uncertainty_Sensitivity_Analysis import get_bounds_from_pc_error
 import matplotlib.pyplot as plt
 
 
@@ -40,18 +38,18 @@ class Model(list):
         self.time = np.linspace(self.start, self.end, self.steps)
 
         """ Species - used to reset the model, or as the bounds to run ua/sa """
-        self.species_defaults = {}
+        self.species = {}
         self.species_distributions = {}
 
         """ Parameters - used to reset the model, or as the bounds to run ua/sa.  Set by self.set_parameters_from_reactions() """
-        self.parameter_defaults = {}
+        self.parameters = {}
         self.parameter_distributions = {}
 
         """ Species and parameters used when the model is ran. These are changed each run when doing ua/sa """
-        self.species = {}
-        self.species_names = []
-        self.species_starting_values = []
-        self.parameters = {}
+        self.run_model_species = {}
+        self.run_model_species_names = []
+        self.run_model_species_starting_values = []
+        self.run_model_parameters = {}
 
         self.y = []
 
@@ -83,45 +81,72 @@ class Model(list):
         """
 
         self.parameters = {}
-        self.parameter_defaults = {}
         self.parameter_distributions = {}
+        self.run_model_parameters = {}
+
+        if self.logging == True:
+            print('-- Set unspecified parameters defaults to the means of distributions: --')
 
         for reaction_class in self:
-            if reaction_class.parameter_defaults == {}:
+            if reaction_class.parameters == {}:
                 reaction_class.set_parameter_defaults_to_means()
                 if self.logging==True:
-                    print('Set parameters to means:')
-                    print(reaction_class.parameter_defaults)
+                    print(reaction_class.parameters)
 
-            self.parameters.update(reaction_class.parameter_defaults)
-            self.parameter_defaults.update(copy.deepcopy(reaction_class.parameter_defaults))
+            self.run_model_parameters.update(reaction_class.parameters)
+            self.parameters.update(copy.deepcopy(reaction_class.parameters))
             self.parameter_distributions.update(reaction_class.parameter_distributions)
 
     # Species
     def update_species(self, species_dict):
-        self.species.update(species_dict)
-        self.species_names = list(self.species.keys())
-        self.species_starting_values = list(self.species.values())
+        self.run_model_species.update(species_dict)
+        self.run_model_species_names = list(self.run_model_species.keys())
+        self.run_model_species_starting_values = list(self.run_model_species.values())
 
     def load_species_from_reactions(self):
+        if self.logging == True:
+            print('-- Load unspecified species as default = 0 --')
         for reaction in self:
             for substrate in reaction.substrates + reaction.products + reaction.reaction_substrate_names:
-                if substrate not in self.species_defaults:
-                    self.species_defaults[substrate] = 0
+                if substrate not in self.species:
+                    self.species[substrate] = 0
                     if self.logging == True:
-                        print("Loaded species '" + str(substrate) + "' as 0")
+                        print(str(substrate) + ' ', end='')
+        if self.logging == True:
+            print()
 
     def set_species_defaults_to_mean(self):
+
         for name in self.species_distributions:
-            self.species_defaults[name] = self.species_distributions[name].mean()
+            if name not in self.species:
+                self.species[name] = self.species_distributions[name].mean()
 
-        return self.species_defaults
-
+    # Prepare the model
     def setup_model(self):
+        # Species
         self.set_species_defaults_to_mean()
         self.load_species_from_reactions()
+        self.update_species(self.species)
+
+        # Parameters
         self.set_parameters_from_reactions()
-        self.update_species(self.species_defaults)
+
+    def reset_reaction_indexes(self):
+        for reaction_class in self:
+            reaction_class.reset_reaction()
+
+    def reset_model_to_defaults(self):
+        """
+        Reset the model back to the default settings
+
+        This uses self.species_defaults and self.parameter_defaults
+          to set self.species_names, self.species_starting_values and self.parameters
+          back to the original default settings.  These the variables used to run the model.
+        """
+
+        self.update_species(self.species)
+        self.run_model_parameters = self.parameters
+        self.y = []
 
     # Run the model
     def deriv(self, y, t):
@@ -139,7 +164,7 @@ class Model(list):
         yprime = np.zeros(len(y))
 
         for reaction_class in self:
-            yprime += reaction_class.reaction(y, self.species_names, self.parameters)
+            yprime += reaction_class.reaction(y, self.run_model_species_names, self.run_model_parameters)
 
         return yprime
 
@@ -161,37 +186,18 @@ class Model(list):
 
         :return: y - a numpy array of 2 dimensions. Time by substrate.
         """
-        y0 = np.array(self.species_starting_values)
+        y0 = np.array(self.run_model_species_starting_values)
         self.y = integrate.odeint(self.deriv, y0, self.time, mxstep=self.mxsteps)
-        self.reset_reactions()
+        self.reset_reaction_indexes()
 
         return self.y
 
-    # Reset the model back to default settings
-    def reset_reactions(self):
-        for reaction_class in self:
-            reaction_class.reset_reaction()
-
-    def reset_model(self):
-        """
-        Reset the model back to the default settings
-
-        This uses self.species_defaults and self.parameter_defaults
-          to set self.species_names, self.species_starting_values and self.parameters
-          back to the original default settings.  These the variables used to run the model.
-        """
-
-        self.species = self.species_defaults
-        self.species_names, self.species_starting_values = get_species_positions(self.species)
-        self.parameters = self.parameter_defaults
-        self.y = []
-
-    # Export results as dataframe
+    # Export results as dataframe and plot
     def results_dataframe(self):
         ys_at_t = {'Time' : self.time}
 
-        for i in range(len(self.species_names)):
-            name = self.species_names[i]
+        for i in range(len(self.run_model_species_names)):
+            name = self.run_model_species_names[i]
             ys_at_t[name] = []
 
             for t in range(len(self.time)):
@@ -201,21 +207,26 @@ class Model(list):
 
         return df
 
-    # Check parameters
-    def check_parameter_limits(self):
-        all_within_limits = True
-        for reaction_class in self:
-            if reaction_class.sampling_limits(self.parameters) == False:
-                all_within_limits = False
-        return all_within_limits
-
-    def plot_substrate(self, substrate):
+    def plot_substrate(self, substrate, plot=False):
         ys_at_t = []
-        i = self.species_names.index(substrate)
+        i = self.run_model_species_names.index(substrate)
         for t in range(len(self.time)):
             ys_at_t.append(self.y[t][i])
 
-        plt.plot(self.time, ys_at_t)
+        plt.plot(self.time, ys_at_t, label=substrate)
+        plt.legend()
+
+        if plot == True:
+            plt.show()
+
+    # Check parameters when contraining parameter space
+    def check_parameter_limits(self):
+        all_within_limits = True
+        for reaction_class in self:
+            if reaction_class.sampling_limits(self.run_model_parameters) == False:
+                all_within_limits = False
+        return all_within_limits
+
 
 
 """Functions to add or substract the rate from yprime at the correct index's"""
@@ -253,3 +264,18 @@ def check_positive(y_prime):
 
     return y_prime
 
+def uM_to_mgml(enzyme_mws, species_concs, scale=1000000):
+
+    dict_of_mgml = {}
+
+    for enzyme, mw in enzyme_mws.items():
+        vol = 1 # 1L
+        conc = species_concs[enzyme] / scale #returns conc in M
+
+        moles = vol*conc #in moles
+
+        mass = moles * mw #in grams, this is grams in 1L
+
+        dict_of_mgml[enzyme] = mass
+
+    return dict_of_mgml

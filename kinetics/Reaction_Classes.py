@@ -12,11 +12,11 @@ class Reaction():
         self.substrates = []
         self.products = []
 
-        self.parameter_names = []
-        self.parameter_defaults = {}
+        self.parameters = {}
         self.parameter_distributions = {}
 
-        self.parameters = []
+        self.parameter_names = []
+        self.run_model_parameters = []
 
         self.modifiers = []
 
@@ -26,7 +26,8 @@ class Reaction():
 
     def set_parameter_defaults_to_means(self):
         for name in self.parameter_distributions:
-            self.parameter_defaults[name] = self.parameter_distributions[name].mean()
+            if name not in self.parameters:
+                self.parameters[name] = self.parameter_distributions[name].mean()
 
     def get_indexes(self, substrate_names):
         self.substrate_indexes = []
@@ -49,7 +50,7 @@ class Reaction():
 
     def reset_reaction(self):
         self.substrate_indexes = []
-        self.parameters = []
+        self.run_model_parameters = []
 
     def add_modifier(self, modifier):
         for name in modifier.parameter_names:
@@ -75,8 +76,8 @@ class Reaction():
         if self.substrate_indexes == []:
             self.get_indexes(substrate_names) # need to move this to the model
 
-        if self.parameters == []:
-            self.parameters = self.get_parameters(parameter_dict)
+        if self.run_model_parameters == []:
+            self.run_model_parameters = self.get_parameters(parameter_dict)
 
         for modifier in self.modifiers:
             if modifier.substrate_indexes == []:
@@ -86,7 +87,7 @@ class Reaction():
 
         substrates = self.get_substrates(y)
 
-        substrates, parameters = self.calculate_modifiers(substrates, copy.copy(self.parameters))
+        substrates, parameters = self.calculate_modifiers(substrates, copy.copy(self.run_model_parameters))
 
         rate = self.calculate_rate(substrates, parameters)
 
@@ -110,7 +111,7 @@ class Reaction():
         return True
 
 """ Michaelis-Menten irreversible equations """
-class One_irr(Reaction):
+class Uni(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, a=None, enz=None,
@@ -137,7 +138,7 @@ class One_irr(Reaction):
 
         return rate
 
-class Two_irr(Reaction):
+class Bi(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None,
@@ -168,7 +169,7 @@ class Two_irr(Reaction):
 
         return rate
 
-class Two_ternary_complex_irr(Reaction):
+class Bi_ternary_complex(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, kia=None,
@@ -202,7 +203,7 @@ class Two_ternary_complex_irr(Reaction):
 
         return rate
 
-class Two_ping_pong_irr(Reaction):
+class Bi_ping_pong(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, a=None, b=None, enz=None,
@@ -231,7 +232,7 @@ class Two_ping_pong_irr(Reaction):
 
         return rate
 
-class Three_seq_irr_redam(Reaction):
+class Ter_seq_redam(Reaction):
     # This is the mechanism RedAms use
 
     def __init__(self,
@@ -267,7 +268,7 @@ class Three_seq_irr_redam(Reaction):
                                                                  enz=enz, a=a, b=b, c=c)
         return rate
 
-class Three_seq_irr_car(Reaction):
+class Ter_seq_car(Reaction):
     # This is the mechanism CARs use
 
     def __init__(self,
@@ -304,7 +305,7 @@ class Three_seq_irr_car(Reaction):
                                                                   enz=enz, a=a, b=b, c=c)
         return rate
 
-class Two_ternary_complex_small_kma(Reaction):
+class Bi_ternary_complex_small_kma(Reaction):
 
     def __init__(self,
                  kcat=None, kmb=None, kia=None,
@@ -335,9 +336,8 @@ class Two_ternary_complex_small_kma(Reaction):
 
         return rate
 
-
 """ Michaelis-Menten reversible equations """
-class Two_Ordered_rev(Reaction):
+class BiBi_Ordered_rev(Reaction):
 
     def __init__(self,
                  kcatf=None, kcatr=None,
@@ -401,7 +401,7 @@ class FirstOrderRate(Reaction):
 
         return k*a
 
-class TwoSecondOrderRate(Reaction):
+class BiSecondOrderRate(Reaction):
 
     def __init__(self,
                  k=None, a=None, b=None,
@@ -510,78 +510,6 @@ class OxygenDiffusion(Reaction):
         rate = Equations.o2_diffusion(kl=kl, area=area, o2sat=o2sat, o2aq=o2aq)
         return rate
 
-class Flow_old(Reaction):
-
-    def __init__(self,
-                 flow_rate=None, column_volume=None,
-                 input_substrates=[], substrates=[],
-                 compartment_name=''):
-
-        super().__init__()
-
-        self.reaction_substrate_names = substrates
-        self.parameter_names=[flow_rate, column_volume]
-
-        self.substrates = substrates
-        self.input_substrates = input_substrates
-        self.input_substrates_indexes = []
-
-        self.compartment_name = compartment_name
-
-    def get_input_indexes(self, substrate_names):
-        self.input_substrates_indexes = []
-        for name in self.input_substrates:
-            self.input_substrates_indexes.append(substrate_names.index(name))
-
-    def reset_reaction(self):
-        self.substrate_indexes = []
-        self.input_substrates_indexes = []
-        self.parameters = []
-
-    def reaction(self, y, substrate_names, parameter_dict):
-        if self.substrate_indexes == []:
-            self.get_indexes(substrate_names) # need to move this to the model
-
-        if self.input_substrates_indexes == []:
-            self.get_input_indexes(substrate_names)
-
-        if self.parameters == []:
-            self.parameters = self.get_parameters(parameter_dict)
-
-
-        fr_over_cv = self.parameters[0] / self.parameters[1]
-
-
-
-
-        # Parameters (convert to L from ml)
-        flow_rate = self.parameters[0] / 1000
-        column_volume = self.parameters[1] / 1000
-
-        def calculate_uM_per_min(uM_initial, uM_input, column_volume, flow_rate):
-            umols_initial = uM_initial * column_volume
-            umols_in_flow_leaving = uM_initial * flow_rate
-            umols_in_flow_entering = uM_input * flow_rate
-
-            umols_now_in_column = umols_initial - umols_in_flow_leaving + umols_in_flow_entering
-            uM_now_in_column = umols_now_in_column / column_volume
-
-            uM_change_per_min = uM_now_in_column - uM_initial
-
-            return uM_change_per_min
-
-        y_prime = np.zeros(len(y))
-
-        for index, input_index in zip(self.substrate_indexes, self.input_substrates_indexes):
-            uM_initial = y[index]
-            uM_input = y[input_index]
-
-            rate = calculate_uM_per_min(uM_initial, uM_input, column_volume, flow_rate)
-            y_prime[index] += rate
-
-        return y_prime
-
-
 class Flow(Reaction):
     def __init__(self,
                  flow_rate=None, column_volume=None,
@@ -634,6 +562,9 @@ class Flow(Reaction):
             y_prime[index] += rate
 
         return y_prime
+
+
+
 
 class Modifier():
 

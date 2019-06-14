@@ -195,15 +195,15 @@ def parse_samples_to_run(samples, parameter_names, species_names):
     # returns a list of tuples containing [(parameter_dict, species_dict), ] for each sample
     return parsed_samples
 
-def run_all_models(parsed_samples, model, logging=True):
+def run_all_models(samples, model, logging=True):
     """
-    Run all the models for a set of parsed samples. Return the outputs
+    Run all the models for a set of  samples. Return the outputs
 
-    Takes the parsed samples, runs each model in turn.  Saves each model output to a list of outputs.
+    Takes the samples, runs each model in turn.  Saves each model output to a list of outputs.
     Returns the list of outputs  - [ys1, ys2, ys3] - where ys is the numpy array of y values from a model run)
 
 
-    :param parsed_samples: a list of [ (parameter_dict1, species_dict1), (parameter_dict2, species_dict2), ..]
+    :param samples: a list of [ (parameter_dict1, species_dict1), (parameter_dict2, species_dict2), ..]
     :param model:  an instance of the Model class
     :return: list of outputs  - [ys1, ys2, ys3] - where ys is a numpy array of y values from a model run)
     """
@@ -211,16 +211,16 @@ def run_all_models(parsed_samples, model, logging=True):
     output = []
 
     if logging==True:
-        for parameters, species in tqdm(parsed_samples):
+        for parameters, species in tqdm(samples):
             model.update_species(species)
-            model.update_parameters(parameters)
+            model.parameters.update(parameters)
             y = model.run_model()
             output.append(y)
 
     elif logging==False:
-        for parameters, species in parsed_samples:
+        for parameters, species in samples:
             model.update_species(species)
-            model.update_parameters(parameters)
+            model.parameters.update(parameters)
 
             y = model.run_model()
             output.append(y)
@@ -333,52 +333,32 @@ class UA(object):
 
     def __init__(self, model, num_samples=1000, quartile_range=95, logging=True):
 
-        self.parameters_with_bounds = model.parameter_bounds
-        self.species_with_bounds = model.species_bounds
-
-        self.parameter_names, self.parameter_bounds = setup_bounds_lists(self.parameters_with_bounds)
-        self.species_names, self.species_bounds = setup_bounds_lists(self.species_with_bounds)
-
         self.model = model
         self.num_samples = num_samples
         self.quartile_range = quartile_range
 
         self.samples = []
-        self.parsed_samples = []
-        self.problem = {}
 
         self.output = []
         self.quartile_output = {}
-
         self.substrate_dataframes = {}
-
         self.all_runs_substrate_dataframes = {}
 
         self.logging = logging
 
-    def load_species_and_parameters_from_model(self):
-        self.parameters_with_bounds = self.model.parameter_bounds
-        self.species_with_bounds = self.model.species_bounds
+    def make_samples_from_distributions(self):
+        # parsed samples look like:
+        # Parsed samples - [ (parameter_dict1, species_dict1), (parameter_dict2, species_dict2) ..]
+        self.samples = []
+        for i in range(self.num_samples):
+            parameter_dict = {}
+            species_dict = {}
+            for name, distribution in self.model.parameter_distributions.items():
+                parameter_dict[name] = distribution.rvs()
+            for name, distribution in self.model.species_distributions.items():
+                species_dict[name] = distribution.rvs()
 
-        self.parameter_names, self.parameter_bounds = setup_bounds_lists(self.parameters_with_bounds)
-        self.species_names, self.species_bounds = setup_bounds_lists(self.species_with_bounds)
-
-
-    def make_lhc_samples(self):
-        check_bounds(self.parameter_names, self.parameter_bounds)
-        check_bounds(self.species_names, self.species_bounds)
-
-        self.problem = setup_problem(self.parameter_names, self.parameter_bounds,
-                                     self.species_names, self.species_bounds)
-
-        self.samples = latin.sample(self.problem, self.num_samples)
-
-        self.parsed_samples = parse_samples_to_run(self.samples, self.parameter_names, self.species_names)
-
-        if self.logging==True:
-            print("self.problem, self.samples and self.parsed_samples set by lhc")
-
-        return self.parsed_samples
+            self.samples.append([parameter_dict, species_dict])
 
     def make_random_samples(self, max_iter=1000):
 
@@ -423,18 +403,8 @@ class UA(object):
         return self.samples
 
     def run_models(self):
-        if self.logging == True:
-            print("running all models")
-
-        time.sleep(0.5)
-        self.output = run_all_models(self.parsed_samples, self.model, logging=self.logging)
-
-        if self.logging == True:
-            print("samples run, model outputs saved in self.output")
-
+        self.output = run_all_models(self.samples, self.model, logging=self.logging)
         self.model.reset_model()
-
-        return self.output
 
     def quartiles_to_dataframe(self):
         self.substrate_dataframes = {}

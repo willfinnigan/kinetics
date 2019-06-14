@@ -55,7 +55,7 @@ class Metrics(object):
         if flow_rate != False:
             self.total_volume = (self.model.end * self.model.parameters[flow_rate])/1000 # In L
 
-        self.model.load_species()
+        self.model.setup_model()
         self.model.run_model()
 
 
