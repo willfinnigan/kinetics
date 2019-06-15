@@ -1,4 +1,3 @@
-from kinetics import Equations
 from kinetics.Model import calculate_yprime, check_positive
 import numpy as np
 import copy

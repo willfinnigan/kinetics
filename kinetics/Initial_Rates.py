@@ -6,9 +6,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 
-
-
-
 def calc_initial_rates_ua(model, substrate_name, enzyme_name, substrate_concs,
                        time=1, ua_samples=500, ua_quartile_range=95,
                        logging=False):

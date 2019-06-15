@@ -3,7 +3,6 @@ import random
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-#test
 class GA_Base_Class(object):
 
     def __init__(self, model=None, ua=None, metrics=None, weights=(1,), bounds={}):

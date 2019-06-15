@@ -227,7 +227,163 @@ class Model(list):
                 all_within_limits = False
         return all_within_limits
 
+class Metrics(object):
 
+    def __init__(self, model,
+                 substrate='', product='', reaction_volume=1,
+                 enzyme_mws={}, species_mws={}):
+
+        self.model = model
+        self.substrate = substrate
+        self.product = product
+        self.reaction_volume = reaction_volume
+        self.total_volume = reaction_volume
+        self.enzyme_mws = enzyme_mws
+        self.species_mws = species_mws
+
+        self.refresh_metrics()
+
+    def refresh_metrics(self, model=False, flow_rate=False):
+        if model!=False:
+            self.model=model
+
+        if flow_rate != False:
+            self.total_volume = (self.model.end * self.model.parameters[flow_rate])/1000 # In L
+
+        self.model.setup_model()
+        self.model.run_model()
+
+
+    def total_enzyme(self):
+
+        total = 0
+        for enzyme in self.enzyme_mws:
+            conc = self.model.species_defaults[enzyme]
+            mol_enzyme = (conc / 1000000) * self.reaction_volume
+            g_enzyme = mol_enzyme * self.enzyme_mws[enzyme]
+            total += g_enzyme
+
+        return total
+
+    def total_enzyme_concentration(self):
+
+        conc = self.total_enzyme() / self.reaction_volume
+        return conc
+
+    def e_factor(self):
+        g_waste = 0
+        g_product = 0
+
+        df = self.model.results_dataframe()
+
+        for substrate in df:
+            if substrate in self.species_mws:
+                mol_substrate = ((df[substrate].iloc[-1] * self.total_volume) / 1000000)
+                g_substrate = mol_substrate * self.species_mws[substrate]
+            elif substrate in self.enzyme_mws:
+                mol_substrate = ((df[substrate].iloc[-1] * self.total_volume) / 1000000)
+                g_substrate = mol_substrate * self.enzyme_mws[substrate]
+            else:
+                g_substrate = 0
+
+            if substrate == self.product:
+                g_product = g_substrate
+            else:
+                g_waste += g_substrate
+
+        e_factor = g_waste / g_product
+
+        return e_factor
+
+    def space_time_yield(self):
+        # g / L / day   eg 360 g/L/day
+
+        g_product = self.total_product()
+        time_taken_days = (self.model.end / (60*24)) # time in days
+
+        sty_per_day = g_product / self.reaction_volume / time_taken_days
+
+        return sty_per_day
+
+    def total_product(self):
+        conc_uM = self.product_concentration_uM()
+        conc_mM = conc_uM/1000
+        conc_M = conc_mM/1000
+        mol_product = (conc_M * self.total_volume)
+        g_product = mol_product * self.species_mws[self.product]
+
+        return g_product
+
+    def product_concentration_uM(self):
+        df = self.model.results_dataframe()
+        conc = df[self.product].iloc[-1]
+
+        return conc
+
+    def specific_productivity(self):
+        g_product = self.total_product()
+        g_enzyme = self.total_enzyme()
+        reaction_time = self.reaction_time() / 60 #in hours
+
+        return g_product / g_enzyme / reaction_time
+
+
+    def biocatalyst_productivity(self):
+
+        df = self.model.results_dataframe()
+        mol_product = ((df[self.product].iloc[-1] * self.total_volume) / 1000000)
+        g_product = mol_product * self.species_mws[self.product]
+
+        total_g_enzyme = 0
+        for enzyme in self.enzyme_mws:
+            conc = self.model.species_defaults[enzyme]
+            mol_enzyme = (conc / 1000000) * self.reaction_volume
+            g_enzyme = mol_enzyme * self.enzyme_mws[enzyme]
+            total_g_enzyme += g_enzyme
+
+        biocatalyst_productivity = g_product / total_g_enzyme
+
+        return biocatalyst_productivity
+
+    def substrate_concentration(self):
+
+        df = self.model.results_dataframe()
+        mol_substrate = ((df[self.substrate].iloc[0] * self.reaction_volume) / 1000000)
+        g_substrate = mol_substrate * self.species_mws[self.substrate]
+
+        conc = g_substrate / self.reaction_volume
+
+        return conc
+
+    def pc_yield(self):
+
+        if self.model.y == []:
+            self.refresh_metrics()
+
+        df = self.model.results_dataframe()
+
+        substrate_start = df[self.substrate].iloc[0]
+        product_end = df[self.product].iloc[-1]
+        final_yield = (product_end/substrate_start)*100
+
+        return final_yield
+
+    def reaction_time(self):
+        return self.model.end
+
+    def uncertainty(self, ci=95, num_samples=100, logging=False):
+        if self.model.y == []:
+            self.refresh_metrics()
+
+        ua = UA(self.model, num_samples=num_samples, quartile_range=ci, logging=logging)
+        ua.make_lhc_samples()
+        ua.run_models()
+        product_df = ua.calculate_df_quartiles_single_substrate(self.product)
+
+        high_end = product_df['High'].iloc[-1]
+        low_end = product_df['Low'].iloc[-1]
+
+        return high_end-low_end
 
 """Functions to add or substract the rate from yprime at the correct index's"""
 def calculate_yprime(y, rate, substrates, products, substrate_names):
