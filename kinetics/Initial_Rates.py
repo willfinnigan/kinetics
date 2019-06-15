@@ -1,4 +1,3 @@
-from kinetics.Uncertainty_Sensitivity_Analysis import UA
 import pandas as pd
 import numpy as np
 import scipy.optimize
