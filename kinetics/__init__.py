@@ -12,7 +12,7 @@ from kinetics.ga import GA_Base_Class
 
 from kinetics.metrics import Metrics
 
-from kinetics import Uncertainty
+from kinetics import Uncertainty, Sensitivity
 
 from kinetics import Enzymes
 
