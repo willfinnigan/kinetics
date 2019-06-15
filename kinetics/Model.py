@@ -3,6 +3,23 @@ import pandas as pd
 from scipy import integrate
 import copy
 import matplotlib.pyplot as plt
+import kinetics.Uncertainty
+
+def uM_to_mgml(species_mws, species_concs, scale=1000000):
+
+    dict_of_mgml = {}
+
+    for specie, mw in species_mws.items():
+        vol = 1 # 1L
+        conc = species_concs[specie] / scale #returns conc in M
+
+        moles = vol*conc #in moles
+
+        mass = moles * mw #in grams, this is grams in 1L
+
+        dict_of_mgml[specie] = mass
+
+    return dict_of_mgml
 
 class Model(list):
     """
@@ -252,7 +269,6 @@ class Metrics(object):
         self.model.setup_model()
         self.model.run_model()
 
-
     def total_enzyme(self):
 
         total = 0
@@ -371,31 +387,12 @@ class Metrics(object):
         return self.model.end
 
     def uncertainty(self, ci=95, num_samples=100, logging=False):
-        if self.model.y == []:
-            self.refresh_metrics()
 
-        ua = UA(self.model, num_samples=num_samples, quartile_range=ci, logging=logging)
-        ua.make_lhc_samples()
-        ua.run_models()
-        product_df = ua.calculate_df_quartiles_single_substrate(self.product)
+        samples = kinetics.Uncertainty.make_samples_from_distributions(self.model, num_samples=num_samples)
+        outputs = kinetics.Uncertainty.run_all_models(self.model, samples, logging=logging)
+        product_df = kinetics.Uncertainty.dataframes_quartiles(self.model, outputs, substrates=[self.product], quartile=ci)
 
         high_end = product_df['High'].iloc[-1]
         low_end = product_df['Low'].iloc[-1]
 
         return high_end-low_end
-
-def uM_to_mgml(enzyme_mws, species_concs, scale=1000000):
-
-    dict_of_mgml = {}
-
-    for enzyme, mw in enzyme_mws.items():
-        vol = 1 # 1L
-        conc = species_concs[enzyme] / scale #returns conc in M
-
-        moles = vol*conc #in moles
-
-        mass = moles * mw #in grams, this is grams in 1L
-
-        dict_of_mgml[enzyme] = mass
-
-    return dict_of_mgml
