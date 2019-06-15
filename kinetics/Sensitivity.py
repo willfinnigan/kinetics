@@ -1,4 +1,4 @@
-from kinetics.Uncertainty import check_not_neg, run_all_models
+from kinetics.Uncertainty import check_not_neg
 from SALib.sample import saltelli
 from SALib.analyze import sobol
 import numpy as np

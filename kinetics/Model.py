@@ -4,7 +4,6 @@ from scipy import integrate
 import copy
 import matplotlib.pyplot as plt
 
-
 class Model(list):
     """
     The model class inherits from a list.
@@ -384,41 +383,6 @@ class Metrics(object):
         low_end = product_df['Low'].iloc[-1]
 
         return high_end-low_end
-
-"""Functions to add or substract the rate from yprime at the correct index's"""
-def calculate_yprime(y, rate, substrates, products, substrate_names):
-    """
-    This function is used by the rate classes the user creates.
-
-    It takes the numpy array for y_prime,
-      and adds or subtracts the amount in rate to all the substrates or products listed
-    Returns the new y_prime
-
-    :param y_prime: a numpy array for the substrate values, the same order as y
-    :param rate:   the rate calculated by the user made rate equation
-    :param substrates: list of substrates for which rate should be subtracted
-    :param products: list of products for which rate should be added
-    :param substrate_names: the ordered list of substrate names in the model.  Used to get the position of each substrate or product in y_prime
-    :return: y_prime: following the addition or subtraction of rate to the specificed substrates
-    """
-
-    y_prime = np.zeros(len(y))
-
-    for name in substrates:
-        y_prime[substrate_names.index(name)] -= rate
-
-    for name in products:
-        y_prime[substrate_names.index(name)] += rate
-
-    return y_prime
-
-def check_positive(y_prime):
-
-    for i in range(len(y_prime)):
-        if y_prime[i] < 0:
-            y_prime[i] = 0
-
-    return y_prime
 
 def uM_to_mgml(enzyme_mws, species_concs, scale=1000000):
 

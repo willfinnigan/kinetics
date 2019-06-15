@@ -165,8 +165,6 @@ def dataframes_quartiles(model, output, substrates=[], quartile=95):
 
 
 
-
-
 def plot_substrate(substrate, dataframes,
                    colour='blue', xlabel="Time (mins)", ylabel="μM",
                    alpha=0.1, linewidth=0.1, y_min=True, plot=False):

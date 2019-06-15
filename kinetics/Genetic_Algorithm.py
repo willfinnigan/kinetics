@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 class GA_Base_Class(object):
 
-    def __init__(self, model=None, ua=None, metrics=None, weights=(1,), bounds={}):
+    def __init__(self, model=None, metrics=None, weights=(1,), bounds={}):
 
         self.names_list = []
         self.bounds_list = []
@@ -22,14 +22,10 @@ class GA_Base_Class(object):
         self.toolbox = base.Toolbox()
 
         self.model = model
-        self.ua = ua
 
         self.metrics=metrics
 
         self.weights = weights
-
-        if self.ua != None:
-            self.ua.logging = False
 
         self.all_pops = []
 
@@ -41,7 +37,6 @@ class GA_Base_Class(object):
         self.logging=True
 
         self.flow = False
-
 
     def set_ga_settings(self, indpb_mate=0.5, mu=0, sigma=0.4, indpb_mutate=0.5):
         self.indpb_mate = indpb_mate
@@ -123,26 +118,6 @@ class GA_Base_Class(object):
         fitness = self.fitness()
 
         return fitness
-
-    def evaluate_ua(self, ind):
-        # Check that the GA hasn't evolved towards negative substrate
-        if self.check_neg_substrate(ind) == True:
-                ind.fitness.values = None
-                return ind.fitness.values
-
-        # Update ua species with the concentrations in ind
-        for i in range(len(self.names_list)):
-            name = self.names_list[i]
-            old_conc, error = self.model.reaction_species[name]
-            self.ua.model.reaction_species[name] = [ind[i], error]
-
-        self.ua.model.load_species()
-        self.ua.load_species_and_parameters_from_model()
-        self.ua.run_standard_ua()
-
-        # Calculate fitness
-        ind.fitness.values = self.fitness()
-        return ind.fitness.values
 
     def fitness(self):
         return 1
