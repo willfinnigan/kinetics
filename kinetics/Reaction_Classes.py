@@ -295,9 +295,12 @@ class Ter_seq_redam(Reaction):
         kia = parameters[4]
         kib = parameters[5]
 
-        rate = Equations.three_substrate_irreversible_sequential(kcat=kcat, kma=kma, kmb=kmb, kmc=kmc,
-                                                                 kia=kia, kib=kib,
-                                                                 enz=enz, a=a, b=b, c=c)
+        numerator = kcat * enz * a * b * c
+
+        denominator = (kia * kib * kmc) + (kib * kmc * a) + (kia * kmb * c) + (kmc * a * b) + (kmb * a * c) + (kma * b * c) + (a * b * c)
+
+        rate = numerator / denominator
+
         return rate
 
 class Ter_seq_car(Reaction):
@@ -332,9 +335,8 @@ class Ter_seq_car(Reaction):
         kmc = parameters[3]
         kia = parameters[4]
 
-        rate = Equations.three_substrate_irreversible_ter_ordered(kcat=kcat,
-                                                                  kma=kma, kmb=kmb, kia=kia, kmc=kmc,
-                                                                  enz=enz, a=a, b=b, c=c)
+        rate = (kcat * enz * a * b * c) / ((kia * c) + (kmc * a * b) + (kmb * a * c) + (kma * b * c) + (a * b * c))
+
         return rate
 
 class Bi_ternary_complex_small_kma(Reaction):

@@ -22,25 +22,6 @@ def uM_to_mgml(species_mws, species_concs, scale=1000000):
     return dict_of_mgml
 
 class Model(list):
-    """
-    The model class inherits from a list.
-      The user made reaction classes are appended to this self list.
-
-    When the model is run it uses only:
-      self.parameters
-      self.species_names
-      self.species_starting_values
-
-    When the model is run, it calls integrate.odeint(self.deriv, y0, self.time).
-      self.deriv(self, y, t) runs each reaction_class.reaction(y, self.species_names, self.parameters) in turn,
-        with the output added to y_prime as the relevent index (determined by self.species_names)
-
-    Each reaction class contains parameter_defaults and parameter_bounds.
-      These are used to set self.parameter_defaults and self.parameter_bounds, when self.set_parameters_from_reactions() is called.
-
-    Species are set using the set_species_defaults and set_species_bounds functions.
-
-    """
 
     def __init__(self, logging=True):
         # Model inherits from list - reaction classes are held in this self list.
