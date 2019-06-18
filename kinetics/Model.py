@@ -254,7 +254,7 @@ class Metrics(object):
 
         total = 0
         for enzyme in self.enzyme_mws:
-            conc = self.model.species_defaults[enzyme]
+            conc = self.model.species[enzyme]
             mol_enzyme = (conc / 1000000) * self.reaction_volume
             g_enzyme = mol_enzyme * self.enzyme_mws[enzyme]
             total += g_enzyme
@@ -323,7 +323,6 @@ class Metrics(object):
 
         return g_product / g_enzyme / reaction_time
 
-
     def biocatalyst_productivity(self):
 
         df = self.model.results_dataframe()
@@ -332,7 +331,7 @@ class Metrics(object):
 
         total_g_enzyme = 0
         for enzyme in self.enzyme_mws:
-            conc = self.model.species_defaults[enzyme]
+            conc = self.model.species[enzyme]
             mol_enzyme = (conc / 1000000) * self.reaction_volume
             g_enzyme = mol_enzyme * self.enzyme_mws[enzyme]
             total_g_enzyme += g_enzyme
