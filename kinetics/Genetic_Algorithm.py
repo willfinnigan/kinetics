@@ -93,6 +93,7 @@ class GA_Base_Class(object):
             elif 'Parameter_' in name:
                 parameter_name = name[10:]
                 self.model.parameters[parameter_name] = ind[i]
+                self.model.run_model_parameters[parameter_name] = ind[i]
             else:
                 self.model.species[name] = ind[i]
 
