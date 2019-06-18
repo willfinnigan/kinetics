@@ -692,10 +692,10 @@ class Flow(Reaction):
         if self.input_substrates_indexes == []:
             self.get_input_indexes(substrate_names)
 
-        if self.parameters == []:
-            self.parameters = self.get_parameters(parameter_dict)
+        if self.run_model_parameters == []:
+            self.run_model_parameters = self.get_parameters(parameter_dict)
 
-        fr_over_cv = self.parameters[0] / self.parameters[1]
+        fr_over_cv = self.run_model_parameters[0] / self.run_model_parameters[1]
 
         y_prime = np.zeros(len(y))
 
