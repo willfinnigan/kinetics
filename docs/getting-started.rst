@@ -18,6 +18,7 @@ To install the latest development version of kinetics, run the following
 commands.  Note that the development version may be unstable and include bugs.
 
 ::
+
     git clone -branch dev https://github.com/willfinnigan/kinetics.git
     cd kinetics
     python setup.py develop
