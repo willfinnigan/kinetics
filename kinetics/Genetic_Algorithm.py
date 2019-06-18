@@ -92,17 +92,9 @@ class GA_Base_Class(object):
                 self.model.set_end_time(ind[i])
             elif 'Parameter_' in name:
                 parameter_name = name[10:]
-                # Get the pc error used to calculate bounds, and apply to new param.
-                old_param_lower, old_param_upper = self.model.parameter_bounds[parameter_name]
-                mean_old_param = (old_param_lower + old_param_upper)/2
-                old_pc_error = (old_param_upper - mean_old_param) / mean_old_param
-                new_upper = ind[i] + (ind[i]*old_pc_error)
-                new_lower = ind[i] - (ind[i] * old_pc_error)
-                self.model.parameter_bounds[parameter_name] = (new_lower, new_upper)
                 self.model.parameters[parameter_name] = ind[i]
-                self.model.parameter_defaults[parameter_name] = ind[i]
             else:
-                self.model.species_defaults[name] = ind[i]
+                self.model.species[name] = ind[i]
 
         self.metrics.refresh_metrics(model=self.model, flow_rate=self.flow)
 
