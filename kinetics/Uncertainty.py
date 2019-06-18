@@ -62,14 +62,14 @@ def run_all_models(model, samples, logging=True):
     if logging==True:
         for parameters, species in tqdm(samples):
             model.update_species(species)
-            model.parameters.update(parameters)
+            model.run_model_parameters.update(parameters)
             y = model.run_model()
             output.append(y)
 
     elif logging==False:
         for parameters, species in samples:
             model.update_species(species)
-            model.parameters.update(parameters)
+            model.run_model_parameters.update(parameters)
 
             y = model.run_model()
             output.append(y)
