@@ -365,4 +365,19 @@ def set_units(parameters, kcat='$min^{-1}$', km_ki='$\mu M$', concs=False):
     return units
 
 
+def save_sampling_plots(samples, model, param_logs, filename, units={}, plot=True, dpi=100):
+    samples_dict = dict_of_samples(samples)
+    units_dict = set_units(model.parameter_distributions)
+    units_dict.update(units)
 
+    for name in model.parameter_distributions:
+
+        log = False
+        if name in param_logs:
+            log = True
+
+        plot_parameter_distribution_and_sample(samples_dict, model.parameter_distributions, name, units=units_dict, log=log)
+        plt.savefig(str(filename) + '/' + str(name) + '.png', dpi=dpi)
+
+        if plot == True:
+            plt.show()
