@@ -44,6 +44,3 @@ Using `pip <https://pip.pypa.io/en/stable/installing/>`_, these libraries can be
 The packages are normally included with most Python bundles, such as Anaconda and Canopy.
 In any case, they are installed automatically when using pip or setuptools to install
 kinetics.
-
-
-

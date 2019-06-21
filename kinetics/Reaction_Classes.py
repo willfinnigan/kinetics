@@ -603,6 +603,32 @@ class Binding(Reaction):
 
         return rate
 
+class DiffusionEquilibrium(Reaction):
+    def __init__(self, kd=None, k1=None, org_c=None, aq_c=None):
+        super().__init__()
+
+        self.reaction_substrate_names = [org_c, aq_c]
+        self.parameter_names = [kd, k1]
+
+        self.substrates = [org_c]
+        self.products = [aq_c]
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        org_c = substrates[0]
+        aq_c = substrates[1]
+
+        # Parameters
+        kd = parameters[0]
+        k1 = parameters[1]
+
+        kminus1 = kd * k1
+
+        rate = (k1 * a * b) - (kminus1 * c)
+
+        return rate
+
+
 class Binding2(Reaction):
 
     def __init__(self, k1=None, kminus1=None,
@@ -655,7 +681,8 @@ class OxygenDiffusion(Reaction):
         area = parameters[1]
         o2sat = parameters[2]
 
-        rate = Equations.o2_diffusion(kl=kl, area=area, o2sat=o2sat, o2aq=o2aq)
+        rate = -kl * area * (o2aq - o2sat)
+
         return rate
 
 class Flow(Reaction):
@@ -791,7 +818,18 @@ class MixedInhibition(Modifier):
 
         return substrates, parameters
 
+class FirstOrder_Modifier(Modifier):
 
+    def __init__(self, kcat=None, k=None, s=None):
+        super().__init__()
+        self.substrate_names = [s]
+        self.parameter_names = [kcat, k]
 
+    def calc_modifier(self, substrates, parameters):
+        kcat = parameters[self.parameter_indexes[0]]
+        k = parameters[self.parameter_indexes[1]]
+        s = substrates[self.substrate_indexes[0]]
 
+        parameters[self.parameter_indexes[0]] = s*k*kcat
 
+        return substrates, parameters

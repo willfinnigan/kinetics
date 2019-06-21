@@ -82,13 +82,11 @@ class Model(list):
         self.run_model_parameters = {}
 
         if self.logging == True:
-            print('-- Set unspecified parameters defaults to the means of distributions: --')
-
+            print('-- Setting default parameters, using means of distributions where undefined: --')
         for reaction_class in self:
-            if reaction_class.parameters == {}:
-                reaction_class.set_parameter_defaults_to_means()
-                if self.logging==True:
-                    print(reaction_class.parameters)
+            reaction_class.set_parameter_defaults_to_means()
+            if self.logging==True:
+                print(reaction_class.parameters)
 
             self.run_model_parameters.update(reaction_class.parameters)
             self.parameters.update(copy.deepcopy(reaction_class.parameters))
