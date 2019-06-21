@@ -7,17 +7,9 @@ It's primarily aimed at modelling enzyme reactions, although can be used for oth
 kinetics uses scipy.integrate.odeint to solve ordinary differential equations,
 but extends upon this to allow the use of parameter distributions rather than single parameter values.
 
-Features
-Construct systems of ODEs simply by selecting suitable rate equations and naming parameters and species.
-Use either simple parameter values or probability distributions.
-Run sensitivity analysis using SALib
-Easily plot model runs using predefined plotting functions
-
-
-
-
-
-
+.. image:: images/simple_example1.png
+   :scale: 50
+   :alt: example plot
 
 .. toctree::
    :maxdepth: 2
@@ -25,22 +17,15 @@ Easily plot model runs using predefined plotting functions
    getting-started
 
 
+
 Features
 --------
+Construct systems of ODEs simply by selecting suitable rate equations and naming parameters and species.
+Use either simple parameter values or probability distributions.
+Run sensitivity analysis using SALib
+Easily plot model runs using predefined plotting functions
 
 
-
-Installation
-------------
-
-Install kinetics by running:
-
-    pip install kinetics
-
-Contribute
-----------
-
-- Source Code: http://github.com/willfinnigan/kinetics
 
 Support
 -------
@@ -51,6 +36,3 @@ License
 -------
 
 The project is licensed under the MIT license.
-
-.. automodule:: io
-   :kinetics.Model:
