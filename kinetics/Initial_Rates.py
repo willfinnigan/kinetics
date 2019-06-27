@@ -1,12 +1,8 @@
-from kinetics.Uncertainty_Sensitivity_Analysis import UA
 import pandas as pd
 import numpy as np
 import scipy.optimize
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-
-
-
 
 
 def calc_initial_rates_ua(model, substrate_name, enzyme_name, substrate_concs,
