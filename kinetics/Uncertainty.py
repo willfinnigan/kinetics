@@ -296,11 +296,11 @@ def plot_distribution(samples_dict, parameter_distributions, param_name, units='
 
 
 
-def plot_parameter_distribution_and_sample(samples_dict, parameter_distributions, parameter_name,
-                                           units={}, num_points=1000, figsize=[10, 5],
-                                           colour='darkblue', alpha_dist=0.5, alpha_sample=0.01,
-                                           size=10, log=False, plot=False,
-                                           xaxis_rotation=0, width_ratio=[4,1]):
+def plot_single_parameter_distribution_and_sample(samples_dict, parameter_distributions, parameter_name,
+                                                  units={}, num_points=1000, figsize=[10, 5],
+                                                  colour='darkblue', alpha_dist=0.5, alpha_sample=0.01,
+                                                  size=10, log=False, plot=False,
+                                                  xaxis_rotation=0, width_ratio=[4,1]):
 
     fig = plt.figure(1)
     grid = gridspec.GridSpec(1, 2, width_ratios=width_ratio)
@@ -346,7 +346,6 @@ def plot_parameter_distribution_and_sample(samples_dict, parameter_distributions
     if plot == True:
         plt.show()
 
-
 def set_units(parameters, kcat='$min^{-1}$', km_ki='$\mu M$', concs=False):
 
     units = {}
@@ -360,7 +359,6 @@ def set_units(parameters, kcat='$min^{-1}$', km_ki='$\mu M$', concs=False):
 
     return units
 
-
 def plot_sampling(samples, model, param_logs, folder_name='', units={}, plot=True, save=False, dpi=100):
     samples_dict = dict_of_samples(samples)
     units_dict = set_units(model.parameter_distributions)
@@ -372,7 +370,7 @@ def plot_sampling(samples, model, param_logs, folder_name='', units={}, plot=Tru
         if name in param_logs:
             log = True
 
-        plot_parameter_distribution_and_sample(samples_dict, model.parameter_distributions, name, units=units_dict, log=log)
+        plot_single_parameter_distribution_and_sample(samples_dict, model.parameter_distributions, name, units=units_dict, log=log)
 
         if save == True:
             plt.savefig(str(folder_name) + '/' + str(name) + '.png', dpi=dpi)
