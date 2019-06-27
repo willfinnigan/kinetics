@@ -59,7 +59,7 @@ It is essentially a list to which we append our reactions, with some extra varia
     import kinetics
 
     # Initiate a new model
-    model_one = kinetics.Model()
+    model = kinetics.Model()
 
 Add reactions to the model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,8 +68,8 @@ The reactions we defined above are appended to the model.
 .. code:: python
 
     # Append our reactions.
-    model_one.append(enzyme_1)
-    model_one.append(enzyme_2)
+    model.append(enzyme_1)
+    model.append(enzyme_2)
 
 Set how long the model will simulate
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -79,7 +79,7 @@ The time that a model will simulate can be set by using:
 .. code:: python
 
     # Set the model to run from 0 to 120 minutes, over 1000 steps
-    model_one.set_time(0, 120, 1000)
+    model.set_time(0, 120, 1000)
 
 Set starting species concentrations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,9 +90,9 @@ Only species which are greater than 0 need to be defined here.
 .. code:: python
 
     # Set starting concentrations
-    model_one.species = {"A" : 10000,
-                         "enz_1" : 4,
-                         "enz_2" : 10}
+    model.species = {"A" : 10000,
+                    "enz_1" : 4,
+                    "enz_2" : 10}
 
 Run the model
 ~~~~~~~~~~~~~
@@ -103,13 +103,13 @@ Alternatively, results can plotted directly using an in-built plot function ``mo
 .. code:: python
 
     # Setup and run the model
-    model_one.setup_model()
-    model_one.run_model()
+    model.setup_model()
+    model.run_model()
 
     # Plot the results
-    model_one.plot_substrate('A')
-    model_one.plot_substrate('B')
-    model_one.plot_substrate('C', plot=True)
+    model.plot_substrate('A')
+    model.plot_substrate('B')
+    model.plot_substrate('C', plot=True)
 
 .. image:: images/simple_example1.png
    :scale: 25
@@ -143,22 +143,22 @@ All the code in this example in one handy block.
                            'enz2_km' : 2000}
 
     # Set up the model
-    model_one = kinetics.Model(logging=False)
-    model_one.append(enzyme_1)
-    model_one.append(enzyme_2)
-    model_one.set_time(0, 120, 1000) # 120 mins, 1000 timepoints.
+    model = kinetics.Model(logging=False)
+    model.append(enzyme_1)
+    model.append(enzyme_2)
+    model.set_time(0, 120, 1000) # 120 mins, 1000 timepoints.
 
     # Set starting concentrations
-    model_one.species = {"A" : 10000,
-                         "enz_1" : 4,
-                         "enz_2" : 10}
-    model_one.setup_model()
+    model.species = {"A" : 10000,
+                     "enz_1" : 4,
+                     "enz_2" : 10}
+    model.setup_model()
 
     # Run the model
-    model_one.run_model()
-    model_one.plot_substrate('A')
-    model_one.plot_substrate('B')
-    model_one.plot_substrate('C', plot=True)
+    model.run_model()
+    model.plot_substrate('A')
+    model.plot_substrate('B')
+    model.plot_substrate('C', plot=True)
 
     # Now try altering the enzyme concentration, km or kcat, and re-running the model to see the effects this has....
 
