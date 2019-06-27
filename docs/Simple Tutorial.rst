@@ -8,6 +8,7 @@ Alternatively use a `google colab
 notebook to get started quickly. (Use ``!pip install kinetics`` in the first cell)
 
 This example shows the code required to model the relatively simple system shown on the main page.
+The complete example as a single block of code is available at the end.
 
 .. image:: images/example_system.png
    :scale: 20

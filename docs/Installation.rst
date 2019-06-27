@@ -15,7 +15,6 @@ dependencies, run the following command:
     pip install kinetics
 
 
-
 Running in google colab
 -----------------------
 An easy way to get started quickly is to use a a `google colab
