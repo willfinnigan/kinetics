@@ -15,71 +15,6 @@ def check_not_neg(sample, name, negative_allowed):
 
     return True
 
-def make_samples_from_distributions(model, num_samples=1000, negative_allowed=[]):
-
-    samples = []
-    for i in range(num_samples):
-        parameter_dict = {}
-        species_dict = {}
-
-        for name, distribution in model.parameter_distributions.items():
-            sample = None
-            while not check_not_neg(sample, name, negative_allowed):
-                sample = distribution.rvs()
-            parameter_dict[name] = sample
-
-        for name, distribution in model.species_distributions.items():
-            sample=None
-            while not check_not_neg(sample, name, negative_allowed):
-                sample = distribution.rvs()
-            species_dict[name] = sample
-
-        samples.append([parameter_dict, species_dict])
-
-    return samples # samples will = [ (parameter_dict1, species_dict1), (parameter_dict2, species_dict2) ..]
-
-def dict_of_samples(samples):
-
-    samples_dict = {}
-
-    for s in samples:
-        # s = (param_dict, species_dict)
-        for name in {**s[0], **s[1]}:
-
-            try:
-                values = samples_dict[name]
-            except KeyError:
-                values = samples_dict[name] = []
-
-            sample_to_add = {**s[0], **s[1]}[name]
-            values.append(sample_to_add)
-
-    return samples_dict
-
-def run_all_models(model, samples, logging=True):
-    output = []
-
-    if logging==True:
-        for parameters, species in tqdm(samples):
-            model.update_species(species)
-            model.run_model_parameters.update(parameters)
-            y = model.run_model()
-            output.append(y)
-
-    elif logging==False:
-        for parameters, species in samples:
-            model.update_species(species)
-            model.run_model_parameters.update(parameters)
-
-            y = model.run_model()
-            output.append(y)
-
-    # Reset the model back to the default values
-    model.reset_model_to_defaults()
-
-    # ua_output will be a list like [y1, y2, y3, ect...]
-    return output
-
 def return_ys_for_a_single_substrate(model, output, substrate_name):
     """
     From run_all_models_ouput, return only the outputs for substrate_name
@@ -106,6 +41,54 @@ def return_ys_for_a_single_substrate(model, output, substrate_name):
         collected_output.append(timepoint)
 
     return collected_output
+
+
+def make_samples_from_distributions(model, num_samples=1000, negative_allowed=[]):
+
+    samples = []
+    for i in range(num_samples):
+        parameter_dict = {}
+        species_dict = {}
+
+        for name, distribution in model.parameter_distributions.items():
+            sample = None
+            while not check_not_neg(sample, name, negative_allowed):
+                sample = distribution.rvs()
+            parameter_dict[name] = sample
+
+        for name, distribution in model.species_distributions.items():
+            sample=None
+            while not check_not_neg(sample, name, negative_allowed):
+                sample = distribution.rvs()
+            species_dict[name] = sample
+
+        samples.append([parameter_dict, species_dict])
+
+    return samples # samples will = [ (parameter_dict1, species_dict1), (parameter_dict2, species_dict2) ..]
+
+def run_all_models(model, samples, logging=True):
+    output = []
+
+    if logging==True:
+        for parameters, species in tqdm(samples):
+            model.update_species(species)
+            model.run_model_parameters.update(parameters)
+            y = model.run_model()
+            output.append(y)
+
+    elif logging==False:
+        for parameters, species in samples:
+            model.update_species(species)
+            model.run_model_parameters.update(parameters)
+
+            y = model.run_model()
+            output.append(y)
+
+    # Reset the model back to the default values
+    model.reset_model_to_defaults()
+
+    # ua_output will be a list like [y1, y2, y3, ect...]
+    return output
 
 def dataframes_all_runs(model, output, substrates=[]):
 
@@ -160,6 +143,24 @@ def dataframes_quartiles(model, output, substrates=[], quartile=95):
         dataframes[name] = quartiles
 
     return dataframes
+
+def dict_of_samples(samples):
+
+    samples_dict = {}
+
+    for s in samples:
+        # s = (param_dict, species_dict)
+        for name in {**s[0], **s[1]}:
+
+            try:
+                values = samples_dict[name]
+            except KeyError:
+                values = samples_dict[name] = []
+
+            sample_to_add = {**s[0], **s[1]}[name]
+            values.append(sample_to_add)
+
+    return samples_dict
 
 
 def plot_substrate(substrate, dataframes,
@@ -346,8 +347,6 @@ def plot_parameter_distribution_and_sample(samples_dict, parameter_distributions
         plt.show()
 
 
-
-
 def set_units(parameters, kcat='$min^{-1}$', km_ki='$\mu M$', concs=False):
 
     units = {}
@@ -362,7 +361,7 @@ def set_units(parameters, kcat='$min^{-1}$', km_ki='$\mu M$', concs=False):
     return units
 
 
-def save_sampling_plots(samples, model, param_logs, filename, units={}, plot=True, dpi=100):
+def plot_sampling(samples, model, param_logs, folder_name='', units={}, plot=True, save=False, dpi=100):
     samples_dict = dict_of_samples(samples)
     units_dict = set_units(model.parameter_distributions)
     units_dict.update(units)
@@ -374,7 +373,9 @@ def save_sampling_plots(samples, model, param_logs, filename, units={}, plot=Tru
             log = True
 
         plot_parameter_distribution_and_sample(samples_dict, model.parameter_distributions, name, units=units_dict, log=log)
-        plt.savefig(str(filename) + '/' + str(name) + '.png', dpi=dpi)
+
+        if save == True:
+            plt.savefig(str(folder_name) + '/' + str(name) + '.png', dpi=dpi)
 
         if plot == True:
             plt.show()
