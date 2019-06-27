@@ -14,6 +14,7 @@
 #
 import os
 import sys
+import kinetics
 sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
@@ -25,7 +26,7 @@ author = 'William Finnigan'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '1.1'
+release = kinetics.__version__
 
 
 # -- General configuration ---------------------------------------------------
