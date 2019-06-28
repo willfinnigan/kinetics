@@ -1,10 +1,9 @@
 from distutils.core import setup
-import kinetics
 
 setup(
   name = 'kinetics',
   packages = ['kinetics'],
-  version = kinetics.__version__,
+  version = '1.3.1',
   license='MIT',
   description = 'Python code to run kinetic models of enzyme reactions',
   author = 'William Finnigan',
