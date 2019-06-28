@@ -174,3 +174,6 @@ def plot_sa_total_sensitivity(df):
     plt.bar(x, st, align='center', yerr=st_err, edgecolor='black', color='#000090')
     plt.xticks(x, x_names, rotation=90)
     plt.ylabel("ST")
+
+
+
