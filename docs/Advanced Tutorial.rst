@@ -114,8 +114,10 @@ To deal with the large amount of data this generates, two functions are availabl
 
 These dataframes can then be exported for further use, or can be used to generate plots.
 
-Plotting the 95% confidence intervals can look neater, but we lose some information on the outliers by doing this.
+Plotting graphs with confidence intervals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Plotting the 95% confidence intervals can look neater, but we lose some information on the outliers by doing this.
 
 .. code:: python
 
@@ -126,6 +128,12 @@ Plotting the 95% confidence intervals can look neater, but we lose some informat
 .. image:: images/advanced_example1.png
    :scale: 25
    :alt: example plot
+
+Plotting graphs showing all runs (spagetti plots)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Alternatively we can plot every single run.  With 1000 runs this can look a bit chaotic, and it may be clearer to plot each substrate on its own graph.
+Also, altering the alpha and linewidth values allows the graphs to be tweaked to preference.
 
 .. code:: python
 
@@ -138,6 +146,8 @@ Plotting the 95% confidence intervals can look neater, but we lose some informat
 .. image:: images/advanced_example2.png
    :scale: 25
    :alt: example plot
+
+Of course the dataframes are also available to be used as the output, possibly to create your own graphs or for other analysis.
 
 
 Complete code

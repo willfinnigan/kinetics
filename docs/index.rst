@@ -12,8 +12,11 @@ kinetics uses scipy.integrate.odeint to solve ordinary differential equations,
 but extends upon this to allow the use of parameter distributions rather than single parameter values.
 This allows error to be incorporated into the modelling.
 
+kinetics uses `scipy's probability distributions <https://docs.scipy.org/doc/scipy/reference/stats.html/>`_, with a large number of distributions to choose from.
+Typically uniform , normal, log-uniform or log-normal distributions are used.
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    Installation
    Simple Tutorial
