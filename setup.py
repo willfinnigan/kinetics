@@ -1,14 +1,16 @@
 from distutils.core import setup
+import kinetics
+
 setup(
   name = 'kinetics',
   packages = ['kinetics'],
-  version = '1.1.5',
+  version = kinetics.__version__,
   license='MIT',
   description = 'Python code to run kinetic models of enzyme reactions',
   author = 'William Finnigan',
   author_email = 'wjafinnigan@gmail.com',
   url = 'https://github.com/willfinnigan/kinetics',
-  download_url = 'https://github.com/willfinnigan/kinetics/archive/1.1.5.tar.gz',
+  download_url = '',
   keywords = ['enzyme', 'kinetics', 'modelling'],
   install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas', 'deap'],
   classifiers=[

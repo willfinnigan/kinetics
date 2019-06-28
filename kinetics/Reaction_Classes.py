@@ -1,7 +1,39 @@
-from kinetics import Equations
-from kinetics.Model import calculate_yprime, check_positive
 import numpy as np
 import copy
+
+def calculate_yprime(y, rate, substrates, products, substrate_names):
+    """
+    This function is used by the rate classes the user creates.
+
+    It takes the numpy array for y_prime,
+      and adds or subtracts the amount in rate to all the substrates or products listed
+    Returns the new y_prime
+
+    :param y_prime: a numpy array for the substrate values, the same order as y
+    :param rate:   the rate calculated by the user made rate equation
+    :param substrates: list of substrates for which rate should be subtracted
+    :param products: list of products for which rate should be added
+    :param substrate_names: the ordered list of substrate names in the model.  Used to get the position of each substrate or product in y_prime
+    :return: y_prime: following the addition or subtraction of rate to the specificed substrates
+    """
+
+    y_prime = np.zeros(len(y))
+
+    for name in substrates:
+        y_prime[substrate_names.index(name)] -= rate
+
+    for name in products:
+        y_prime[substrate_names.index(name)] += rate
+
+    return y_prime
+
+def check_positive(y_prime):
+
+    for i in range(len(y_prime)):
+        if y_prime[i] < 0:
+            y_prime[i] = 0
+
+    return y_prime
 
 class Reaction():
 
@@ -12,30 +44,22 @@ class Reaction():
         self.substrates = []
         self.products = []
 
-        self.parameter_names = []
-        self.parameter_defaults = {}
-        self.parameter_bounds = {}
+        self.parameters = {}
+        self.parameter_distributions = {}
 
-        self.parameters = []
+        self.parameter_names = []
+        self.run_model_parameters = []
 
         self.modifiers = []
 
         self.check_positive = False
 
-    def set_substrates_and_products(self, substrates, products):
-        self.substrates = substrates
-        self.products = products
+        self.check_limits_functions = []
 
-    def set_parameters(self, parameter_defaults={}, parameter_bounds={}):
-        self.parameter_defaults = parameter_defaults
-        self.parameter_bounds = parameter_bounds
-
-    def set_parameter_defaults_to_mean_of_bounds(self):
-        for name in self.parameter_bounds:
-            lower = self.parameter_bounds[name][0]
-            upper = self.parameter_bounds[name][1]
-            mean_value = (lower + upper) / 2
-            self.parameter_defaults[name] = mean_value
+    def set_parameter_defaults_to_means(self):
+        for name in self.parameter_distributions:
+            if name not in self.parameters:
+                self.parameters[name] = self.parameter_distributions[name].mean()
 
     def get_indexes(self, substrate_names):
         self.substrate_indexes = []
@@ -58,7 +82,7 @@ class Reaction():
 
     def reset_reaction(self):
         self.substrate_indexes = []
-        self.parameters = []
+        self.run_model_parameters = []
 
     def add_modifier(self, modifier):
         for name in modifier.parameter_names:
@@ -84,8 +108,8 @@ class Reaction():
         if self.substrate_indexes == []:
             self.get_indexes(substrate_names) # need to move this to the model
 
-        if self.parameters == []:
-            self.parameters = self.get_parameters(parameter_dict)
+        if self.run_model_parameters == []:
+            self.run_model_parameters = self.get_parameters(parameter_dict)
 
         for modifier in self.modifiers:
             if modifier.substrate_indexes == []:
@@ -95,7 +119,7 @@ class Reaction():
 
         substrates = self.get_substrates(y)
 
-        substrates, parameters = self.calculate_modifiers(substrates, copy.copy(self.parameters))
+        substrates, parameters = self.calculate_modifiers(substrates, copy.copy(self.run_model_parameters))
 
         rate = self.calculate_rate(substrates, parameters)
 
@@ -110,8 +134,16 @@ class Reaction():
     def modify_product(self, y_prime, substrate_names):
         return y_prime
 
+    def sampling_limits(self, parameter_dict):
+        # Return true if parameters within limits, false if not
+        for func in self.check_limits_functions:
+            if func(parameter_dict) == False:
+                return False
+
+        return True
+
 """ Michaelis-Menten irreversible equations """
-class One_irr(Reaction):
+class Uni(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, a=None, enz=None,
@@ -138,7 +170,7 @@ class One_irr(Reaction):
 
         return rate
 
-class Two_irr(Reaction):
+class Bi(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None,
@@ -169,7 +201,7 @@ class Two_irr(Reaction):
 
         return rate
 
-class Two_ternary_complex_irr(Reaction):
+class Bi_ternary_complex(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, kia=None,
@@ -203,7 +235,7 @@ class Two_ternary_complex_irr(Reaction):
 
         return rate
 
-class Two_ping_pong_irr(Reaction):
+class Bi_ping_pong(Reaction):
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, a=None, b=None, enz=None,
@@ -232,7 +264,7 @@ class Two_ping_pong_irr(Reaction):
 
         return rate
 
-class Three_seq_irr_redam(Reaction):
+class Ter_seq_redam(Reaction):
     # This is the mechanism RedAms use
 
     def __init__(self,
@@ -263,12 +295,15 @@ class Three_seq_irr_redam(Reaction):
         kia = parameters[4]
         kib = parameters[5]
 
-        rate = Equations.three_substrate_irreversible_sequential(kcat=kcat, kma=kma, kmb=kmb, kmc=kmc,
-                                                                 kia=kia, kib=kib,
-                                                                 enz=enz, a=a, b=b, c=c)
+        numerator = kcat * enz * a * b * c
+
+        denominator = (kia * kib * kmc) + (kib * kmc * a) + (kia * kmb * c) + (kmc * a * b) + (kmb * a * c) + (kma * b * c) + (a * b * c)
+
+        rate = numerator / denominator
+
         return rate
 
-class Three_seq_irr_car(Reaction):
+class Ter_seq_car(Reaction):
     # This is the mechanism CARs use
 
     def __init__(self,
@@ -300,12 +335,11 @@ class Three_seq_irr_car(Reaction):
         kmc = parameters[3]
         kia = parameters[4]
 
-        rate = Equations.three_substrate_irreversible_ter_ordered(kcat=kcat,
-                                                                  kma=kma, kmb=kmb, kia=kia, kmc=kmc,
-                                                                  enz=enz, a=a, b=b, c=c)
+        rate = (kcat * enz * a * b * c) / ((kia * c) + (kmc * a * b) + (kmb * a * c) + (kma * b * c) + (a * b * c))
+
         return rate
 
-class Two_ternary_complex_small_kma(Reaction):
+class Bi_ternary_complex_small_kma(Reaction):
 
     def __init__(self,
                  kcat=None, kmb=None, kia=None,
@@ -336,9 +370,38 @@ class Two_ternary_complex_small_kma(Reaction):
 
         return rate
 
-
 """ Michaelis-Menten reversible equations """
-class Two_Ordered_rev(Reaction):
+class Uni_rev(Reaction):
+
+    def __init__(self,
+                 kcatf=None, kcatr=None, kma=None, kmp=None, a=None, p=None, enz=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, p, enz]
+        self.parameter_names=[kcatf, kcatr, kma, kmp]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        p = substrates[1]
+        enz = substrates[2]
+
+        # Parameters
+        kcatf = parameters[0]
+        kcatr = parameters[1]
+        kma = parameters[2]
+        kmp = parameters[3]
+
+        rate = ((kcatf * enz * a) - (kcatr * enz * p)) / (1 + (a / kma) + (p / kmp))
+
+        return rate
+
+class BiBi_Ordered_rev(Reaction):
 
     def __init__(self,
                  kcatf=None, kcatr=None,
@@ -378,6 +441,89 @@ class Two_Ordered_rev(Reaction):
 
         return (numerator / denominator)
 
+class BiBi_Random_rev(Reaction):
+
+    def __init__(self,
+                 kcatf=None, kcatr=None, kmb=None, kia=None, kib=None, kmp=None, kip=None, kiq=None,
+                 a=None, b=None, p=None, q=None, enz=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b, p, q, enz]
+        self.parameter_names=[kcatf, kcatr, kmb, kia, kib, kmp, kip, kiq]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        p = substrates[2]
+        q = substrates[3]
+        enz = substrates[4]
+
+        # Parameters
+        kcatf = parameters[0]
+        kcatr = parameters[1]
+        kmb = parameters[2]
+        kia = parameters[3]
+        kib = parameters[4]
+        kmp = parameters[5]
+        kip = parameters[6]
+        kiq = parameters[7]
+
+        num = ((kcatf * enz * a * b) / (kia * kmb)) - ((kcatr * enz * p * q) / (kmp * kiq))
+
+        dom = 1 + (a / kia) + (b / kib) + (p / kip) + (q / kiq) + ((a * b) / (kia * kmb)) + ((p * q) / (kmp * kiq))
+
+        rate = num / dom
+
+        return rate
+
+class BiBi_Pingpong_rev(Reaction):
+
+    def __init__(self,
+                 kcatf=None, kma=None, kmb=None, kia=None,
+                 kcatr=None, kmp=None, kmq=None, kip=None, kiq=None,
+                 enz=None, a=None, b=None, p=None, q=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b, p, q, enz]
+        self.parameter_names=[kcatf, kcatr, kma, kmb, kia, kmp, kmq, kip, kiq]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        p = substrates[2]
+        q = substrates[3]
+        enz = substrates[4]
+
+        # Parameters
+        kcatf = parameters[0]
+        kcatr = parameters[1]
+        kma = parameters[2]
+        kmb = parameters[3]
+        kia = parameters[4]
+        kmp = parameters[5]
+        kmq = parameters[6]
+        kip = parameters[7]
+        kiq = parameters[8]
+
+        num = ((kcatf * enz * a * b) / (kia * kmb)) - ((kcatr * enz * p * q) / kip * kmq)
+
+        den = (a / kia) + ((kma * b) / (kia * kmb)) + (p / kip) + ((kmp * q) / (kip * kmq)) + (
+        (a * b) / (kia * kmb)) + ((a * p) / (kia * kip)) + ((kma * b * q) / (kia * kmb * kiq)) + ((p * q) / (kip * kmq))
+
+        return num / den
+
 
 """ Other rate equations """
 class FirstOrderRate(Reaction):
@@ -402,6 +548,30 @@ class FirstOrderRate(Reaction):
         k = parameters[0]
 
         return k*a
+
+class BiSecondOrderRate(Reaction):
+
+    def __init__(self,
+                 k=None, a=None, b=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b]
+        self.parameter_names=[k]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+
+        # Parameters
+        k = parameters[0]
+
+        return k*a*b
 
 class Binding(Reaction):
 
@@ -433,6 +603,60 @@ class Binding(Reaction):
 
         return rate
 
+class DiffusionEquilibrium(Reaction):
+    def __init__(self, kd=None, k1=None, org_c=None, aq_c=None):
+        super().__init__()
+
+        self.reaction_substrate_names = [org_c, aq_c]
+        self.parameter_names = [kd, k1]
+
+        self.substrates = [org_c]
+        self.products = [aq_c]
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        org_c = substrates[0]
+        aq_c = substrates[1]
+
+        # Parameters
+        kd = parameters[0]
+        k1 = parameters[1]
+
+        kminus1 = kd * k1
+
+        rate = (k1 * a * b) - (kminus1 * c)
+
+        return rate
+
+
+class Binding2(Reaction):
+
+    def __init__(self, k1=None, kminus1=None,
+                 a=None, b=None, c=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b, c]
+        self.parameter_names=[k1, kminus1]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        c = substrates[2]
+
+        # Parameters
+        k1 = parameters[0]
+        kminus1 = parameters[1]
+
+        rate = (k1*a*b) - (kminus1*c)
+
+        return rate
+
 class OxygenDiffusion(Reaction):
 
     def __init__(self,
@@ -457,11 +681,11 @@ class OxygenDiffusion(Reaction):
         area = parameters[1]
         o2sat = parameters[2]
 
-        rate = Equations.o2_diffusion(kl=kl, area=area, o2sat=o2sat, o2aq=o2aq)
+        rate = -kl * area * (o2aq - o2sat)
+
         return rate
 
 class Flow(Reaction):
-
     def __init__(self,
                  flow_rate=None, column_volume=None,
                  input_substrates=[], substrates=[],
@@ -470,7 +694,7 @@ class Flow(Reaction):
         super().__init__()
 
         self.reaction_substrate_names = substrates
-        self.parameter_names=[flow_rate, column_volume]
+        self.parameter_names = [flow_rate, column_volume]
 
         self.substrates = substrates
         self.input_substrates = input_substrates
@@ -490,29 +714,15 @@ class Flow(Reaction):
 
     def reaction(self, y, substrate_names, parameter_dict):
         if self.substrate_indexes == []:
-            self.get_indexes(substrate_names) # need to move this to the model
+            self.get_indexes(substrate_names)  # need to move this to the model
 
         if self.input_substrates_indexes == []:
             self.get_input_indexes(substrate_names)
 
-        if self.parameters == []:
-            self.parameters = self.get_parameters(parameter_dict)
+        if self.run_model_parameters == []:
+            self.run_model_parameters = self.get_parameters(parameter_dict)
 
-        # Parameters (convert to L from ml)
-        flow_rate = self.parameters[0] / 1000
-        column_volume = self.parameters[1] / 1000
-
-        def calculate_uM_per_min(uM_initial, uM_input, column_volume, flow_rate):
-            umols_initial = uM_initial * column_volume
-            umols_in_flow_leaving = uM_initial * flow_rate
-            umols_in_flow_entering = uM_input * flow_rate
-
-            umols_now_in_column = umols_initial - umols_in_flow_leaving + umols_in_flow_entering
-            uM_now_in_column = umols_now_in_column / column_volume
-
-            uM_change_per_min = uM_now_in_column - uM_initial
-
-            return uM_change_per_min
+        fr_over_cv = self.run_model_parameters[0] / self.run_model_parameters[1]
 
         y_prime = np.zeros(len(y))
 
@@ -520,13 +730,16 @@ class Flow(Reaction):
             uM_initial = y[index]
             uM_input = y[input_index]
 
-            rate = calculate_uM_per_min(uM_initial, uM_input, column_volume, flow_rate)
+            rate_inflow = uM_input * fr_over_cv
+            rate_outflow = uM_initial * fr_over_cv
+            rate = rate_inflow - rate_outflow
+
             y_prime[index] += rate
 
         return y_prime
 
 
-
+""" Modifiers (eg inhibtion) """
 class Modifier():
 
     def __init__(self):
@@ -602,5 +815,21 @@ class MixedInhibition(Modifier):
 
         parameters[self.parameter_indexes[0]] = kcat / (1 + i / (alpha * ki))
         parameters[self.parameter_indexes[1]] = km * (1 + i / ki) / (1 + i / (alpha * ki))
+
+        return substrates, parameters
+
+class FirstOrder_Modifier(Modifier):
+
+    def __init__(self, kcat=None, k=None, s=None):
+        super().__init__()
+        self.substrate_names = [s]
+        self.parameter_names = [kcat, k]
+
+    def calc_modifier(self, substrates, parameters):
+        kcat = parameters[self.parameter_indexes[0]]
+        k = parameters[self.parameter_indexes[1]]
+        s = substrates[self.substrate_indexes[0]]
+
+        parameters[self.parameter_indexes[0]] = s*k*kcat
 
         return substrates, parameters

@@ -1,0 +1,38 @@
+kinetics
+========
+
+.. image:: images/title_diagram.png
+   :scale: 20
+   :alt: graphical abstract
+
+kinetics is a package for modelling reactions using ordinary differential equations.
+It's primarily aimed at modelling enzyme reactions, although can be used for other purposes.
+
+kinetics uses scipy.integrate.odeint to solve ordinary differential equations,
+but extends upon this to allow the use of parameter distributions rather than single parameter values.
+This allows error to be incorporated into the modelling.
+
+.. toctree::
+   :maxdepth: 2
+
+   Installation
+   Simple Tutorial
+   Advanced Tutorial
+   Reactions
+   API
+
+
+Features
+--------
+- Construct systems of ODEs simply by selecting suitable rate equations and naming parameters and species.
+- Use either simple parameter values or probability distributions.
+- Run sensitivity analysis using SALib
+- Easily plot model runs using predefined plotting functions
+
+Support
+-------
+wjafinnigan@gmail.com or william.finnigan@manchester.ac.uk
+
+License
+-------
+The project is licensed under the MIT license.

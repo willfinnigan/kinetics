@@ -1,11 +1,11 @@
 from deap import creator, base, tools, algorithms
 import random
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
-#test
 class GA_Base_Class(object):
 
-    def __init__(self, model=None, ua=None, metrics=None, weights=(1,), bounds={}):
+    def __init__(self, model=None, metrics=None, weights=(1,), bounds={}):
 
         self.names_list = []
         self.bounds_list = []
@@ -22,14 +22,10 @@ class GA_Base_Class(object):
         self.toolbox = base.Toolbox()
 
         self.model = model
-        self.ua = ua
 
         self.metrics=metrics
 
         self.weights = weights
-
-        if self.ua != None:
-            self.ua.logging = False
 
         self.all_pops = []
 
@@ -39,6 +35,8 @@ class GA_Base_Class(object):
         self.num_children = 75
 
         self.logging=True
+
+        self.flow = False
 
     def set_ga_settings(self, indpb_mate=0.5, mu=0, sigma=0.4, indpb_mutate=0.5):
         self.indpb_mate = indpb_mate
@@ -92,11 +90,14 @@ class GA_Base_Class(object):
             name = self.names_list[i]
             if name == 'Time':
                 self.model.set_end_time(ind[i])
+            elif 'Parameter_' in name:
+                parameter_name = name[10:]
+                self.model.parameters[parameter_name] = ind[i]
+                self.model.run_model_parameters[parameter_name] = ind[i]
             else:
-                old_conc, error = self.model.reaction_species[name]
-                self.model.reaction_species[name] = [ind[i], error]
+                self.model.species[name] = ind[i]
 
-        self.metrics.refresh_metrics(model=self.model)
+        self.metrics.refresh_metrics(model=self.model, flow_rate=self.flow)
 
     def evaluate(self, ind):
 
@@ -108,34 +109,13 @@ class GA_Base_Class(object):
 
         # Calculate fitness
         fitness = self.fitness()
-        self.model.reset_model()
 
         return fitness
-
-    def evaluate_ua(self, ind):
-        # Check that the GA hasn't evolved towards negative substrate
-        if self.check_neg_substrate(ind) == True:
-                ind.fitness.values = None
-                return ind.fitness.values
-
-        # Update ua species with the concentrations in ind
-        for i in range(len(self.names_list)):
-            name = self.names_list[i]
-            old_conc, error = self.model.reaction_species[name]
-            self.ua.model.reaction_species[name] = [ind[i], error]
-
-        self.ua.model.load_species()
-        self.ua.load_species_and_parameters_from_model()
-        self.ua.run_standard_ua()
-
-        # Calculate fitness
-        ind.fitness.values = self.fitness()
-        return ind.fitness.values
 
     def fitness(self):
         return 1
 
-    def run_ga(self, initial_pop=False):
+    def run_ga(self, initial_pop=False, plot=False):
         if initial_pop != False:
             population = initial_pop
         else:
@@ -159,5 +139,10 @@ class GA_Base_Class(object):
 
             new_population = population + offspring
             population = self.toolbox.select(new_population, k=self.num_to_select)
+
+            if plot==True:
+                self.model.plot_substrate(self.metrics.substrate)
+                self.model.plot_substrate(self.metrics.product)
+                plt.show()
 
 
