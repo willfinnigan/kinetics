@@ -110,16 +110,16 @@ class Model(list):
         if self.logging == True:
             print()
 
-    def set_species_defaults_to_mean(self):
+    def set_species_defaults_to_median(self):
 
         for name in self.species_distributions:
             if name not in self.species:
-                self.species[name] = self.species_distributions[name].mean()
+                self.species[name] = self.species_distributions[name].median()
 
     # Prepare the model
     def setup_model(self):
         # Species
-        self.set_species_defaults_to_mean()
+        self.set_species_defaults_to_median()
         self.load_species_from_reactions()
         self.update_species(self.species)
 
