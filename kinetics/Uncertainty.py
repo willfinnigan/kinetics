@@ -305,12 +305,14 @@ def plot_single_parameter_distribution_and_sample(samples_dict, parameter_distri
     fig = plt.figure(1)
     grid = gridspec.GridSpec(1, 2, width_ratios=width_ratio)
 
-    max_sample = max(samples_dict[parameter_name])
+    distribution = parameter_distributions[parameter_name]
+
+    max_sample = distribution.ppf(0.99)
     max_sample += max_sample*0.05
-    min_sample = min(samples_dict[parameter_name])
+    min_sample = distribution.ppf(0.01)
     min_sample -= max_sample*0.05
     x = np.linspace(min_sample, max_sample, num_points)
-    distribution = parameter_distributions[parameter_name]
+
     y = distribution.pdf(x)
 
     ax0 = plt.subplot(grid[0])
