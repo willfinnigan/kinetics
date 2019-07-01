@@ -84,7 +84,7 @@ class Model(list):
         if self.logging == True:
             print('-- Setting default parameters, using means of distributions where undefined: --')
         for reaction_class in self:
-            reaction_class.set_parameter_defaults_to_means()
+            reaction_class.set_parameter_defaults_to_median()
             if self.logging==True:
                 print(reaction_class.parameters)
 

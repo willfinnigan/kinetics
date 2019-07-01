@@ -56,10 +56,10 @@ class Reaction():
 
         self.check_limits_functions = []
 
-    def set_parameter_defaults_to_means(self):
+    def set_parameter_defaults_to_median(self):
         for name in self.parameter_distributions:
             if name not in self.parameters:
-                self.parameters[name] = self.parameter_distributions[name].mean()
+                self.parameters[name] = self.parameter_distributions[name].median()
 
     def get_indexes(self, substrate_names):
         self.substrate_indexes = []
