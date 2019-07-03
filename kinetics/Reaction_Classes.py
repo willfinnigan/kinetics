@@ -179,8 +179,6 @@ class Uni(Reaction):
 
 class Bi(Reaction):
     r"""
-    .. math::
-        rate = c_{enz}\cdot k_{cat}\cdot \frac{c_{A}}{c_{A}+K_{M}^{A}} \cdot \frac{c_{B}}{c_{B}+K_{M}^{B}}
     """
 
     def __init__(self,
@@ -213,10 +211,6 @@ class Bi(Reaction):
         return rate
 
 class Bi_ternary_complex(Reaction):
-    r"""
-    .. math::
-        rate = \frac{c_{enz}\cdot k_{cat}\cdot c_{A}\cdot c_{B}}{(K_{I}^{A}\cdot K_{M}^{B}) + (K_{M}^{B}\cdot c_{A}) + (K_{M}^{A}\cdot c_{B}) + (c_{A} \cdot c_{B})}
-    """
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, kia=None,
@@ -251,10 +245,6 @@ class Bi_ternary_complex(Reaction):
         return rate
 
 class Bi_ping_pong(Reaction):
-    r"""
-    .. math::
-        rate = \frac{c_{enz}\cdot k_{cat}\cdot c_{A}\cdot c_{B}}{(K_{M}^{B}\cdot c_{A}) + (K_{M}^{A}\cdot c_{B}) + (c_{A} \cdot c_{B})}
-    """
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, a=None, b=None, enz=None,
@@ -285,15 +275,6 @@ class Bi_ping_pong(Reaction):
 
 class Ter_seq_redam(Reaction):
     r"""
-    .. math::
-        rate = \frac{c_{enz}\cdot k_{cat}\cdot c_{A}\cdot c_{B}\cdot c_{C}}
-                         {(K_{I}^{A}\cdot K_{I}^{B} \cdot K_{M}^{C}) +
-                         (K_{I}^{B}\cdot K_{M}^{C} \cdot c_{A}) +
-                         (K_{I}^{A}\cdot K_{M}^{B}\cdot c_{C}) +
-                         (K_{M}^{C}\cdot c_{A}\cdot c_{B}) +
-                         (K_{M}^{B}\cdot c_{A}\cdot c_{C}) +
-                         (K_{M}^{A}\cdot c_{B}\cdot c_{C}) +
-                         (c_{A} \cdot c_{B} \cdot c_{C})}
     """
 
     def __init__(self,
@@ -334,13 +315,6 @@ class Ter_seq_redam(Reaction):
 
 class Ter_seq_car(Reaction):
     r"""
-    .. math::
-        rate = \frac{c_{enz}\cdot k_{cat}\cdot c_{A}\cdot c_{B} \cdot c_{C}}
-                    {(K_{I}^{A}\cdot c_{C}) +
-                    (K_{M}^{C}\cdot c_{A} \cdot c_{B}) +
-                    (K_{M}^{B}\cdot c_{A} \cdot c_{C}) +
-                    (K_{M}^{A}\cdot c_{B} \cdot c_{C}) +
-                    (c_{A} \cdot c_{B} \cdot c_{C})}
 
     """
 
@@ -379,11 +353,6 @@ class Ter_seq_car(Reaction):
 
 class Bi_ternary_complex_small_kma(Reaction):
     r"""
-    .. math::
-        rate = \frac{c_{enz}\cdot k_{cat}\cdot c_{A}\cdot c_{B}}
-                    {(K_{I}^{A}\cdot K_{M}^{B}) +
-                    (K_{M}^{B}\cdot c_{A}) +
-                    (c_{A} \cdot c_{B})}
     """
 
     def __init__(self,
@@ -416,13 +385,8 @@ class Bi_ternary_complex_small_kma(Reaction):
         return rate
 
 """ Michaelis-Menten reversible equations """
-class Uni_rev(Reaction):
+class UniUni_rev(Reaction):
     r"""
-    .. math::
-        rate = \frac{(c_{enz}\cdot k_{cat}^{fwd}\cdot c_{A}) - (c_{enz}\cdot k_{cat}^{rev}\cdot c_{P})}
-                         {1 +
-                         \frac{c_{A}}{K_{M}^{A}} +
-                         \frac{c_{P}}{K_{M}^{P}} }
     """
 
     def __init__(self,
