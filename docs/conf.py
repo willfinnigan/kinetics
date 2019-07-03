@@ -109,6 +109,7 @@ htmlhelp_basename = 'kineticsdoc'
 
 # -- Options for LaTeX output ------------------------------------------------
 
+latex_engine = 'pdflatex'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
@@ -159,3 +160,5 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
+
+mathjax_path = '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
