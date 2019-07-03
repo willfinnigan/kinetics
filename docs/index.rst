@@ -15,22 +15,21 @@ This allows error to be incorporated into the modelling.
 kinetics uses `scipy's probability distributions <https://docs.scipy.org/doc/scipy/reference/stats.html/>`_, with a large number of distributions to choose from.
 Typically uniform , normal, log-uniform or log-normal distributions are used.
 
-.. toctree::
-   :maxdepth: 1
-
-   Installation
-   Simple Tutorial
-   Advanced Tutorial
-   Reactions
-   API
-
-
 Features
 --------
 - Construct systems of ODEs simply by selecting suitable rate equations and naming parameters and species.
 - Use either simple parameter values or probability distributions.
 - Run sensitivity analysis using SALib
 - Easily plot model runs using predefined plotting functions
+
+.. toctree::
+   :maxdepth: 2
+
+   Installation
+   Simple Tutorial
+   Advanced Tutorial
+   Reactions
+   API
 
 Support
 -------
