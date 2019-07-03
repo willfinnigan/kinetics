@@ -16,11 +16,15 @@ Typically uniform , normal, log-uniform or log-normal distributions are used.
 
 **Documentation:** `ReadTheDocs <http://kinetics.readthedocs.org>`__
 
+**Github** https://github.com/willfinnigan/kinetics
+
 **Requirements:**   `NumPy <http://www.numpy.org/>`_, `SciPy <http://www.scipy.org/>`_,
 `matplotlib <http://matplotlib.org/>`_, `tqdm <https://tqdm.github.io>`_, `pandas <http://pandas.pydata.org>`_,
 `SALib <https://salib.readthedocs.io>`_, and `deap <https://deap.readthedocs.io/en/master/>`_.
 
 **Installation:** ``pip install kinetics``
+
+**Citation** https://doi.org/10.1002/cctc.201900646
 
 .. image:: docs/images/title_diagram.png
    :scale: 20
