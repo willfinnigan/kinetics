@@ -32,6 +32,7 @@ Michaelis-Menten kinetics, irreversible.
 
 Uni
 ~~~
+
 .. autoclass:: kinetics.Uni
 
 The classic Miachelis-Menton equation for a single substrate.
@@ -41,6 +42,7 @@ The classic Miachelis-Menton equation for a single substrate.
 
 Bi
 ~~
+
 .. autoclass:: kinetics.Bi
 
 Not strictly a true Miachaelis-Menton equation.
@@ -51,6 +53,7 @@ Use with caution.  Will give a reasonable prediction if one substrate is saturat
 
 Bi Ternary Complex
 ~~~~~~~~~~~~~~~~~~
+
 .. autoclass:: kinetics.Bi_ternary_complex
 
 For reactions with two substrates which have an sequential mechanism (either ordered or random).
@@ -60,6 +63,7 @@ For reactions with two substrates which have an sequential mechanism (either ord
 
 Bi Ping Pong
 ~~~~~~~~~~~~
+
 .. autoclass:: kinetics.Bi_ping_pong
 
 For reactions with two substrates which have a ping-pong mechanism
@@ -70,6 +74,7 @@ For reactions with two substrates which have a ping-pong mechanism
 
 Ter seq redam
 ~~~~~~~~~~~~~
+
 .. autoclass:: kinetics.Ter_seq_redam
 
 A three substrate rate equation which can be used for Reductive Aminase enzymes.
@@ -87,6 +92,7 @@ A three substrate rate equation which can be used for Reductive Aminase enzymes.
 
 Ter seq car
 ~~~~~~~~~~~
+
 .. autoclass:: kinetics.Ter_seq_car
 
 A three substrate rate equation which can be used for Carboxylic Acid Reductase enzymes.
@@ -102,6 +108,7 @@ A three substrate rate equation which can be used for Carboxylic Acid Reductase 
 
 Bi ternary complex small kma
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. autoclass:: kinetics.Bi_ternary_complex_small_kma
 
 A special case of Bi Ternary Complex where kma << kia.
@@ -119,7 +126,8 @@ Michaelis-Menten kinetics, reversible.
 
 UniUni Reversible
 ~~~~~~~~~~~~~~~~~
-.. autoclass:: kinetics.Uni_rev
+
+.. autoclass:: kinetics.UniUni_rev
 
 .. math::
     rate = \frac{(c_{enz}\cdot k_{cat}^{fwd}\cdot c_{A}) - (c_{enz}\cdot k_{cat}^{rev}\cdot c_{P})}
@@ -129,14 +137,17 @@ UniUni Reversible
 
 BiBi Ordered Rev
 ~~~~~~~~~~~~~~~~
+
 .. autoclass:: kinetics.BiBi_Ordered_rev
 
 BiBi Random Rev
 ~~~~~~~~~~~~~~~
+
 .. autoclass:: kinetics.BiBi_Random_rev
 
 BiBi Pingpong Rev
 ~~~~~~~~~~~~~~~~~
+
 .. autoclass:: kinetics.BiBi_Pingpong_rev
 
 
