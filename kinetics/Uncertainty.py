@@ -307,9 +307,9 @@ def plot_single_parameter_distribution_and_sample(samples_dict, parameter_distri
 
     distribution = parameter_distributions[parameter_name]
 
-    max_sample = distribution.ppf(0.99)
+    max_sample = distribution.ppf(0.95)
     max_sample += max_sample*0.05
-    min_sample = distribution.ppf(0.01)
+    min_sample = distribution.ppf(0.05)
     min_sample -= max_sample*0.05
     x = np.linspace(min_sample, max_sample, num_points)
 

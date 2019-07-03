@@ -628,7 +628,6 @@ class DiffusionEquilibrium(Reaction):
 
         return rate
 
-
 class Binding2(Reaction):
 
     def __init__(self, k1=None, kminus1=None,
@@ -727,12 +726,9 @@ class Flow(Reaction):
         y_prime = np.zeros(len(y))
 
         for index, input_index in zip(self.substrate_indexes, self.input_substrates_indexes):
-            uM_initial = y[index]
+            uM_current = y[index]
             uM_input = y[input_index]
-
-            rate_inflow = uM_input * fr_over_cv
-            rate_outflow = uM_initial * fr_over_cv
-            rate = rate_inflow - rate_outflow
+            rate = fr_over_cv*(uM_input-uM_current)
 
             y_prime[index] += rate
 
