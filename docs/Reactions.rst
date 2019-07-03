@@ -62,7 +62,7 @@ A three substrate rate equation which can be used for Reductive Aminase enzymes.
 .. autoclass:: kinetics.Ter_seq_redam
 
 Ter seq car
-~~~~~~~~~~~~~
+~~~~~~~~~~~
 A three substrate rate equation which can be used for Carboxylic Acid Reductase enzymes.
 
 .. autoclass:: kinetics.Ter_seq_car
@@ -77,6 +77,56 @@ A special case of Bi Ternary Complex where kma << kia.
 
 Michaelis-Menten kinetics, reversible.
 --------------------------------------
+
+UniUni Reversible
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: kinetics.Uni_rev
+
+BiBi Ordered Rev
+~~~~~~~~~~~~~~~~
+
+.. autoclass:: kinetics.BiBi_Ordered_rev
+
+BiBi Random Rev
+~~~~~~~~~~~~~~~
+
+.. autoclass:: kinetics.BiBi_Random_rev
+
+BiBi Pingpong Rev
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: kinetics.BiBi_Pingpong_rev
+
+
+Modifiers of Michaelis-Menten kinetics eg for Inhibition
+--------------------------------------------------------
+Modifications to rate equations for things like competitive inhibition can applied as follows:
+
+(Remember to add new parameters to the reaction parameters)
+
+Modifications are applied at each timestep of the model, for example calculating the apparent Km resulting from competitive inhibtion.
+
+This feature allows the easy modification of the pre-defined rate equations.
+
+.. code:: python
+
+    enzyme_1.add_modifier(kinetics.CompetitiveInhibition(km='kma1', ki='ki1', i='I'))
+    enzyme_1.parameters.update({'ki1': 25})
+
+
+.. autoclass:: kinetics.SubstrateInhibition
+
+.. autoclass:: kinetics.CompetitiveInhibition
+
+.. autoclass:: kinetics.MixedInhibition
+
+.. autoclass:: kinetics.FirstOrder_Modifier
+
+
+
+
+
 
 
 

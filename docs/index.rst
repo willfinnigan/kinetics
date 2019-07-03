@@ -46,6 +46,7 @@ Features
    Simple Tutorial
    Advanced Tutorial
    Reactions
+   Custom Reactions
    API
    Authors
 
