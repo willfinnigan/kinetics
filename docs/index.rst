@@ -1,6 +1,8 @@
-========
-kinetics
-========
+====
+Home
+====
+
+**kinetics - a open-source python package for modelling multi-enzyme reactions with uncertainty**
 
 .. image:: images/title_diagram.png
    :scale: 20
