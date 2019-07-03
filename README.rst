@@ -2,6 +2,8 @@
 kinetics
 ========
 
+|docs|
+
 kinetics is a package for modelling reactions using ordinary differential equations.
 It's primarily aimed at modelling enzyme reactions, although can be used for other purposes.
 
@@ -23,6 +25,15 @@ Typically uniform , normal, log-uniform or log-normal distributions are used.
 .. image:: docs/images/title_diagram.png
    :scale: 20
    :alt: graphical abstract
+
+
+
+.. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://kinetics.readthedocs.io/en/latest/?badge=latest
+
+
 
 
 
