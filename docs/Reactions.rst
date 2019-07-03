@@ -32,9 +32,12 @@ Michaelis-Menten kinetics, irreversible.
 
 Uni
 ~~~
+.. autoclass:: kinetics.Uni
+
 The classic Miachelis-Menton equation for a single substrate.
 
-.. autoclass:: kinetics.Uni
+    .. math::
+        rate = \frac{c_{enz}\cdot k_{cat}\cdot c_{A}}{c_{A}+K_{M}^{A}}
 
 Bi
 ~~

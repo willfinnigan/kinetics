@@ -150,8 +150,6 @@ class Reaction():
 """ Michaelis-Menten irreversible equations """
 class Uni(Reaction):
     r"""
-    .. math::
-        rate = \frac{c_{enz}\cdot k_{cat}\cdot c_{A}}{c_{A}+K_{M}^{A}}
     """
 
     def __init__(self,
