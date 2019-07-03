@@ -16,7 +16,7 @@ Typically uniform , normal, log-uniform or log-normal distributions are used.
 
 **Documentation:** `ReadTheDocs <http://kinetics.readthedocs.org>`__
 
-**Github** https://github.com/willfinnigan/kinetics
+**Github:** `kinetics <https://github.com/willfinnigan/kinetics>`__
 
 **Requirements:**   `NumPy <http://www.numpy.org/>`_, `SciPy <http://www.scipy.org/>`_,
 `matplotlib <http://matplotlib.org/>`_, `tqdm <https://tqdm.github.io>`_, `pandas <http://pandas.pydata.org>`_,
@@ -24,7 +24,8 @@ Typically uniform , normal, log-uniform or log-normal distributions are used.
 
 **Installation:** ``pip install kinetics``
 
-**Citation** https://doi.org/10.1002/cctc.201900646
+**Citation:** `Finnigan, W., Cutlan, R., Snajdrova, R., Adams, J., Littlechild, J. and Harmer, N. (2019), Engineering a seven enzyme biotransformation using mathematical modelling and characterized enzyme parts. ChemCatChem.
+<https://doi.org/10.1002/cctc.201900646>`__
 
 .. image:: docs/images/title_diagram.png
    :scale: 20
