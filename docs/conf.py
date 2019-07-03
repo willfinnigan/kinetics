@@ -43,6 +43,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
 ]
+mathjax_path = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -109,7 +110,6 @@ htmlhelp_basename = 'kineticsdoc'
 
 # -- Options for LaTeX output ------------------------------------------------
 
-latex_engine = 'pdflatex'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
@@ -160,5 +160,3 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
-
-mathjax_path = '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
