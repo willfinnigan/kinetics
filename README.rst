@@ -1,5 +1,6 @@
+========
 kinetics
---------
+========
 
 kinetics is a package for modelling reactions using ordinary differential equations.
 It's primarily aimed at modelling enzyme reactions, although can be used for other purposes.

@@ -1,7 +1,8 @@
+========
 kinetics
 ========
 
-.. image:: images/title_diagram.png
+.. image:: docs/images/title_diagram.png
    :scale: 20
    :alt: graphical abstract
 
