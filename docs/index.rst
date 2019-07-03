@@ -31,6 +31,7 @@ Features
    Advanced Tutorial
    Reactions
    API
+   Authors
 
 Support
 -------

@@ -27,7 +27,6 @@ Typically uniform , normal, log-uniform or log-normal distributions are used.
    :alt: graphical abstract
 
 
-
 .. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
