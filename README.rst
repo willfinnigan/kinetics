@@ -20,3 +20,9 @@ Typically uniform , normal, log-uniform or log-normal distributions are used.
 
 **Installation:** ``pip install kinetics``
 
+.. image:: docs/images/title_diagram.png
+   :scale: 20
+   :alt: graphical abstract
+
+
+
