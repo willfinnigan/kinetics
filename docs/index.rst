@@ -42,6 +42,7 @@ Features
    :maxdepth: 2
 
    Installation
+   Why Model
    Simple Tutorial
    Advanced Tutorial
    Reactions

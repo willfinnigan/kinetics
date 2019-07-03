@@ -17,7 +17,7 @@ The complete example as a single block of code is available at the end.
 
 Define reactions
 ----------------
-The first step in building a kinetic model is to define rate equations which describe the rates of the reactions in a system.
+The first step in building a kinetic model using this package is to define rate equations which describe the rates of the reactions in a system.
 Rate equations will typically contain rate constants, referred to as parameters here, and species concentrations.
 Each rate equation which needs to be included in the model should be set up as a reaction object, as shown below.
 

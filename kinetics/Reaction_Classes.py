@@ -28,6 +28,11 @@ def calculate_yprime(y, rate, substrates, products, substrate_names):
     return y_prime
 
 def check_positive(y_prime):
+    """
+
+    :param y_prime:
+    :return:
+    """
 
     for i in range(len(y_prime)):
         if y_prime[i] < 0:
@@ -144,6 +149,10 @@ class Reaction():
 
 """ Michaelis-Menten irreversible equations """
 class Uni(Reaction):
+    r"""
+    .. math::
+        rate = \frac{c_{enz}\cdot k_{cat}\cdot c_{A}}{c_{A}+K_{M}^{A}}
+    """
 
     def __init__(self,
                  kcat=None, kma=None, a=None, enz=None,
@@ -171,6 +180,10 @@ class Uni(Reaction):
         return rate
 
 class Bi(Reaction):
+    r"""
+    .. math::
+        rate = c_{enz}\cdot k_{cat}\cdot \frac{c_{A}}{c_{A}+K_{M}^{A}} \cdot \frac{c_{B}}{c_{B}+K_{M}^{B}}
+    """
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None,
@@ -202,6 +215,10 @@ class Bi(Reaction):
         return rate
 
 class Bi_ternary_complex(Reaction):
+    r"""
+    .. math::
+        rate = \frac{c_{enz}\cdot k_{cat}\cdot c_{A}\cdot c_{B}}{(K_{I}^{A}\cdot K_{M}^{B}) + (K_{M}^{B}\cdot c_{A}) + (K_{M}^{A}\cdot c_{B}) + (c_{A} \cdot c_{B})}
+    """
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, kia=None,
@@ -260,7 +277,7 @@ class Bi_ping_pong(Reaction):
         kma = parameters[1]
         kmb = parameters[2]
 
-        rate = Equations.two_substrate_pingpong_irr(kcat=kcat, kma=kma, kmb=kmb, enz=enz, a=a, b=b)
+        rate = (kcat * enz * a * b) / ((kmb * a) + (kma * b) + (a * b))
 
         return rate
 
