@@ -22,6 +22,7 @@ Features
 - Use either simple parameter values or probability distributions.
 - Run sensitivity analysis using SALib
 - Easily plot model runs using predefined plotting functions
+- Optimisation using genetic algorithm using DEAP (coming soon)
 
 .. toctree::
    :maxdepth: 2

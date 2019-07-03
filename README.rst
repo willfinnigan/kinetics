@@ -26,6 +26,14 @@ Typically uniform , normal, log-uniform or log-normal distributions are used.
    :scale: 20
    :alt: graphical abstract
 
+Features
+--------
+- Construct systems of ODEs simply by selecting suitable rate equations and naming parameters and species.
+- Use either simple parameter values or probability distributions.
+- Run sensitivity analysis using SALib
+- Easily plot model runs using predefined plotting functions
+- Optimisation using genetic algorithm using DEAP (coming soon)
+
 
 .. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
     :alt: Documentation Status
