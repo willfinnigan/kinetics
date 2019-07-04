@@ -30,10 +30,10 @@ For example:
 Michaelis-Menten kinetics, irreversible.
 ----------------------------------------
 
+.. autoclass:: kinetics.Uni
+
 Uni
 ~~~
-
-.. autoclass:: kinetics.Uni
 
 The classic Miachelis-Menton equation for a single substrate.
 
