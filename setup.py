@@ -11,7 +11,7 @@ setup(
   url = 'https://github.com/willfinnigan/kinetics',
   download_url = 'https://github.com/willfinnigan/kinetics/archive/1.3.3.tar.gz',
   keywords = ['enzyme', 'kinetics', 'modelling'],
-  install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas', 'deap'],
+  install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas', 'deap', 'seaborn'],
   classifiers=[
     'Development Status :: 3 - Alpha',
     'License :: OSI Approved :: MIT License',

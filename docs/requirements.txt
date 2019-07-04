@@ -5,3 +5,4 @@ tqdm
 matplotlib
 pandas
 deap
+seaborn
