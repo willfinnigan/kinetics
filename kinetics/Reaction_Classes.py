@@ -42,12 +42,12 @@ def check_positive(y_prime):
 
 class Reaction():
 
-    def __init__(self):
+    def __init__(self, substrates=[], products=[]):
 
         self.reaction_substrate_names = []
         self.substrate_indexes = []
-        self.substrates = []
-        self.products = []
+        self.substrates = substrates
+        self.products = products
 
         self.parameters = {}
         self.parameter_distributions = {}
@@ -845,3 +845,23 @@ class FirstOrder_Modifier(Modifier):
         parameters[self.parameter_indexes[0]] = s*k*kcat
 
         return substrates, parameters
+
+
+class Uni_MT(Reaction):
+
+    def __init__(self,
+                 k1='', k_1='', k2='',
+                 a='', enz='',
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, enz]
+        self.parameter_names = [k1, k_1, k2]
+
+        self.substrates = substrates
+        self.products = products
+
+
+
+

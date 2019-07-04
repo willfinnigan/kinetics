@@ -2,6 +2,7 @@
 Why Model?
 ==========
 
+
 A model is simply a mathematical description for what an experimenter ‘thinks’ will happen in a reaction.
 For single enzymes, relatively simple mental or back-of-the-envelope models are often sufficient.
 For example, it is fairly obvious in the majority of cases that more enzyme results in a faster reaction.
