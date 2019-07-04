@@ -4,9 +4,6 @@ API
 
 Model Class
 -----------
-.. py:class:: Model(logging=False)
-
-
 
 Reaction Class
 --------------
