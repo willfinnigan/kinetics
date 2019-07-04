@@ -150,6 +150,7 @@ class Reaction():
 """ Michaelis-Menten irreversible equations """
 class Uni(Reaction):
     r"""
+    Uni
     """
 
     def __init__(self,
