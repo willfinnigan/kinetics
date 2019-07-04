@@ -566,6 +566,34 @@ class FirstOrderRate(Reaction):
 
         return k*a
 
+class Binding(Reaction):
+
+    def __init__(self, k1=None, kminus1=None,
+                 a=None, b=None, c=None,
+                 substrates=[], products=[]):
+
+        super().__init__()
+
+        self.reaction_substrate_names = [a, b, c]
+        self.parameter_names=[k1, kminus1]
+
+        self.substrates = substrates
+        self.products = products
+
+    def calculate_rate(self, substrates, parameters):
+        # Substrates
+        a = substrates[0]
+        b = substrates[1]
+        c = substrates[2]
+
+        # Parameters
+        k1 = parameters[0]
+        kminus1 = parameters[1]
+
+        rate = (k1*a*b) - (kminus1*c)
+
+        return rate
+
 class BiSecondOrderRate(Reaction):
 
     def __init__(self,
@@ -590,7 +618,7 @@ class BiSecondOrderRate(Reaction):
 
         return k*a*b
 
-class Binding(Reaction):
+class Binding_kd(Reaction):
 
     def __init__(self, kd=None, k1=None,
                  a=None, b=None, c=None,
@@ -642,34 +670,6 @@ class DiffusionEquilibrium(Reaction):
         kminus1 = kd * k1
 
         rate = (k1 * a * b) - (kminus1 * c)
-
-        return rate
-
-class Binding2(Reaction):
-
-    def __init__(self, k1=None, kminus1=None,
-                 a=None, b=None, c=None,
-                 substrates=[], products=[]):
-
-        super().__init__()
-
-        self.reaction_substrate_names = [a, b, c]
-        self.parameter_names=[k1, kminus1]
-
-        self.substrates = substrates
-        self.products = products
-
-    def calculate_rate(self, substrates, parameters):
-        # Substrates
-        a = substrates[0]
-        b = substrates[1]
-        c = substrates[2]
-
-        # Parameters
-        k1 = parameters[0]
-        kminus1 = parameters[1]
-
-        rate = (k1*a*b) - (kminus1*c)
 
         return rate
 
@@ -848,20 +848,6 @@ class FirstOrder_Modifier(Modifier):
         return substrates, parameters
 
 
-class Uni_MT(Reaction):
-
-    def __init__(self,
-                 k1='', k_1='', k2='',
-                 a='', enz='',
-                 substrates=[], products=[]):
-
-        super().__init__()
-
-        self.reaction_substrate_names = [a, enz]
-        self.parameter_names = [k1, k_1, k2]
-
-        self.substrates = substrates
-        self.products = products
 
 
 
