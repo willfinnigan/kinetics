@@ -8,14 +8,13 @@ import matplotlib.pyplot as plt
 
 def parse_samples(samples, parameter_names, species_names):
     """
-    Takes a list of samples and converts this to a list of tuples of dictionaries
-     which can update the Model class.
+    Takes a list of samples and converts this to a list of tuples of dictionaries which can update the Model class.
 
     Samples are created using the relevent function (eg LHC or Saltelli)
     Samples will be a list.
-      Each entry in the list, is a list of values for the species and parameters,
-      in the order they were defined in the 'problem' dictionary.
-      This will be the parameters first followed by the species.
+    Each entry in the list, is a list of values for the species and parameters,
+    in the order they were defined in the 'problem' dictionary.
+    This will be the parameters first followed by the species.
 
     For example, Samples = [ [value1, value2, value3..],  [value1, value2, value3], ...]
 
@@ -67,6 +66,18 @@ def parse_samples(samples, parameter_names, species_names):
     return parsed_samples
 
 def make_salib_problem_with_bounds(model, negative_allowed=[], ppf=(0,1)):
+    """
+    Make a salib problem by specifying bounds using ppf of scipy distributions
+
+    Args:
+        model (Model): The model object
+        negative_allowed (list): Any distributions which are allowed negative samples
+        ppf (Tuple): Percent point functions to take.  Default is 0 and 1 which will give the absolute upper and lower bounds of a distribution.
+
+    Returns:
+        An SALib problem
+    """
+
     names = list(model.parameter_distributions.keys()) + list(model.species_distributions.keys())
 
     bounds = []
@@ -96,6 +107,19 @@ def make_salib_problem_with_bounds(model, negative_allowed=[], ppf=(0,1)):
     return problem
 
 def make_saltelli_samples(model, salib_problem, num_samples, second_order=False):
+    """
+    Use SALib to make saltelli samples
+
+    Args:
+        model (Model): The model object
+        salib_problem (dict): An SALib Problem
+        num_samples (int): number of samples to take
+        second_order (bool): look at second order interactions
+
+    Returns:
+        Samples from salib which have been parsed into a set of samples which run_all_models can take.
+
+    """
 
     saltelli_samples = saltelli.sample(salib_problem, num_samples, calc_second_order=second_order)
 
@@ -104,6 +128,19 @@ def make_saltelli_samples(model, salib_problem, num_samples, second_order=False)
     return samples
 
 def get_concentrations_at_timepoint(model, output, timepoint, substrate):
+    """
+    Return a np.array of concentrations at the specified timepoint (or closest timepoint)
+
+    Args:
+        model (Model): The model object
+        output (list): Output from run_all_models
+        timepoint (int): Timepoint of interest
+        substrate (str): Substrate name of interest
+
+    Returns:
+        A np.array containing the concentrations from run_all_models at the specified timepoint
+        [c1, c2, c3...]
+    """
     closest_timepoint = min(model.time, key=lambda x: abs(x - timepoint))
     index = list(model.time).index(closest_timepoint)
 
@@ -117,6 +154,20 @@ def get_concentrations_at_timepoint(model, output, timepoint, substrate):
     return outputs_for_analysis
 
 def get_time_to_concentration(model, output, concentration, substrate, mode='>='):
+    """
+    Return a np.array containing the time it takes to reach a certain concentration for all the models run.
+
+    Args:
+        model (Model): A model object
+        output (list): Output from run_all_models
+        concentration (int): The concentration of interest
+        substrate (str): The substrate of interest
+        mode (str): Either '>=' or '<=' which looks for more_or_equal or less_or_equal respectively.
+
+    Returns:
+        A np.array containing the times taken to reach concentration for all models from run_all_models
+    """
+
     list_of_times = []
 
     for y in output:
@@ -143,6 +194,19 @@ def get_time_to_concentration(model, output, concentration, substrate, mode='>='
 
 def analyse_sobal_sensitivity(salib_problem, output_to_analyse,
                               second_order=False, num_resample=100, conf_level=0.95):
+    """
+    Run the SALib sobal sensitivity analysis
+
+    Args:
+        salib_problem (dict): The salib problem used to make the samples
+        output_to_analyse (np.array): A np.array containing the output of interest.
+        second_order (bool): Look at second order interactions. Default=Fa;se
+        num_resample(int): salib, number of resamples.  Default=100
+        conf_level (float): salib confidence level, default = 0.95
+
+    Returns:
+        A dataframe containing the output from the sobal sensitivity analysis
+    """
 
     analysis = sobol.analyze(salib_problem,
                              output_to_analyse,
@@ -159,11 +223,29 @@ def analyse_sobal_sensitivity(salib_problem, output_to_analyse,
     return dataframe_output
 
 def remove_st_less_than(dataframe, column='ST', less_than=0.001):
+    """
+    Remove any entry with an ST less than specified
+
+    Args:
+        dataframe (pandas.Dataframe): dataframe containing sensitivity analysis output
+        column (str): Column name, default is 'ST'
+        less_than (float): Remove anything less than this
+
+    Returns:
+        New dataframe.
+    """
+
     new_df = dataframe[dataframe[column] > less_than]
 
     return new_df
 
 def plot_sa_total_sensitivity(df):
+    """
+    Plot the sensitivity analysis
+
+    Args:
+        df: Dataframe containing output of sensitivity analysis.
+    """
     df.sort_values("ST", inplace=True, ascending=False)
 
     x_names = df.index.values

@@ -1,10 +1,14 @@
+"""
+The Uncertainty Module is for running uncertainty analysis.
+There are 2 mains steps.
+1.  Make samples
+2.  Run models for all the samples.
+"""
+
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import gridspec
-import seaborn as sns
-
 
 def check_not_neg(sample, name, negative_allowed):
     if sample == None:
@@ -16,18 +20,6 @@ def check_not_neg(sample, name, negative_allowed):
     return True
 
 def return_ys_for_a_single_substrate(model, output, substrate_name):
-    """
-    From run_all_models_ouput, return only the outputs for substrate_name
-
-    collected_output = [ [t0, r1, r2, r3],
-                         [t1, r1, r2, r3].... ]
-
-
-    :param model: an instance of the Model class
-    :param ouput: the output from the run_all_models function - [ys1, ys2, ys3 .. ]
-    :param substrate_name: he name of the substrate to return the ys for
-    :return: collected_output = [ [t0, r1, r2, r3],   [t1, r1, r2, r3].... ]
-    """
 
     collected_output = []
     species_names = list(model.species.keys())
@@ -42,8 +34,18 @@ def return_ys_for_a_single_substrate(model, output, substrate_name):
 
     return collected_output
 
-
 def make_samples_from_distributions(model, num_samples=1000, negative_allowed=[]):
+    """
+    Makes a set of samples from the species and parameter distributions in the model.
+
+    Args:
+        model (kinetics.Model): A model object
+        num_samples (int): Number of samples to make (default 1000)
+        negative_allowed (list): A list of any distributions that can be negative.
+
+    Returns:
+        A list of samples.  Each entry in the list is a tuple containing (parameter_dict, species_dict) for the samples.
+    """
 
     samples = []
     for i in range(num_samples):
@@ -67,6 +69,17 @@ def make_samples_from_distributions(model, num_samples=1000, negative_allowed=[]
     return samples # samples will = [ (parameter_dict1, species_dict1), (parameter_dict2, species_dict2) ..]
 
 def run_all_models(model, samples, logging=True):
+    """
+    Run all the models for a set of samples.
+
+    Args:
+        model (kinetics.Model): A model object
+        samples (list): A list of samples in the form [(param_dict1, species_dict1), (param_dict2.... ect}
+        logging (bool): Show logging and progress bar.  Default = True
+
+    Returns (list): [y1, y2, y3, y4, ect..]
+
+    """
     output = []
 
     if logging==True:
@@ -91,6 +104,20 @@ def run_all_models(model, samples, logging=True):
     return output
 
 def dataframes_all_runs(model, output, substrates=[]):
+    """
+    Gives a dictionary of dataframes - {'Substrate' : dataframe'}
+    Each dataframe has time in the first column, followed by every model run in the subsequent columns
+
+    [[t0, r1, r2, r3], [t1, r1, r2, r3]]
+
+    Args:
+        model (Model): Model object
+        output (list): The output from run_all_models. [y1, y2, y3 ect]
+        substrates (list): Substrate names to include. If empty returns all (default).
+
+    Returns:
+        Dictionary of dataframes containing all model runs - {'Substrate' : dataframe'}
+    """
 
     all_runs_substrate_dataframes = {}
 
@@ -120,6 +147,19 @@ def dataframes_all_runs(model, output, substrates=[]):
     return all_runs_substrate_dataframes
 
 def dataframes_quartiles(model, output, substrates=[], quartile=95):
+    """
+    Gives a dictionary of dataframes - {'Substrate' : dataframe'}
+    Each dataframe has columns ['Time', 'High', 'Low', 'Mean']
+
+    Args:
+        model (Model): Model object
+        output (list): The output from run_all_models. [y1, y2, y3 ect]
+        substrates (list): Substrate names to include. If empty returns all (default).
+        quartile (int): The percentile to take.  Default is 95 which gives with 95% and 5% quartiles.
+
+    Returns:
+        Dictionary of dataframes containing confidence intervals from the uncertainty analysis.
+    """
 
     dataframes = {}
 
@@ -145,6 +185,15 @@ def dataframes_quartiles(model, output, substrates=[], quartile=95):
     return dataframes
 
 def dict_of_samples(samples):
+    """
+    Gives a dictionary containing {'Sample_name' : [all samples]}
+    Args:
+        samples (list): The output from make_samples. Each entry in the list is a tuple containing (parameter_dict, species_dict)
+
+    Returns:
+        A dictionary containing {'Sample_name' : [all samples]}
+
+    """
 
     samples_dict = {}
 
@@ -166,6 +215,21 @@ def dict_of_samples(samples):
 def plot_substrate(substrate, dataframes,
                    colour='blue', xlabel="Time (mins)", ylabel="μM",
                    alpha=0.1, linewidth=0.1, y_min=True, plot=False):
+    """
+    Plot every model run for a single substrate.
+
+    Args:
+        substrate (str): Substrate name
+        dataframes (dict): A dictionary of dataframes made using dataframes_all_runs
+        colour: Colour argument for matplotlib, default = 'blue'
+        xlabel (str): Label for x axis, default = 'Time (mins)'
+        ylabel (str): Label for y axis, default = 'μM'
+        alpha: Alpha argument for matplotlib, default = 0.1
+        linewidth: Linewidth argument for matplotlib, defualt = 0.1
+        y_min (int): If a number sets the bottom of the axis to this. Default is True
+        plot (bool):  If true plots the graph using plt.plot()
+
+    """
 
     df = dataframes[substrate]
     for i in range(1, len(df.columns)):
@@ -184,6 +248,17 @@ def plot_substrate(substrate, dataframes,
 def plot_ci_intervals(substrates_to_add, dataframes, plot=False,
                       colours=['darkred', 'darkblue', 'darkgreen', 'darkorange'],
                       alpha=0.1, units=['$\mu M$', 'Time (mins)']):
+    """
+    Plot every model run for a single substrate.
+
+    Args:
+        substrates_to_add (list): List of substrate names
+        dataframes (dict): A dictionary of dataframes made using dataframes_quartiles
+        colours (list): Colour arguments for matplotlib, each substrate will cycle through this list.
+        alpha (int): Alpha argument for matplotlib, default = 0.1
+        units (list): Units for the axis [yaxis_lable, xaxis_lable]
+        plot (bool):  If true plots the graph using plt.plot()
+    """
 
     for i, substrate in enumerate(substrates_to_add):
         color = colours.pop(0)
@@ -209,6 +284,18 @@ def plot_ci_intervals(substrates_to_add, dataframes, plot=False,
 
 def plot_data(substrates, data_df, plot=False,
               alpha=0.5, size=35, colours=['black'], symbols=["o", "s", '^', 'v']):
+    """
+    Add experimental data to a plot.
+
+    Args:
+        substrates (list): A list of substrate names
+        data_df (Dataframe): A pandas dataframe containing experimental data
+        plot (bool): If True calls plt.plot()
+        alpha (int): Alpha argument for matplotlib, default = 0.1
+        size (int): Size argument for matplotlib, default = 35
+        colours (list): List of colours for matplotlib. Default=['black']
+        symbols (list): Symbols for matpltlib. Defaut=["o", "s", '^', 'v']
+    """
 
     time_data = data_df["Time"]
 
@@ -228,154 +315,3 @@ def plot_data(substrates, data_df, plot=False,
 
     if plot==True:
         plt.show()
-
-
-def plot_parameters(samples_dict, parameter_names, units={}, plot=True,
-                    colour='red', alpha=0.01, size=10, params_to_log=[], num_graphs=6, figsize=(15,5), wspace=3,
-                    xaxis_rotation=0):
-
-    fig = plt.figure(figsize=figsize)
-    grid = plt.GridSpec(1, num_graphs, wspace=wspace, figure=fig)
-
-    for i, name in enumerate(parameter_names):
-        data = samples_dict[name]
-        plt.subplot(grid[0, i])
-
-        if name in params_to_log:
-            plt.yscale('log')
-
-        sns.stripplot(x=data,orient='v', color=colour, size=size, jitter=False, alpha=alpha)
-        plt.xlim(-0.5, 0.5)
-        plt.xticks([0], [name], rotation=xaxis_rotation)
-
-        if name in units:
-            unit = units[name]
-            plt.ylabel(unit)
-
-    if plot==True:
-        plt.show()
-
-
-
-def plot_distribution(samples_dict, parameter_distributions, param_name, units='',
-                      num_points=100, figsize=[8, 5], colour='darkblue', alpha=0.5,
-                      log=False, plot=True):
-
-    max_sample = max(samples_dict[param_name])
-    max_sample += max_sample*0.05
-    min_sample = min(samples_dict[param_name])
-    min_sample -= max_sample*0.05
-
-    x = np.linspace(min_sample, max_sample, num_points)
-
-    distribution = parameter_distributions[param_name]
-    y = distribution.pdf(x)
-
-    fig, ax = plt.subplots(figsize=figsize)
-    plot1 = ax.plot(x, y, color='black')
-    plot2 = plt.fill_between(x, y, color=colour, alpha=alpha, linewidth=0)
-
-    # adds a title and axes labels
-    ax.set_title(param_name)
-    ax.set_xlabel(units)
-
-    # removing top and right borders
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    plt.yticks([])
-
-    if log == True:
-        plt.xscale('log')
-
-    plt.show()
-
-    if plot == True:
-        plt.show()
-
-
-
-
-def plot_single_parameter_distribution_and_sample(samples_dict, parameter_distributions, parameter_name,
-                                                  units={}, num_points=1000, figsize=[10, 5],
-                                                  colour='darkblue', alpha_dist=0.5, alpha_sample=0.01,
-                                                  size=10, log=False, plot=False,
-                                                  xaxis_rotation=0, width_ratio=[4,1]):
-
-    fig = plt.figure(1)
-    grid = gridspec.GridSpec(1, 2, width_ratios=width_ratio)
-
-    distribution = parameter_distributions[parameter_name]
-
-    max_sample = distribution.ppf(0.95)
-    max_sample += max_sample*0.05
-    min_sample = distribution.ppf(0.05)
-    min_sample -= max_sample*0.05
-    x = np.linspace(min_sample, max_sample, num_points)
-
-    y = distribution.pdf(x)
-
-    ax0 = plt.subplot(grid[0])
-    ax0.plot(x, y, color='black')
-    ax0.fill_between(x, y, color=colour, alpha=alpha_dist, linewidth=0)
-
-    ax0.set_title(parameter_name)
-
-    if parameter_name in units:
-        unit = units[parameter_name]
-        ax0.set_xlabel(unit)
-
-    ax0.spines['top'].set_visible(False)
-    ax0.spines['right'].set_visible(False)
-    ax0.spines['left'].set_visible(False)
-    plt.yticks([])
-
-    ax1 = plt.subplot(grid[1])
-    data = samples_dict[parameter_name]
-    y = np.random.normal(1, 0.04, size=len(data))
-    sns.stripplot(x=data, orient='v', color=colour, size=size, jitter=False, alpha=alpha_sample)
-    #ax1.scatter(data, y, color=colour, size=size, alpha=alpha)
-    plt.xlim(-0.5, 0.5)
-    plt.xticks([0], [parameter_name], rotation=xaxis_rotation)
-
-    if parameter_name in units:
-        unit = units[parameter_name]
-        plt.ylabel(unit)
-
-    if log == True:
-        plt.yscale('log')
-
-    if plot == True:
-        plt.show()
-
-def set_units(parameters, kcat='$min^{-1}$', km_ki='$\mu M$', concs=False):
-
-    units = {}
-    for name in parameters:
-        if 'kcat' in name:
-            units[name] = kcat
-        elif ('km' in name) or ('ki' in name):
-            units[name] = km_ki
-        elif concs==True:
-            units[name] = km_ki
-
-    return units
-
-def plot_sampling(samples, model, param_logs, folder_name='', units={}, plot=True, save=False, dpi=100):
-    samples_dict = dict_of_samples(samples)
-    units_dict = set_units(model.parameter_distributions)
-    units_dict.update(units)
-
-    for name in model.parameter_distributions:
-
-        log = False
-        if name in param_logs:
-            log = True
-
-        plot_single_parameter_distribution_and_sample(samples_dict, model.parameter_distributions, name, units=units_dict, log=log)
-
-        if save == True:
-            plt.savefig(str(folder_name) + '/' + str(name) + '.png', dpi=dpi)
-
-        if plot == True:
-            plt.show()

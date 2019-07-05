@@ -6,15 +6,18 @@ def calculate_yprime(y, rate, substrates, products, substrate_names):
     This function is used by the rate classes the user creates.
 
     It takes the numpy array for y_prime,
-      and adds or subtracts the amount in rate to all the substrates or products listed
+    and adds or subtracts the amount in rate to all the substrates or products listed
     Returns the new y_prime
 
-    :param y_prime: a numpy array for the substrate values, the same order as y
-    :param rate:   the rate calculated by the user made rate equation
-    :param substrates: list of substrates for which rate should be subtracted
-    :param products: list of products for which rate should be added
-    :param substrate_names: the ordered list of substrate names in the model.  Used to get the position of each substrate or product in y_prime
-    :return: y_prime: following the addition or subtraction of rate to the specificed substrates
+    Args:
+        y: a numpy array for the substrate values, the same order as y
+        rate: the rate calculated by the user made rate equation
+        substrates: list of substrates for which rate should be subtracted
+        products: list of products for which rate should be added
+        substrate_names: the ordered list of substrate names in the model.  Used to get the position of each substrate or product in y_prime
+
+    Returns:
+        y_prime: following the addition or subtraction of rate to the specificed substrates
     """
 
     y_prime = np.zeros(len(y))
@@ -29,9 +32,7 @@ def calculate_yprime(y, rate, substrates, products, substrate_names):
 
 def check_positive(y_prime):
     """
-
-    :param y_prime:
-    :return:
+    Chack that substrate values are not negative when they shouldnt be
     """
 
     for i in range(len(y_prime)):

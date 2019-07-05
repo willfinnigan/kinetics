@@ -24,9 +24,9 @@ copyright = '2019, William Finnigan'
 author = 'William Finnigan'
 
 # The short X.Y version
-version = '1.3.3'
+version = '1.3.4'
 # The full version, including alpha/beta/rc tags
-release = '1.3.3'
+release = '1.3.4'
 
 
 # -- General configuration ---------------------------------------------------
@@ -43,7 +43,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-]
+    'sphinx.ext.napoleon']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -24,7 +24,7 @@ Typically uniform , normal, log-uniform or log-normal distributions are used.
 
 **Requirements:**   `NumPy <http://www.numpy.org/>`_, `SciPy <http://www.scipy.org/>`_,
 `matplotlib <http://matplotlib.org/>`_, `tqdm <https://tqdm.github.io>`_, `pandas <http://pandas.pydata.org>`_,
-`SALib <https://salib.readthedocs.io>`_, and `deap <https://deap.readthedocs.io/en/master/>`_.
+`SALib <https://salib.readthedocs.io>`_, `seaborn <http://seaborn.pydata.org>`_, and `deap <https://deap.readthedocs.io/en/master/>`_.
 
 **Installation:** ``pip install kinetics``
 

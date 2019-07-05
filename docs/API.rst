@@ -4,21 +4,34 @@ API
 
 Model Class
 -----------
+.. autoclass:: kinetics.Model
+   :members:
 
-Reaction Class
---------------
+Reaction Classes
+----------------
+.. automodule:: kinetics.Reaction_Classes
+    :members:
 
 Metric Class
 ------------
+.. autoclass:: kinetics.Metrics
+    :members:
 
 Uncertainty Module
 ------------------
+.. automodule:: kinetics.Uncertainty
+    :members:
 
 Sensitivity Module
 ------------------
+.. automodule:: kinetics.Sensitivity
+    :members:
 
-Genetic_Algorithm Base Class
-----------------------------
+
+Other Functions
+---------------
+.. autofunction:: kinetics.uM_to_mgml
+
 
 
 

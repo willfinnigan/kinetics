@@ -64,6 +64,13 @@ Literature is a good place to find the appropriate mechanism for you enzyme, fro
 
 Having found the appropriate rate equations, follow either the simple or advanced tutorials to model your system using this package.
 
+Conceptual diagram for how this package works
+---------------------------------------------
+.. image:: images/concept_figure.png
+   :scale: 18
+   :alt: concept figure
+
+
 
 
 
