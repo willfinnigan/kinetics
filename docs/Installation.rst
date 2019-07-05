@@ -58,7 +58,7 @@ You shouldn't need to worry about this if using the **anaconda** python distribu
 
 kinetics requires `NumPy <http://www.numpy.org/>`_, `SciPy <http://www.scipy.org/>`_,
 `matplotlib <http://matplotlib.org/>`_, `tqdm <https://tqdm.github.io>`_, `pandas <http://pandas.pydata.org>`_,
-`SALib <https://salib.readthedocs.io>`_, and `deap <https://deap.readthedocs.io/en/master/>`_,installed on your computer.
+`SALib <https://salib.readthedocs.io>`_, `seaborn <http://seaborn.pydata.org>`_, and `deap <https://deap.readthedocs.io/en/master/>`_,installed on your computer.
 Using `pip <https://pip.pypa.io/en/stable/installing/>`_, these libraries can be installed with the following command:
 
 ::
@@ -70,8 +70,9 @@ Using `pip <https://pip.pypa.io/en/stable/installing/>`_, these libraries can be
     pip install pandas
     pip install salib
     pip install deap
+    pip install seaborn
 
-The packages are normally included with most Python bundles, such as Anaconda and Canopy.
+The packages are normally included with most Python bundles, such as Anaconda.
 In any case, they are installed automatically when using pip or setuptools to install
 kinetics.
 
