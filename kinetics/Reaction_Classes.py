@@ -179,6 +179,31 @@ class Uni(Reaction):
 
         return rate
 
+
+class Generic(Reaction):
+    r"""
+    Uni
+    """
+
+    def __init__(self,
+                 params=[], species=[],
+                 rate_equation=''):
+
+        super().__init__()
+
+        self.reaction_substrate_names = species
+        self.parameter_names=params
+        self.rate_equation = rate_equation
+
+
+    def calculate_rate(self, substrates, parameters):
+        locals().update(substrates)
+        locals().update(parameters)
+
+        rate = exec(self.rate_equation)
+
+        return rate
+
 class Bi(Reaction):
     r"""
     """
