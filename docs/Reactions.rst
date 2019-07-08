@@ -27,6 +27,8 @@ For example:
     model.append(enzyme1)
 
 
+
+
 Michaelis-Menten kinetics, irreversible.
 ----------------------------------------
 
@@ -176,6 +178,14 @@ This feature allows the easy modification of the pre-defined rate equations.
 .. autoclass:: kinetics.FirstOrder_Modifier
 
 
+
+
+Generic Reaction Class
+----------------------
+This reaction class could in theory be the only one you ever need.
+It allows you to specify your own rate equation.
+
+.. autoclass:: kinetics.Generic
 
 
 
