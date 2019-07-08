@@ -24,9 +24,9 @@ copyright = '2019, William Finnigan'
 author = 'William Finnigan'
 
 # The short X.Y version
-version = '1.3.4'
+version = '1.3.5'
 # The full version, including alpha/beta/rc tags
-release = '1.3.4'
+release = '1.3.5'
 
 
 # -- General configuration ---------------------------------------------------
