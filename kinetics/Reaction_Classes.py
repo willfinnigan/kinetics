@@ -748,6 +748,9 @@ class Flow(Reaction):
 
         self.compartment_name = compartment_name
 
+        self.parameters = {}
+        self.parameter_distributions = {}
+
     def get_input_indexes(self, substrate_names):
         self.input_substrates_indexes = []
         for name in self.input_substrates:
@@ -756,7 +759,8 @@ class Flow(Reaction):
     def reset_reaction(self):
         self.substrate_indexes = []
         self.input_substrates_indexes = []
-        self.parameters = []
+        self.run_model_parameters = []
+
 
     def reaction(self, y, substrate_names, parameter_dict):
         if self.substrate_indexes == []:
