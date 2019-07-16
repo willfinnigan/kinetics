@@ -124,8 +124,6 @@ class Model(list):
         Called by self.setup_model()
         """
 
-        self.parameters = {}
-        self.parameter_distributions = {}
         self.run_model_parameters = {}
 
         if self.logging == True:
@@ -135,9 +133,15 @@ class Model(list):
             if self.logging==True:
                 print(reaction_class.parameters)
 
-            self.run_model_parameters.update(reaction_class.parameters)
-            self.parameters.update(copy.deepcopy(reaction_class.parameters))
-            self.parameter_distributions.update(reaction_class.parameter_distributions)
+            for name in reaction_class.parameters:
+                if name not in self.parameters:
+                    self.parameters[name] = reaction_class.parameters[name]
+
+            for name in reaction_class.parameter_distributions:
+                if name not in self.parameter_distributions:
+                    self.parameter_distributions[name] = reaction_class.parameter_distributions[name]
+
+            self.run_model_parameters.update(self.parameters)
 
     def update_species(self, species_dict):
         """
