@@ -4,6 +4,34 @@ from matplotlib import gridspec
 import seaborn as sns
 
 
+def dict_of_samples(samples):
+    """
+    Gives a dictionary containing {'Sample_name' : [all samples]}
+    Args:
+        samples (list): The output from make_samples. Each entry in the list is a tuple containing (parameter_dict, species_dict)
+
+    Returns:
+        A dictionary containing {'Sample_name' : [all samples]}
+
+    """
+
+    samples_dict = {}
+
+    for s in samples:
+        # s = (param_dict, species_dict)
+        for name in {**s[0], **s[1]}:
+
+            try:
+                values = samples_dict[name]
+            except KeyError:
+                values = samples_dict[name] = []
+
+            sample_to_add = {**s[0], **s[1]}[name]
+            values.append(sample_to_add)
+
+    return samples_dict
+
+
 def plot_parameters(samples_dict, parameter_names, units={}, plot=True,
                     colour='red', alpha=0.01, size=10, params_to_log=[], num_graphs=6, figsize=(15,5), wspace=3,
                     xaxis_rotation=0):
