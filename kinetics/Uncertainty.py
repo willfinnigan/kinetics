@@ -9,6 +9,8 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from SALib.sample import latin
+from kinetics.Sensitivity import parse_samples
 
 def check_not_neg(sample, name, negative_allowed):
     if sample == None:
@@ -35,6 +37,10 @@ def return_ys_for_a_single_substrate(model, output, substrate_name):
     return collected_output
 
 def make_samples_from_distributions(model, num_samples=1000, negative_allowed=[]):
+
+    return sample_distributions(model, num_samples=num_samples, negative_allowed=negative_allowed)
+
+def sample_distributions(model, num_samples=1000, negative_allowed=[]):
     """
     Makes a set of samples from the species and parameter distributions in the model.
 
@@ -67,6 +73,28 @@ def make_samples_from_distributions(model, num_samples=1000, negative_allowed=[]
         samples.append([parameter_dict, species_dict])
 
     return samples # samples will = [ (parameter_dict1, species_dict1), (parameter_dict2, species_dict2) ..]
+
+def sample_uniforms(model, num_samples=1000):
+
+    bounds = []
+    names = []
+    for name, tuple in model.parameter_distributions.items():
+        bounds.append(tuple)
+        names.append(names)
+
+    for name, tuple in  model.species_distributions.items():
+        bounds.append(tuple)
+        names.append(names)
+
+    problem = {'num_vars': len(names),
+               'names': names,
+               'bounds': bounds}
+
+    lhc_samples = latin.sample(problem, num_samples)
+
+    samples = parse_samples(lhc_samples, list(model.parameter_distributions.keys()), list(model.species_distributions.keys()))
+
+    return samples
 
 def run_all_models(model, samples, logging=True):
     """
@@ -210,6 +238,8 @@ def dict_of_samples(samples):
             values.append(sample_to_add)
 
     return samples_dict
+
+
 
 
 def plot_substrate(substrate, dataframes,
