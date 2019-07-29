@@ -864,6 +864,26 @@ class MixedInhibition(Modifier):
 
         return substrates, parameters
 
+class MixedInhibition2(Modifier):
+
+    def __init__(self, kcat=None, km=None, kic=None, kiu=None, i=None):
+        super().__init__()
+        self.substrate_names = [i]
+        self.parameter_names = [kcat, km, kic, kiu]
+
+    def calc_modifier(self, substrates, parameters):
+        kcat = parameters[self.parameter_indexes[0]]
+        km = parameters[self.parameter_indexes[1]]
+        kic = parameters[self.parameter_indexes[2]]
+        kiu = parameters[self.parameter_indexes[3]]
+
+        i = substrates[self.substrate_indexes[0]]
+
+        parameters[self.parameter_indexes[0]] = kcat / (1 + i / kiu)
+        parameters[self.parameter_indexes[1]] = km * (1 + i / kic) / (1 + i / (kiu))
+
+        return substrates, parameters
+
 class FirstOrder_Modifier(Modifier):
 
     def __init__(self, kcat=None, k=None, s=None):

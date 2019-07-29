@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from SALib.sample import latin
 from kinetics.Sensitivity import parse_samples
 
+''' -- Helper Functions, not for use by user -- '''
 def check_not_neg(sample, name, negative_allowed):
     if sample == None:
         return False
@@ -36,10 +37,8 @@ def return_ys_for_a_single_substrate(model, output, substrate_name):
 
     return collected_output
 
-def make_samples_from_distributions(model, num_samples=1000, negative_allowed=[]):
 
-    return sample_distributions(model, num_samples=num_samples, negative_allowed=negative_allowed)
-
+''' -- Functions to running uncertainty analysis -- '''
 def sample_distributions(model, num_samples=1000, negative_allowed=[]):
     """
     Makes a set of samples from the species and parameter distributions in the model.
@@ -240,8 +239,7 @@ def dict_of_samples(samples):
     return samples_dict
 
 
-
-
+''' -- Functions for plotting uncertainty analysis -- '''
 def plot_substrate(substrate, dataframes,
                    colour='blue', xlabel="Time (mins)", ylabel="μM",
                    alpha=0.1, linewidth=0.1, y_min=True, plot=False):
