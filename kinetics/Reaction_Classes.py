@@ -176,7 +176,6 @@ class Uni(Reaction):
 
         return rate
 
-
 class Generic(Reaction):
     """
     This Reaction class allows you to specify your own rate equation.
