@@ -698,7 +698,7 @@ class DiffusionEquilibrium(Reaction):
 
         kminus1 = kd * k1
 
-        rate = (k1 * a * b) - (kminus1 * c)
+        rate = (k1*org_c) - (kminus1*aq_c)
 
         return rate
 
