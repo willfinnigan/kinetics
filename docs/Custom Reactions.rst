@@ -69,7 +69,7 @@ An example which models a UniUni enzyme
     plt.show()
 
 2.  Make your own reaction class.
---------------------------------
+---------------------------------
 **This might be useful if its going to be re-used alot**
 
 To make a reaction class for a custom rate equation we need to define a new class which inherits from ``kinetics.Reaction``

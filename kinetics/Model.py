@@ -194,8 +194,8 @@ class Model(list):
         """
         Reset the model back to the default settings
 
-        This uses self.species and self.parameters to set the 'run_model_' attibutes, which are used when calling run_model
-        When running Uncertainty the 'run_model_' attributes are the ones that are changed.
+        This uses self.species and self.parameters to set the run_model attibutes, which are used when calling run_model
+        When running ua the run_model attributes are the ones that are changed.
         """
 
         self.update_species(self.species)
