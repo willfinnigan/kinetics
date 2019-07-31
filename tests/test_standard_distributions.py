@@ -1,7 +1,6 @@
 
 
 import kinetics
-import kinetics.Uncertainty as ua
 from scipy.stats import reciprocal, uniform, norm
 
 def test_distributions_model():
@@ -31,8 +30,8 @@ def test_distributions_model():
     model.setup_model()
 
     # Run the model 1000 times, sampling from distributions
-    samples = ua.sample_distributions(model, num_samples=1000)
-    outputs = ua.run_all_models(model, samples, logging=True)
+    samples = kinetics.sample_distributions(model, num_samples=50)
+    outputs = kinetics.run_all_models(model, samples, logging=True)
 
     model.run_model()
     model.plot_substrate('A')
@@ -40,11 +39,11 @@ def test_distributions_model():
     model.plot_substrate('C')
 
     # Plot model runs at 95% CI
-    ci_dataframes = ua.dataframes_quartiles(model, outputs)
-    ua.plot_ci_intervals(['A', 'B', 'C'], ci_dataframes, colours=['blue', 'darkorange', 'green'])
+    ci_dataframes = kinetics.dataframes_quartiles(model, outputs)
+    kinetics.plot_ci_intervals(['A', 'B', 'C'], ci_dataframes, colours=['blue', 'darkorange', 'green'])
 
     # Plot all model runs
-    all_runs_dataframes = ua.dataframes_all_runs(model, outputs)
-    ua.plot_substrate('A', all_runs_dataframes, colour='blue', alpha=0.01, linewidth=5)
-    ua.plot_substrate('B', all_runs_dataframes, colour='darkorange', alpha=0.01, linewidth=5)
-    ua.plot_substrate('C', all_runs_dataframes, colour='green', alpha=0.01, linewidth=5)
+    all_runs_dataframes = kinetics.dataframes_all_runs(model, outputs)
+    kinetics.plot_substrate('A', all_runs_dataframes, colour='blue', alpha=0.01, linewidth=5)
+    kinetics.plot_substrate('B', all_runs_dataframes, colour='darkorange', alpha=0.01, linewidth=5)
+    kinetics.plot_substrate('C', all_runs_dataframes, colour='green', alpha=0.01, linewidth=5)
