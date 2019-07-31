@@ -51,6 +51,7 @@ Features
    Custom Reactions
    API
    Authors
+   Change Log
 
 Support
 -------
