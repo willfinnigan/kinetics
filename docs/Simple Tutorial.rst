@@ -14,6 +14,54 @@ The complete example as a single block of code is available at the end.
    :scale: 20
    :alt: graphical abstract
 
+Complete code example
+---------------------
+Below is the complete code for this example.  Copy it into a jupyter notebook or google colab notebook to get started.
+This example is then explained step by step in the rest of this tutorial.
+
+.. code:: python
+
+    # Uncomment and run this if using google colab
+    # !pip install kinetics
+
+    import kinetics
+    import matplotlib.pyplot as plt
+    %config InlineBackend.figure_format ='retina'
+
+    # Define reactions
+    enzyme_1 = kinetics.Uni(kcat='enz1_kcat', kma='enz1_km', enz='enz_1', a='A',
+                            substrates=['A'], products=['B'])
+
+    enzyme_1.parameters = {'enz1_kcat' : 100,
+                           'enz1_km' : 8000}
+
+    enzyme_2 = kinetics.Uni(kcat='enz2_kcat', kma='enz2_km', enz='enz_2', a='B',
+                            substrates=['B'], products=['C'])
+
+    enzyme_2.parameters = {'enz2_kcat' : 30,
+                           'enz2_km' : 2000}
+
+    # Set up the model
+    model = kinetics.Model(logging=False)
+    model.append(enzyme_1)
+    model.append(enzyme_2)
+    model.set_time(0, 120, 1000) # 120 mins, 1000 timepoints.
+
+    # Set starting concentrations
+    model.species = {"A" : 10000,
+                     "enz_1" : 4,
+                     "enz_2" : 10}
+    model.setup_model()
+
+    # Run the model
+    model.run_model()
+    model.plot_substrate('A')
+    model.plot_substrate('B')
+    model.plot_substrate('C', plot=True)
+
+    # Now try altering the enzyme concentration, km or kcat, and re-running the model to see the effects this has....
+
+
 
 Define reactions
 ----------------
@@ -114,53 +162,6 @@ Alternatively, results can plotted directly using an in-built plot function ``mo
 .. image:: images/simple_example1.png
    :scale: 25
    :alt: example plot
-
-
-Complete code
--------------
-All the code in this example in one handy block.
-
-.. code:: python
-
-    # Uncomment and run this if using google colab
-    # !pip install kinetics
-
-    import kinetics
-    import matplotlib.pyplot as plt
-    %config InlineBackend.figure_format ='retina'
-
-    # Define reactions
-    enzyme_1 = kinetics.Uni(kcat='enz1_kcat', kma='enz1_km', enz='enz_1', a='A',
-                            substrates=['A'], products=['B'])
-
-    enzyme_1.parameters = {'enz1_kcat' : 100,
-                           'enz1_km' : 8000}
-
-    enzyme_2 = kinetics.Uni(kcat='enz2_kcat', kma='enz2_km', enz='enz_2', a='B',
-                            substrates=['B'], products=['C'])
-
-    enzyme_2.parameters = {'enz2_kcat' : 30,
-                           'enz2_km' : 2000}
-
-    # Set up the model
-    model = kinetics.Model(logging=False)
-    model.append(enzyme_1)
-    model.append(enzyme_2)
-    model.set_time(0, 120, 1000) # 120 mins, 1000 timepoints.
-
-    # Set starting concentrations
-    model.species = {"A" : 10000,
-                     "enz_1" : 4,
-                     "enz_2" : 10}
-    model.setup_model()
-
-    # Run the model
-    model.run_model()
-    model.plot_substrate('A')
-    model.plot_substrate('B')
-    model.plot_substrate('C', plot=True)
-
-    # Now try altering the enzyme concentration, km or kcat, and re-running the model to see the effects this has....
 
 
 

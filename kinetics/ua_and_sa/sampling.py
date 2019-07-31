@@ -1,10 +1,4 @@
-from kinetics.Uncertainty import check_not_neg, run_all_models
-from SALib.sample import saltelli
-from SALib.analyze import sobol
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
+from SALib.sample import latin, saltelli
 
 def parse_samples(samples, parameter_names, species_names):
     """
@@ -65,7 +59,74 @@ def parse_samples(samples, parameter_names, species_names):
     # returns a list of tuples containing [(parameter_dict, species_dict), ] for each sample
     return parsed_samples
 
-def make_salib_problem_with_bounds(model, negative_allowed=[], ppf=(0,1)):
+def check_not_neg(sample, name, negative_allowed):
+    if sample == None:
+        return False
+
+    if (sample < 0) and (name not in negative_allowed):
+        return False
+
+    return True
+
+
+""" -- Generate Samples --"""
+def sample_distributions(model, num_samples=1000, negative_allowed=[]):
+    """
+    Makes a set of samples from the species and parameter distributions in the model.
+
+    Args:
+        model (kinetics.Model): A model object
+        num_samples (int): Number of samples to make (default 1000)
+        negative_allowed (list): A list of any distributions that can be negative.
+
+    Returns:
+        A list of samples.  Each entry in the list is a tuple containing (parameter_dict, species_dict) for the samples.
+    """
+
+    samples = []
+    for i in range(num_samples):
+        parameter_dict = {}
+        species_dict = {}
+
+        for name, distribution in model.parameter_distributions.items():
+            sample = None
+            while not check_not_neg(sample, name, negative_allowed):
+                sample = distribution.rvs()
+            parameter_dict[name] = sample
+
+        for name, distribution in model.species_distributions.items():
+            sample=None
+            while not check_not_neg(sample, name, negative_allowed):
+                sample = distribution.rvs()
+            species_dict[name] = sample
+
+        samples.append([parameter_dict, species_dict])
+
+    return samples # samples will = [ (parameter_dict1, species_dict1), (parameter_dict2, species_dict2) ..]
+
+def sample_uniforms(model, num_samples=1000):
+
+    bounds = []
+    names = []
+    for name, tuple in model.parameter_distributions.items():
+        bounds.append(tuple)
+        names.append(names)
+
+    for name, tuple in  model.species_distributions.items():
+        bounds.append(tuple)
+        names.append(names)
+
+    problem = {'num_vars': len(names),
+               'names': names,
+               'bounds': bounds}
+
+    lhc_samples = latin.sample(problem, num_samples)
+
+    samples = parse_samples(lhc_samples, list(model.parameter_distributions.keys()), list(model.species_distributions.keys()))
+
+    return samples
+
+def salib_problem_with_bounds(model, negative_allowed=[], ppf=(0,1)):
     """
     Make a salib problem by specifying bounds using ppf of scipy distributions
 
@@ -126,136 +187,3 @@ def make_saltelli_samples(model, salib_problem, num_samples, second_order=False)
     samples = parse_samples(saltelli_samples, list(model.parameter_distributions.keys()), list(model.species_distributions.keys()))
 
     return samples
-
-def get_concentrations_at_timepoint(model, output, timepoint, substrate):
-    """
-    Return a np.array of concentrations at the specified timepoint (or closest timepoint)
-
-    Args:
-        model (Model): The model object
-        output (list): Output from run_all_models
-        timepoint (int): Timepoint of interest
-        substrate (str): Substrate name of interest
-
-    Returns:
-        A np.array containing the concentrations from run_all_models at the specified timepoint
-        [c1, c2, c3...]
-    """
-    closest_timepoint = min(model.time, key=lambda x: abs(x - timepoint))
-    index = list(model.time).index(closest_timepoint)
-
-    outputs_for_analysis = []
-    for y in output:
-        output_at_t = y[index][model.run_model_species_names.index(substrate)]
-        outputs_for_analysis.append(output_at_t)
-
-    outputs_for_analysis = np.array(outputs_for_analysis)
-
-    return outputs_for_analysis
-
-def get_time_to_concentration(model, output, concentration, substrate, mode='>='):
-    """
-    Return a np.array containing the time it takes to reach a certain concentration for all the models run.
-
-    Args:
-        model (Model): A model object
-        output (list): Output from run_all_models
-        concentration (int): The concentration of interest
-        substrate (str): The substrate of interest
-        mode (str): Either '>=' or '<=' which looks for more_or_equal or less_or_equal respectively.
-
-    Returns:
-        A np.array containing the times taken to reach concentration for all models from run_all_models
-    """
-
-    list_of_times = []
-
-    for y in output:
-        y = np.transpose(y)
-
-        substrate_index = model.run_model_species_names.index(substrate)
-        y_substrate = y[substrate_index]
-
-        if mode == '<=':
-            index_for_conc = np.where(y_substrate <= concentration)
-        elif mode == '>=':
-            index_for_conc = np.where(y_substrate >= concentration)
-
-        if len(index_for_conc[0]) == 0:
-            time = model.time[-1]
-        else:
-            index_for_conc = index_for_conc[0][0]
-            time = model.time[index_for_conc]
-
-        list_of_times.append(time)
-
-    list_of_times = np.array(list_of_times)
-    return list_of_times
-
-def analyse_sobal_sensitivity(salib_problem, output_to_analyse,
-                              second_order=False, num_resample=100, conf_level=0.95):
-    """
-    Run the SALib sobal sensitivity analysis
-
-    Args:
-        salib_problem (dict): The salib problem used to make the samples
-        output_to_analyse (np.array): A np.array containing the output of interest.
-        second_order (bool): Look at second order interactions. Default=Fa;se
-        num_resample(int): salib, number of resamples.  Default=100
-        conf_level (float): salib confidence level, default = 0.95
-
-    Returns:
-        A dataframe containing the output from the sobal sensitivity analysis
-    """
-
-    analysis = sobol.analyze(salib_problem,
-                             output_to_analyse,
-                             calc_second_order=second_order,
-                             num_resamples=num_resample,
-                             conf_level=conf_level,
-                             print_to_console=False,
-                             parallel=False,
-                             n_processors=None)
-
-    rows = salib_problem['names']
-    dataframe_output = pd.DataFrame(analysis, index=rows)
-
-    return dataframe_output
-
-def remove_st_less_than(dataframe, column='ST', less_than=0.001):
-    """
-    Remove any entry with an ST less than specified
-
-    Args:
-        dataframe (pandas.Dataframe): dataframe containing sensitivity analysis output
-        column (str): Column name, default is 'ST'
-        less_than (float): Remove anything less than this
-
-    Returns:
-        New dataframe.
-    """
-
-    new_df = dataframe[dataframe[column] > less_than]
-
-    return new_df
-
-def plot_sa_total_sensitivity(df):
-    """
-    Plot the sensitivity analysis
-
-    Args:
-        df: Dataframe containing output of sensitivity analysis.
-    """
-    df.sort_values("ST", inplace=True, ascending=False)
-
-    x_names = df.index.values
-    x = np.arange(len(x_names))
-    st = df['ST']
-    st_err = df['ST_conf']
-
-    plt.bar(x, st, align='center', yerr=st_err, edgecolor='black', color='#000090')
-    plt.xticks(x, x_names, rotation=90)
-    plt.ylabel("ST")
-
-
-

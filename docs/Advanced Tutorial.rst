@@ -87,22 +87,17 @@ Running the model this way will use the mean of each probability distribution sp
 Running the model by sampling within the probability distributions
 ------------------------------------------------------------------
 However we would like to run lots of models, sampling within our probability distributions.
-To do this a special module within the kinetics package is available:  ``kinetics.Uncertainty``
 
-We can import this as ``import kinetics.Uncertainty as ua`` for easier use.
+To generate samples from within the distributions we have defined, run ``kinetics.sample_distributions(model, num_samples=1000)``.
+This returns a set of samples which can be used by ``kinetics.run_all_models(model, samples)``.
 
-To generate samples from within the distributions we have defined, run ``ua.make_samples_from_distributions(model, num_samples=1000)``.
-This returns a set of samples which can be used by ``ua.run_all_models(model, samples)``.
-
-``ua.run_all_models(model, samples)`` will return a list of outputs.  Each entry in this list is equivalent to ``model.y`` after running ``model.run_model()``.
+``kinetics.run_all_models(model, samples)`` will return a list of outputs.  Each entry in this list is equivalent to ``model.y`` after running ``model.run_model()``.
 
 .. code:: python
 
-    import kinetics.Uncertainty as ua
-
     # Run the model 1000 times, sampling from distributions
-    samples = ua.make_samples_from_distributions(model, num_samples=1000)
-    outputs = ua.run_all_models(model, samples, logging=True)
+    samples = kinetics.sample_distributions(model, num_samples=1000)
+    outputs = kinetics.run_all_models(model, samples, logging=True)
 
 Plotting the data
 -----------------
@@ -122,8 +117,8 @@ Plotting the 95% confidence intervals can look neater, but we lose some informat
 .. code:: python
 
     # Plot model runs at 95% CI
-    ci_dataframes = ua.dataframes_quartiles(model, outputs)
-    ua.plot_ci_intervals(['A', 'B', 'C'], ci_dataframes, colours=['blue', 'darkorange', 'green'], plot=True)
+    ci_dataframes = kinetics.dataframes_quartiles(model, outputs)
+    kinetics.plot_ci_intervals(['A', 'B', 'C'], ci_dataframes, colours=['blue', 'darkorange', 'green'], plot=True)
 
 .. image:: images/advanced_example1.png
    :scale: 25
@@ -138,10 +133,10 @@ Also, altering the alpha and linewidth values allows the graphs to be tweaked to
 .. code:: python
 
     # Plot all model runs
-    all_runs_dataframes = ua.dataframes_all_runs(model, outputs)
-    ua.plot_substrate('A', all_runs_dataframes, colour='blue', alpha=0.01, linewidth=5)
-    ua.plot_substrate('B', all_runs_dataframes, colour='darkorange', alpha=0.01, linewidth=5)
-    ua.plot_substrate('C', all_runs_dataframes, colour='green', alpha=0.01, linewidth=5, plot=True)
+    all_runs_dataframes = kinetics.dataframes_all_runs(model, outputs)
+    kinetics.plot_substrate('A', all_runs_dataframes, colour='blue', alpha=0.01, linewidth=5)
+    kinetics.plot_substrate('B', all_runs_dataframes, colour='darkorange', alpha=0.01, linewidth=5)
+    kinetics.plot_substrate('C', all_runs_dataframes, colour='green', alpha=0.01, linewidth=5, plot=True)
 
 .. image:: images/advanced_example2.png
    :scale: 25
@@ -156,7 +151,6 @@ Complete code
 .. code:: python
 
     import kinetics
-    import kinetics.Uncertainty as ua
     import matplotlib.pyplot as plt
     from scipy.stats import reciprocal, uniform, norm
     %config InlineBackend.figure_format ='retina'
@@ -187,8 +181,8 @@ Complete code
     model.setup_model()
 
     # Run the model 1000 times, sampling from distributions
-    samples = ua.make_samples_from_distributions(model, num_samples=1000)
-    outputs = ua.run_all_models(model, samples, logging=True)
+    samples = kinetics.make_samples_from_distributions(model, num_samples=1000)
+    outputs = kinetics.run_all_models(model, samples, logging=True)
 
     model.run_model()
     model.plot_substrate('A')
@@ -196,15 +190,15 @@ Complete code
     model.plot_substrate('C', plot=True)
 
     # Plot model runs at 95% CI
-    ci_dataframes = ua.dataframes_quartiles(model, outputs)
-    ua.plot_ci_intervals(['A', 'B', 'C'], ci_dataframes, colours=['blue', 'darkorange', 'green'])
+    ci_dataframes = kinetics.dataframes_quartiles(model, outputs)
+    kinetics.plot_ci_intervals(['A', 'B', 'C'], ci_dataframes, colours=['blue', 'darkorange', 'green'])
     plt.show()
 
     # Plot all model runs
-    all_runs_dataframes = ua.dataframes_all_runs(model, outputs)
-    ua.plot_substrate('A', all_runs_dataframes, colour='blue', alpha=0.01, linewidth=5)
-    ua.plot_substrate('B', all_runs_dataframes, colour='darkorange', alpha=0.01, linewidth=5)
-    ua.plot_substrate('C', all_runs_dataframes, colour='green', alpha=0.01, linewidth=5)
+    all_runs_dataframes = kinetics.dataframes_all_runs(model, outputs)
+    kinetics.plot_substrate('A', all_runs_dataframes, colour='blue', alpha=0.01, linewidth=5)
+    kinetics.plot_substrate('B', all_runs_dataframes, colour='darkorange', alpha=0.01, linewidth=5)
+    kinetics.plot_substrate('C', all_runs_dataframes, colour='green', alpha=0.01, linewidth=5)
     plt.show()
 
 
