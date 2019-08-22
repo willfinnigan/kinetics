@@ -1,8 +1,12 @@
-from setuptools import setup
+from distutils.core import setup
 
 setup(
   name = 'kinetics',
-  packages = ['kinetics'],
+  packages = ['kinetics',
+              'kinetics.optimisation',
+              'kinetics.other_analysis',
+              'kinetics.reaction_classes',
+              'kinetics.ua_and_sa'],
   version = '1.3.8',
   license='MIT',
   description = 'Python code to run kinetic models of enzyme reactions',
