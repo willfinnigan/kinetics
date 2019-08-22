@@ -181,7 +181,7 @@ Complete code
     model.setup_model()
 
     # Run the model 1000 times, sampling from distributions
-    samples = kinetics.samples_distributions(model, num_samples=1000)
+    samples = kinetics.sample_distributions(model, num_samples=1000)
     outputs = kinetics.run_all_models(model, samples, logging=True)
 
     model.run_model()
