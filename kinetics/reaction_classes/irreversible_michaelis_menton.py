@@ -1,4 +1,4 @@
-from kinetics.reaction_classes import Reaction
+from kinetics.reaction_classes.reaction_base_class import Reaction
 
 """ Michaelis-Menten irreversible equations """
 class Uni(Reaction):

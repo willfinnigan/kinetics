@@ -1,4 +1,4 @@
-from kinetics.reaction_classes import Reaction
+from kinetics.reaction_classes.reaction_base_class import Reaction
 import numpy as np
 
 """ Other rate equations """
