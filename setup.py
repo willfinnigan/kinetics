@@ -7,7 +7,7 @@ setup(
               'kinetics.other_analysis',
               'kinetics.reaction_classes',
               'kinetics.ua_and_sa'],
-  version = '1.3.8',
+  version = '1.3.9',
   license='MIT',
   description = 'Python code to run kinetic models of enzyme reactions',
   author = 'William Finnigan',
