@@ -8,7 +8,7 @@ Again I recommend running this using a jupyter notebook or google colab.
 
 Here is a direct link to this example in google colab.
 Or here is a direct link to this workbook in google colab.
-https://colab.research.google.com/github/willfinnigan/kinetics/blob/master/Advanced_example.ipynb
+https://colab.research.google.com/github/willfinnigan/kinetics/blob/master/examples/Advanced_example.ipynb
 
 
 

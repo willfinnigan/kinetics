@@ -8,7 +8,7 @@ Alternatively use a `google colab
 notebook to get started quickly. (Use ``!pip install kinetics`` in the first cell)
 
 Or here is a direct link to this workbook in google colab.
-https://colab.research.google.com/github/willfinnigan/kinetics/blob/master/Simple_example.ipynb
+https://colab.research.google.com/github/willfinnigan/kinetics/blob/master/examples/Simple_example.ipynb
 
 This example shows the code required to model the relatively simple system shown on the main page.
 The complete example as a single block of code is available at the end.
