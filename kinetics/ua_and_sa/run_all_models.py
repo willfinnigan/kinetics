@@ -7,7 +7,7 @@ def run_all_models(model, samples, logging=True):
     Run all the models for a set of samples.
 
     Args:
-        model (kinetics.Model): A model object
+        model (kinetics.model): A model object
         samples (list): A list of samples in the form [(param_dict1, species_dict1), (param_dict2.... ect}
         logging (bool): Show logging and progress bar.  Default = True
 
