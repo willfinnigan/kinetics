@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 """ -- Plotting uncertainty analysis -- """
 def plot_substrate(substrate, dataframes,
-                   colour='blue', xlabel="Time (mins)", ylabel="μM",
+                   colour='blue', units=['',''],
                    alpha=0.1, linewidth=0.1, y_min=True, plot=False):
     """
     Plot every model run for a single substrate.
@@ -20,6 +20,9 @@ def plot_substrate(substrate, dataframes,
 
     """
 
+    ylabel = units[0]
+    xlabel = units[1]
+
     df = dataframes[substrate]
     for i in range(1, len(df.columns)):
         plt.plot(df['Time'], df[str(i)],
@@ -36,7 +39,7 @@ def plot_substrate(substrate, dataframes,
 
 def plot_ci_intervals(substrates_to_add, dataframes, plot=False,
                       colours=['darkred', 'darkblue', 'darkgreen', 'darkorange'],
-                      alpha=0.1, units=['$\mu M$', 'Time (mins)']):
+                      alpha=0.1, units=['','']):
     """
     Plot every model run for a single substrate.
 

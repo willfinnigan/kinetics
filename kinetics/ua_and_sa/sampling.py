@@ -61,20 +61,27 @@ def parse_samples(samples, parameter_names, species_names):
     return parsed_samples
 
 def check_not_neg(sample, name, negative_allowed):
-    def check_sample(sample, name):
-        if (sample < 0) and (name not in negative_allowed):
+    def check_sample(sample_to_check, name_to_check):
+        if (sample_to_check < 0) and (name_to_check not in negative_allowed):
             return False
 
     if type(sample) == np.ndarray:
         for s in sample:
             print(s)
-            check_sample(s, name)
+            if check_sample(s, name) == False:
+                return False
 
-    elif type(sample) == float:
-        check_sample(sample, name)
+    elif type(sample) == np.float64:
+        if check_sample(sample, name) == False:
+            return False
 
     elif sample == None:
         return False
+
+    else:
+        print('Error no type matches')
+        print(type(sample))
+        return None
 
     return True
 
@@ -102,7 +109,7 @@ def sample_distributions(model, num_samples=1000, negative_allowed=[]):
     Makes a set of samples from the species and parameter distributions in the model.
 
     Args:
-        model (kinetics.model): A model object
+        model (kinetics.model_module): A model object
         num_samples (int): Number of samples to make (default 1000)
         negative_allowed (list): A list of any distributions that can be negative.
 
@@ -118,6 +125,7 @@ def sample_distributions(model, num_samples=1000, negative_allowed=[]):
         species_dict = {}
 
         for name, distribution in model.parameter_distributions.items():
+
             if type(distribution) != list and type(distribution) != tuple:
                 sample = None
                 while not check_not_neg(sample, name, negative_allowed):
@@ -131,7 +139,6 @@ def sample_distributions(model, num_samples=1000, negative_allowed=[]):
                 if name in mv_params:
                     for multi_name, index in mv_params[name]:
                         parameter_dict[multi_name] = sample[index]
-
 
         for name, distribution in model.species_distributions.items():
             sample=None
