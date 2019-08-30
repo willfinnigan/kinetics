@@ -128,7 +128,8 @@ class Reaction():
 
         substrates = self.get_substrates(y)
 
-        substrates, parameters = self.calculate_modifiers(substrates, copy.copy(self.run_model_parameters))
+        if len(self.modifiers) != 0:
+            substrates, parameters = self.calculate_modifiers(substrates, copy.copy(self.run_model_parameters))
 
         rate = self.calculate_rate(substrates, parameters)
 
