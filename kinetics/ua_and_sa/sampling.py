@@ -62,7 +62,7 @@ def parse_samples(samples, parameter_names, species_names):
 
 def check_not_neg(sample, name, negative_allowed):
     def check_sample(sample_to_check, name_to_check):
-        if (sample_to_check < 0) and (name_to_check not in negative_allowed):
+        if (sample_to_check <= 0) and (name_to_check not in negative_allowed):
             return False
 
     if type(sample) == np.ndarray:
@@ -150,29 +150,32 @@ def sample_distributions(model, num_samples=1000, negative_allowed=[]):
 
     return samples # samples will = [ (parameter_dict1, species_dict1), (parameter_dict2, species_dict2) ..]
 
-def sample_uniforms(model, num_samples=1000):
+def sample_uniforms(model, num_samples=1000, log=[]):
 
     bounds = []
     names = []
     for name, tuple in model.parameter_distributions.items():
+        names.append(name)
         bounds.append(tuple)
-        names.append(names)
 
-    for name, tuple in  model.species_distributions.items():
+    for name, tuple in model.species_distributions.items():
+        names.append(name)
         bounds.append(tuple)
-        names.append(names)
 
     problem = {'num_vars': len(names),
                'names': names,
                'bounds': bounds}
 
+    problem = salib_problem_to_log_space(problem, log)
+
     lhc_samples = latin.sample(problem, num_samples)
+    lhc_samples = samples_to_normal_space(lhc_samples, problem, log)
 
     samples = parse_samples(lhc_samples, list(model.parameter_distributions.keys()), list(model.species_distributions.keys()))
 
     return samples
 
-def distributions_to_uniforms(model, negative_allowed=[], ppf=(0.05,0.95), save_to_model=False):
+def distributions_to_lower_upper_bounds(model, negative_allowed=[], ppf=(0.05,0.95), save_to_model=False):
     """
     Converts distributions to uniform distributions by taking specified ppf
 
@@ -212,7 +215,7 @@ def distributions_to_uniforms(model, negative_allowed=[], ppf=(0.05,0.95), save_
 
     return bounds
 
-def salib_problem(model, bounds=[]):
+def salib_problem(model, bounds=[], log=[]):
     """
     Make a salib problem by specifying bounds using ppf of scipy distributions
 
@@ -237,9 +240,11 @@ def salib_problem(model, bounds=[]):
                'names': names,
                'bounds': bounds}
 
+    problem = salib_problem_to_log_space(problem, log)
+
     return problem
 
-def make_saltelli_samples(model, salib_problem, num_samples, second_order=False):
+def make_saltelli_samples(model, salib_problem, num_samples, second_order=False, log=[]):
     """
     Use SALib to make saltelli samples
 
@@ -255,7 +260,25 @@ def make_saltelli_samples(model, salib_problem, num_samples, second_order=False)
     """
 
     saltelli_samples = saltelli.sample(salib_problem, num_samples, calc_second_order=second_order)
+    saltelli_samples = samples_to_normal_space(saltelli_samples, salib_problem, log)
+
     samples = parse_samples(saltelli_samples, list(model.parameter_distributions.keys()), list(model.species_distributions.keys()))
 
     return samples
 
+def salib_problem_to_log_space(salib_problem, to_log):
+    for i, name in enumerate(salib_problem['names']):
+        if name in to_log:
+            lower = np.log(salib_problem['bounds'][i][0])
+            upper = np.log(salib_problem['bounds'][i][1])
+            salib_problem['bounds'][i] = [lower, upper]
+
+    return salib_problem
+
+def samples_to_normal_space(salib_samples, salib_problem, to_log):
+    for i, name in enumerate(salib_problem['names']):
+        if name in to_log:
+            for j, sample_set in enumerate(salib_samples):
+                salib_samples[j][i] = float(np.exp(sample_set[i]))
+
+    return salib_samples

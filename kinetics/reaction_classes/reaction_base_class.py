@@ -65,7 +65,10 @@ class Reaction():
     def set_parameter_defaults_to_mean(self):
         for name in self.parameter_distributions:
             if name not in self.parameters:
-                self.parameters[name] = self.parameter_distributions[name].mean()
+                if type(self.parameter_distributions[name]) == list or type(self.parameter_distributions[name]) == tuple:
+                    self.parameters[name] = (self.parameter_distributions[name][0] + self.parameter_distributions[name][1]) / 2
+                else:
+                    self.parameters[name] = self.parameter_distributions[name].mean()
 
     def get_indexes(self, substrate_names):
         self.substrate_indexes = []
