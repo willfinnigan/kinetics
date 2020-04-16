@@ -37,7 +37,7 @@ class Model(list):
     """
 
 
-    def __init__(self, logging=True):
+    def __init__(self, logging=False):
         # Model inherits from list - reaction classes are held in this self list.
         super(Model, self).__init__()
 
@@ -117,7 +117,10 @@ class Model(list):
             # if parameter not set in model, and hasn't been loaded from reaction, take mean of model_distribution
             for name in self.parameter_distributions:
                 if name not in self.parameters:
-                    self.parameters[name] = self.parameter_distributions[name].mean()
+                    if type(self.parameter_distributions[name]) == list or type(self.parameter_distributions[name]) == tuple:
+                        self.parameters[name] = (self.parameter_distributions[name][0] + self.parameter_distributions[name][1]) / 2
+                    else:
+                        self.parameters[name] = self.parameter_distributions[name].mean()
                     if self.logging == True:
                         print(str(name) + ' - ' + str(self.parameters[name]))
 
@@ -159,10 +162,16 @@ class Model(list):
 
         Called by self.setup_model()
         """
-
+        if self.logging==True:
+            print('-- Setting default species, using means of distributions where undefined: --')
         for name in self.species_distributions:
             if name not in self.species:
-                self.species[name] = self.species_distributions[name].mean()
+                if type(self.species_distributions[name]) == list or type(self.species_distributions[name]) == tuple:
+                    self.species[name] = (self.species_distributions[name][0] + self.species_distributions[name][1])/2
+                else:
+                    self.species[name] = self.species_distributions[name].mean()
+                if self.logging==True:
+                    print(str(name) + ' - ' + str(self.species[name]))
 
     def setup_model(self):
         """
@@ -262,7 +271,7 @@ class Model(list):
 
         return df
 
-    def plot_substrate(self, substrate, plot=False):
+    def plot_substrate(self, substrate, plot=False, units=['','']):
         """
         Plot a graph of substrate concentration vs time.
 
@@ -270,12 +279,15 @@ class Model(list):
             substrate (str): Name of substrate to plot
             plot (bool): Default False.  If True calls plt.show()
         """
+
         ys_at_t = []
         i = self.run_model_species_names.index(substrate)
         for t in range(len(self.time)):
             ys_at_t.append(self.y[t][i])
 
         plt.plot(self.time, ys_at_t, label=substrate)
+        plt.ylabel(units[0])
+        plt.xlabel(units[1])
         plt.legend()
 
         if plot == True:
