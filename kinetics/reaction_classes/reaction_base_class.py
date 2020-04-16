@@ -127,9 +127,10 @@ class Reaction():
                 modifier.get_parameter_indexes(self.parameter_names)
 
         substrates = self.get_substrates(y)
+        parameters = copy.copy(self.run_model_parameters)
 
         if len(self.modifiers) != 0:
-            substrates, parameters = self.calculate_modifiers(substrates, copy.copy(self.run_model_parameters))
+            substrates, parameters = self.calculate_modifiers(substrates, parameters)
 
         rate = self.calculate_rate(substrates, parameters)
 
