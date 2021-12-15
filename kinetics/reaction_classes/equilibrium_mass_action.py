@@ -1,7 +1,7 @@
 from kinetics.reaction_classes.reaction_base_class import Reaction
 
 
-class Uni_mass_action_eq(kinetics.Reaction):
+class Uni_mass_action_eq(Reaction):
 
     def __init__(self,
                  keq=None, kf=None,

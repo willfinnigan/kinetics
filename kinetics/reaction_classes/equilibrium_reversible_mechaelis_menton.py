@@ -1,6 +1,6 @@
 from kinetics.reaction_classes.reaction_base_class import Reaction
 
-class BiBi_Ordered_rev_eq(kinetics.Reaction):
+class BiBi_Ordered_rev_eq(Reaction):
 
     def __init__(self,
                  keq=None,
@@ -51,7 +51,7 @@ class BiBi_Ordered_rev_eq(kinetics.Reaction):
         rate = num / (den1 + den2 + den3)
         return rate
 
-class UniUni_rev_eq(kinetics.Reaction):
+class UniUni_rev_eq(Reaction):
 
     def __init__(self,
                  keq=None, kcatf=None, kma=None, kmp=None,
