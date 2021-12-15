@@ -153,6 +153,30 @@ BiBi Pingpong Rev
 .. autoclass:: kinetics.BiBi_Pingpong_rev
 
 
+Equilibrium based reversible Michaelis-Menten kinetics
+------------------------------------------------------
+
+BiBi Ordered rev eq
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: kinetics.BiBi_Ordered_rev_eq
+
+UniUni Ordered rev eq
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: kinetics.UniUni_rev_eq
+
+
+Equilibrium based mass action
+------------------------------------------------------
+
+UniUni Ordered rev eq
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: kinetics.UniUni_rev_eq
+
+
+
 Modifiers of Michaelis-Menten kinetics eg for Inhibition
 --------------------------------------------------------
 Modifications to rate equations for things like competitive inhibition can applied as follows:
