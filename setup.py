@@ -1,6 +1,9 @@
 import setuptools
 from distutils.core import setup
 
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
 setup(
   name = 'kinetics',
   packages = ['kinetics',
@@ -12,6 +15,8 @@ setup(
   version = '1.4.4',
   license='MIT',
   description = 'Python code to run kinetic models of enzyme reactions',
+  long_description=long_description,
+  long_description_content_type="text/markdown",
   author = 'William Finnigan',
   author_email = 'wjafinnigan@gmail.com',
   url = 'https://github.com/willfinnigan/kinetics',
