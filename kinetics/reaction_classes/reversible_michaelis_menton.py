@@ -29,7 +29,10 @@ class UniUni_rev(Reaction):
         kma = parameters[2]
         kmp = parameters[3]
 
-        rate = ((kcatf * enz * a) - (kcatr * enz * p)) / (1 + (a / kma) + (p / kmp))
+        # old equation which was wrong:
+        ## rate = ((kcatf * enz * a) - (kcatr * enz * p)) / (1 + (a / kma) + (p / kmp))
+
+        rate = (((kcatf/kma) * enz * a) - ((kcatr/kmp) * enz * p)) / (1 + (a / kma) + (p / kmp))
 
         return rate
 

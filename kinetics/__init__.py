@@ -18,4 +18,4 @@ from kinetics.ua_and_sa.plotting import plot_substrate, plot_ci_intervals, plot_
 from kinetics.ua_and_sa.sensitivity_analysis import get_concentrations_at_timepoint, get_time_to_concentration, analyse_sobal_sensitivity
 
 
-__version__ = '1.4.1'
+__version__ = '1.4.4'

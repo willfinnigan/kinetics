@@ -132,10 +132,10 @@ UniUni Reversible
 .. autoclass:: kinetics.UniUni_rev
 
 .. math::
-    rate = \frac{(c_{enz}\cdot k_{cat}^{fwd}\cdot c_{A}) - (c_{enz}\cdot k_{cat}^{rev}\cdot c_{P})}
-                     {1 +
-                     \frac{c_{A}}{K_{M}^{A}} +
-                     \frac{c_{P}}{K_{M}^{P}} }
+    rate = \frac{([E] * \frac{k_f}{K^m_s} * [S]) - ([E] * \frac{k_r}{K^m_p} * [P]}{1 + \frac{[S]}{K^m_s} + \frac{[P]}{K^m_p}}
+
+https://biology.stackexchange.com/questions/43767/is-it-possible-to-derive-the-michaelis-menten-equation-under-conditions-where-th
+
 
 BiBi Ordered Rev
 ~~~~~~~~~~~~~~~~
