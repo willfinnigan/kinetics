@@ -25,9 +25,11 @@ class Uni_mass_action_eq(Reaction):
         keq = parameters[0]
         kf = parameters[1]
 
-        fwd = kf*a
-        rev = (kf/keq)*p
+        catalytic_capacity = kf
 
-        rate = fwd-rev
+        if a == 0 or p == 0:
+            return 0.0
 
-        return rate
+        thermodynamic_driving_force = 1 - (p / a / keq)
+
+        return catalytic_capacity * thermodynamic_driving_force

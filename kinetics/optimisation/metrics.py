@@ -1,15 +1,38 @@
+def mgml_to_uM(species_mws, species_mgml, scale=1000000, round_to=2):
+    """
+        Args:
+            species_mws: (dict) For example {'enzyme_1' : 33000, 'substrate_1' : 150}
+            species_concs_in_mgml: (dict) For example {'enzyme_1' : 1}
+            scale: (int) The scale we are working on.  1=M, 1000=mM, 1000,000=uM.  The default is uM.
+
+        Returns:
+            A dictionary of species concentrations in uM.
+        """
+    species_uM = {}
+
+    for specie, mw in species_mws.items():
+        vol = 1 # 1L
+
+        # mass = moles * mw...    moles = mass/mw
+        moles = (species_mgml[specie]) / mw    # mg/ml == g/L
+        conc_M = moles * vol
+        conc_scaled = round(conc_M * scale, round_to)
+
+        species_uM[specie] = conc_scaled
+
+    return species_uM
+
 
 def uM_to_mgml(species_mws, species_concs, scale=1000000):
     """
+        Args:
+            species_mws: (dict) For example {'enzyme_1' : 33000, 'substrate_1' : 150}
+            species_concs: (dict) For example {'enzyme_1' : 10, 'substrate_1' : 10000}
+            scale: (int) The scale we are working on.  1=M, 1000=mM, 1000,000=uM.  The default is uM.
 
-    Args:
-        species_mws: (dict) For example {'enzyme_1' : 33000, 'substrate_1' : 150}
-        species_concs: (dict) For example {'enzyme_1' : 10, 'substrate_1' : 10000}
-        scale: (int) The scale we are working on.  1=M, 1000=mM, 1000,000=uM.  The default is uM.
-
-    Returns:
-        A dictionary of species concentrations in mg/ml.
-        For example {'enzyme_1': 0.33, 'substrate_1': 1.5}
+        Returns:
+            A dictionary of species concentrations in mg/ml.
+            For example {'enzyme_1': 0.33, 'substrate_1': 1.5}
     """
 
     dict_of_mgml = {}

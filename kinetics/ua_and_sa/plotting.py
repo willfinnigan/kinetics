@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 """ -- Plotting uncertainty analysis -- """
 def plot_substrate(substrate, dataframes,
