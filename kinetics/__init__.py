@@ -7,9 +7,10 @@ from kinetics.reaction_classes.michaelis_menton_modifiers import *
 from kinetics.reaction_classes.reversible_michaelis_menton import *
 from kinetics.reaction_classes.equilibrium_mass_action import *
 from kinetics.reaction_classes.equilibrium_reversible_mechaelis_menton import *
+from kinetics.reaction_classes.thermodynamic_separable_rate_law import *
 from kinetics.reaction_classes.reaction_base_class import Reaction
 
-from kinetics.optimisation.metrics import Metrics, uM_to_mgml
+from kinetics.optimisation.metrics import Metrics, uM_to_mgml, mgml_to_uM
 from kinetics.optimisation.genetic_algorithm import GA_Base_Class
 
 from kinetics.ua_and_sa.sampling import sample_distributions, sample_uniforms, salib_problem, make_saltelli_samples, distributions_to_lower_upper_bounds

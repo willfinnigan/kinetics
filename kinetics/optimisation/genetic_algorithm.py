@@ -55,12 +55,11 @@ class GA_Base_Class(object):
         self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.make_ind)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
         self.toolbox.register("mate", tools.cxUniform, indpb=self.indpb_mate)
-
         self.toolbox.register("select", tools.selNSGA2)
         self.toolbox.register("mutate", tools.mutGaussian, mu=self.mu, sigma=self.sigma, indpb=self.indpb_mutate)
         self.toolbox.register("evaluate", self.evaluate)
 
-    def make_ind(self,bounds):
+    def make_ind(self, bounds):
         # bounds = [(0,100), (3, 4), (12, 15)...]
 
         ind = []

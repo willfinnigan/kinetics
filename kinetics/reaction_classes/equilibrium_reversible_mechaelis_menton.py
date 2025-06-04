@@ -45,7 +45,7 @@ class BiBi_Ordered_rev_eq(Reaction):
         num = Vf*(a*b-((p*q)/keq))
 
         den1 = a*b*(1+p/kip)
-        den2 = (kma*b) + (kmb*(a*kia))
+        den2 = (kma*b) + (kmb*(a+kia))
         den3 = (Vf/(Vr*keq)) * ( (kmq*p*(1+(a/kia))) + (q* (kmp*( 1+((kma*b)/(kia*kmb)) + p*(1+(b/kib)))) ))
 
         rate = num / (den1 + den2 + den3)
