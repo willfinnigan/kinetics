@@ -12,7 +12,7 @@ setup(
               'kinetics.reaction_classes',
               'kinetics.ua_and_sa'],
   setup_requires=['wheel'],
-  version = '1.4.4',
+  version = '1.4.5',
   license='MIT',
   description = 'Python code to run kinetic models of enzyme reactions',
   long_description=long_description,
@@ -20,7 +20,7 @@ setup(
   author = 'William Finnigan',
   author_email = 'wjafinnigan@gmail.com',
   url = 'https://github.com/willfinnigan/kinetics',
-  download_url = 'https://github.com/willfinnigan/kinetics/archive/1.4.4.tar.gz',
+  download_url = 'https://github.com/willfinnigan/kinetics/archive/1.4.5.tar.gz',
   keywords = ['enzyme', 'kinetics', 'modelling'],
   install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas', 'deap', 'seaborn'],
   classifiers=[

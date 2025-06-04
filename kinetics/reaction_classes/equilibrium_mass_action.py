@@ -27,6 +27,9 @@ class Uni_mass_action_eq(Reaction):
 
         catalytic_capacity = kf
 
+        if a == 0 or p == 0:
+            return 0.0
+
         thermodynamic_driving_force = 1 - (p / a / keq)
 
         return catalytic_capacity * thermodynamic_driving_force
