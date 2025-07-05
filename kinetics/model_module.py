@@ -5,8 +5,27 @@ import matplotlib.pyplot as plt
 
 from kinetics.solvers.scipy_solver import SciPy_Solver
 
+class TimeSeries(object):
 
-class Model(list):
+    def __init__(self, start: int, end: int, steps: int, mxsteps=10000):
+        """
+        This function sets the time parameters for the model.  This is how long the model will simulate
+
+        Args:
+            start (int): the start time - usually 0
+            end (int): the end time (default is 100)
+            steps (int): the number of timepoints for the output
+        """
+
+        self.start = start
+        self.end = end
+        self.steps = steps
+        self.t = np.linspace(self.start, self.end, self.steps)
+        self.mxsteps = mxsteps
+
+
+
+class Model(object):
     """
     The model class is central.  It inherits from a list.  Reactions are appended to this list to build the model.
     Upon creating a new object logging can be turned off by passing in logging=False
@@ -39,24 +58,13 @@ class Model(list):
 
     """
 
-    def __init__(self, logging=False):
-        # Model inherits from list - reaction classes are held in this self list.
-        super(Model, self).__init__()
+    def __init__(self):
 
-        """ Time """
-        self.start = 0
-        self.end = 100
-        self.steps = 100
-        self.mxsteps = 10000
-        self.time = np.linspace(self.start, self.end, self.steps)
-
-        """ Species - used to reset the model, or as the bounds to run ua/sa """
+        """ Reactions - a list of reaction classes """
+        self.reactions = []
         self.species = {}
-        self.species_distributions = {}
-
-        """ Parameters - used to reset the model, or as the bounds to run ua/sa.  Set by self.set_parameters_from_reactions() """
         self.parameters = {}
-        self.parameter_distributions = {}
+        self.timeseries: TimeSeries = None
 
         """ Species and parameters used when the model is ran. These are changed each run when doing ua/sa """
         self.run_model_species = {}
@@ -66,157 +74,31 @@ class Model(list):
 
         self.y = []
 
-        self.logging = logging
+    def set_time(self, start: int, end: int, steps: int, mxsteps=10000):
+        self.timeseries = TimeSeries(start, end, steps, mxsteps)
 
-    # Time
-    def set_time(self, start, end, steps):
-        """
-        This function sets the time parameters for the model.  This is how long the model will simulate
+    def set_species(self, species):
+        self.species.update(species)
 
-        Args:
-            start (int): the start time - usually 0
-            end (int): the end time (default is 100)
-            steps (int): the number of timepoints for the output
-        """
+    def add_reaction(self, reaction):
+        self.reactions.append(reaction)
+        reaction.set_parameter_defaults_to_mean()
 
-        self.start = start
-        self.end = end
-        self.steps = steps
-        self.time = np.linspace(self.start, self.end, self.steps)
+        # Load the model's parameters from the reaction's parameters
+        for name in reaction.parameters:
+            if name not in self.parameters:
+                self.parameters[name] = reaction.parameters[name]
+            else:
+                print('Warning - parameter ' + name + ' already set in model, not overwriting with reaction value')
 
-    # Setup Model
-    def set_parameters_from_reactions(self):
-        """
-        Sets all the parameter variables from those set in the reaction classes attached to the model
-
-        For each reaction_class, updates self.parameters and self.parameter_distributions with the dictionaries held in each reaction_class.
-        This will add new keys, or overwrite existing ones.
-
-        Where only a distribution is set, the median value of this distribution will be used for the parameter value.
-
-        Called by self.setup_model()
-        """
-
-        self.run_model_parameters = {}
-
-        if self.logging == True:
-            print('-- Setting default parameters, using means of distributions where undefined: --')
-        for reaction_class in self:
-            reaction_class.set_parameter_defaults_to_mean()
-            if self.logging==True:
-                print(reaction_class.parameters)
-
-            # if parameter not already set in model, load it from reaction
-            for name in reaction_class.parameters:
-                if name not in self.parameters:
-                    self.parameters[name] = reaction_class.parameters[name]
-
-            # if parameter_distribution not already set in model, load it from reaction
-            for name in reaction_class.parameter_distributions:
-                if name not in self.parameter_distributions:
-                    self.parameter_distributions[name] = reaction_class.parameter_distributions[name]
-
-            # if parameter not set in model, and hasn't been loaded from reaction, take mean of model_distribution
-            for name in self.parameter_distributions:
-                if name not in self.parameters:
-                    if type(self.parameter_distributions[name]) == list or type(self.parameter_distributions[name]) == tuple:
-                        self.parameters[name] = (self.parameter_distributions[name][0] + self.parameter_distributions[name][1]) / 2
-                    else:
-                        self.parameters[name] = self.parameter_distributions[name].mean()
-                    if self.logging == True:
-                        print(str(name) + ' - ' + str(self.parameters[name]))
-
-
-            self.run_model_parameters.update(self.parameters)
-
-    def update_species(self, species_dict):
-        """
-        This func is used by to update starting species values used by the model
-        Called by: self.setup_model() and self.reset_model_to_defaults()
-        """
-
-        self.run_model_species.update(species_dict)
-        self.run_model_species_names = list(self.run_model_species.keys())
-        self.run_model_species_starting_values = list(self.run_model_species.values())
-
-    def load_species_from_reactions(self):
-        """
-        Loads species which are present in one of the reaction_classes but not in
-        either self.species or self.species_distributions.  Loads them as self.species[name] = 0.
-
-        Called by self.setup_model()
-        """
-        if self.logging == True:
-            print('-- Load unspecified species as default = 0 --')
-        for reaction in self:
-            for substrate in reaction.substrates + reaction.products + reaction.reaction_substrate_names:
-                if substrate not in self.species:
-                    self.species[substrate] = 0
-                    if self.logging == True:
-                        print(str(substrate) + ' ', end='')
-        if self.logging == True:
-            print()
-
-    def set_species_defaults_to_mean(self):
-        """
-        For any species defined in self.species_distributions, but not in self.species,
-        set self.species[name] to the median of self.species_distributions[name]
-
-        Called by self.setup_model()
-        """
-        if self.logging==True:
-            print('-- Setting default species, using means of distributions where undefined: --')
-        for name in self.species_distributions:
-            if name not in self.species:
-                if type(self.species_distributions[name]) == list or type(self.species_distributions[name]) == tuple:
-                    self.species[name] = (self.species_distributions[name][0] + self.species_distributions[name][1])/2
-                else:
-                    self.species[name] = self.species_distributions[name].mean()
-                if self.logging==True:
-                    print(str(name) + ' - ' + str(self.species[name]))
-
-    def setup_model(self):
-        """
-        Run methods to setup the model.
-        1. set_species_defaults_to_median()
-        2. load_species_from_reactions()
-        3. update_species(self.species())
-        4. set_parameters_from_reactions()
-        """
-
-        # Species
-        self.set_species_defaults_to_mean()
-        self.load_species_from_reactions()
-        self.update_species(self.species)
-
-        # Parameters
-        self.set_parameters_from_reactions()
-
-    # Reset the model
-    def reset_reaction_indexes(self):
-        """
-        Called at the end of run_model() to reset the indexes of the substrates and parameters in the reaction classes.
-        May not be necessary - need to look into this.
-        """
-        for reaction_class in self:
-            reaction_class.reset_reaction()
-
-    def reset_model_to_defaults(self):
-        """
-        Reset the model back to the default settings
-
-        This uses self.species and self.parameters to set the run_model attibutes, which are used when calling run_model
-        When running ua the run_model attributes are the ones that are changed.
-        """
-
-        self.update_species(self.species)
-        self.run_model_parameters = self.parameters
-        self.y = []
-
+        # Load the model's species from the reaction's species
+        for substrate in reaction.substrates + reaction.products + reaction.reaction_substrate_names:
+            if substrate not in self.species:
+                self.species[substrate] = 0
 
     def run_model(self):
         solver = SciPy_Solver()
-        self.y = solver.run(self, self.run_model_species, self.run_model_parameters, self.time)
+        self.y = solver.run(self.reactions, self.species, self.parameters, self.timeseries.t)
         return self.y
 
 
@@ -228,45 +110,16 @@ class Model(list):
         Returns:
             Pandas dataframe of results
         """
-        ys_at_t = {'Time' : self.time}
+        ys_at_t = {'Time' : self.timeseries.t}
+        species_names = list(self.species.keys())
 
-        for i in range(len(self.run_model_species_names)):
-            name = self.run_model_species_names[i]
+        for i in range(len(species_names)):
+            name = species_names[i]
             ys_at_t[name] = []
 
-            for t in range(len(self.time)):
+            for t in range(len(self.timeseries.t)):
                 ys_at_t[name].append(self.y[t][i])
 
         df = pd.DataFrame(ys_at_t)
 
         return df
-
-    def plot_substrate(self, substrate, plot=False, units=['','']):
-        """
-        Plot a graph of substrate concentration vs time.
-
-        Args:
-            substrate (str): Name of substrate to plot
-            plot (bool): Default False.  If True calls plt.show()
-        """
-
-        ys_at_t = []
-        i = self.run_model_species_names.index(substrate)
-        for t in range(len(self.time)):
-            ys_at_t.append(self.y[t][i])
-
-        plt.plot(self.time, ys_at_t, label=substrate)
-        plt.ylabel(units[0])
-        plt.xlabel(units[1])
-        plt.legend()
-
-        if plot == True:
-            plt.show()
-
-    # Check parameters when contraining parameter space
-    def check_parameter_limits(self):
-        all_within_limits = True
-        for reaction_class in self:
-            if reaction_class.sampling_limits(self.run_model_parameters) == False:
-                all_within_limits = False
-        return all_within_limits

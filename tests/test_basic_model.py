@@ -14,14 +14,11 @@ def test_simple_model():
     enzyme_1.parameters = {'enz1_kcat': 100,
                            'enz1_km': 10000}
 
-    model.append(enzyme_1)
+    model.add_reaction(enzyme_1)
 
-    model.species = {"A": 10000,
-                     "enz_1": 5}
-    model.setup_model()
+    model.set_species({"A": 10000, "enz_1": 5})
 
     model.run_model()
-    print(model.y)
     df = model.results_dataframe()
 
     start = df['A'][0]
