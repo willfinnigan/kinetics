@@ -49,17 +49,12 @@ class Reaction():
         self.substrate_indexes = []
         self.substrates = []
         self.products = []
-
         self.parameters = {}
         self.parameter_distributions = {}
-
         self.parameter_names = []
         self.run_model_parameters = []
-
         self.modifiers = []
-
         self.check_positive = False
-
         self.check_limits_functions = []
 
     def set_parameter_defaults_to_mean(self):

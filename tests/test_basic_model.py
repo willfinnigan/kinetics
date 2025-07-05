@@ -21,6 +21,7 @@ def test_simple_model():
     model.setup_model()
 
     model.run_model()
+    print(model.y)
     df = model.results_dataframe()
 
     start = df['A'][0]
