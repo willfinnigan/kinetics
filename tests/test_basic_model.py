@@ -1,10 +1,12 @@
 # from __future__ import division
 
+import pytest
 import kinetics
 import numpy as np
 from numpy.testing import assert_allclose
 
-def test_simple_model():
+@pytest.mark.parametrize("solver_mode", ['jax', 'scipy', 'jax_gpu'])
+def test_simple_model(solver_mode):
     model = kinetics.Model()
     model.set_time(0, 1000, 100)
 
@@ -18,7 +20,7 @@ def test_simple_model():
 
     model.set_species({"A": 10000, "enz_1": 5})
 
-    result = model.run_model(mode='jax')
+    result = model.run_model(mode=solver_mode)
     df = result.results_dataframe()
 
     start = df['A'][0]

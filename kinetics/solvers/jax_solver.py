@@ -2,9 +2,29 @@ from kinetics.solvers.solver_base_class import ODESolver
 import numpy as np
 import pandas as pd
 import jax.numpy as jnp
+from jax import jit, devices, device_put
 from diffrax import diffeqsolve, ODETerm, Dopri5, SaveAt, PIDController
 
 class JaxSolver(ODESolver):
+    
+    def __init__(self, use_gpu=True):
+        super().__init__()
+        self.use_gpu = use_gpu
+        if self.use_gpu:
+            # Check for GPU devices (CUDA/ROCm, not Metal)
+            available_devices = devices()
+            gpu_devices = [d for d in available_devices if d.device_kind == 'gpu']
+            
+            if gpu_devices:
+                print(f"GPU acceleration enabled. Available GPUs: {len(gpu_devices)}")
+                print(f"Using device: {gpu_devices[0]}")
+                self.device = gpu_devices[0]
+            else:
+                print("GPU requested but not available. Falling back to CPU.")
+                self.use_gpu = False
+                self.device = devices('cpu')[0]
+        else:
+            self.device = devices('cpu')[0]
 
     # Run the model
     def deriv(self, t, y, args):
@@ -47,8 +67,13 @@ class JaxSolver(ODESolver):
         # species_names = list(species.keys())
         # y = integrate.odeint(self.deriv, y0, time, args=(reactions, species_names, parameters), mxstep=self.mxsteps)
 
+        # Create arrays and move to GPU if available
         y0 = jnp.array(list(species.values()))
-        time = jnp.asarray(time)  # Ensure time is a JAX array for compatibility with Diffrax
+        time = jnp.asarray(time)
+        
+        if self.use_gpu:
+            y0 = device_put(y0, self.device)
+            time = device_put(time, self.device)
 
         # Package arguments for the derivative function
         species_names = list(species.keys())

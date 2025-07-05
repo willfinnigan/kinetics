@@ -119,9 +119,11 @@ class Model(object):
         if mode == 'scipy':
             solver = SciPy_Solver(mxsteps=self.timeseries.mxsteps)
         elif mode == 'jax':
-            solver = JaxSolver()
+            solver = JaxSolver(use_gpu=False)
+        elif mode == 'jax_gpu':
+            solver = JaxSolver(use_gpu=True)
         else:
-            raise ValueError(f"Unknown solver mode: {mode}. Use 'scipy' or 'jax'.")
+            raise ValueError(f"Unknown solver mode: {mode}. Use 'scipy', 'jax', or 'jax_gpu'.")
 
         y = solver.run(self._reactions, self._species, self._parameters, self.timeseries.t)
         result = ModelResult(self, y)

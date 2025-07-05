@@ -1,5 +1,11 @@
 import numpy as np
 import copy
+try:
+    import jax.numpy as jnp
+    HAS_JAX = True
+except ImportError:
+    jnp = None
+    HAS_JAX = False
 
 def calculate_yprime(y, rate, substrates, products, substrate_names):
     """
@@ -20,13 +26,25 @@ def calculate_yprime(y, rate, substrates, products, substrate_names):
         y_prime: following the addition or subtraction of rate to the specificed substrates
     """
 
-    y_prime = np.zeros(len(y))
+    # Create zeros array compatible with input array type (JAX or NumPy)
+    if HAS_JAX and hasattr(y, 'shape') and str(type(y)).startswith('<class \'jax'):
+        y_prime = jnp.zeros_like(y)
+    else:
+        y_prime = np.zeros(len(y))
 
     for name in substrates:
-        y_prime[substrate_names.index(name)] -= rate
+        idx = substrate_names.index(name)
+        if HAS_JAX and hasattr(y, 'shape') and str(type(y)).startswith('<class \'jax'):
+            y_prime = y_prime.at[idx].add(-rate)
+        else:
+            y_prime[idx] -= rate
 
     for name in products:
-        y_prime[substrate_names.index(name)] += rate
+        idx = substrate_names.index(name)
+        if HAS_JAX and hasattr(y, 'shape') and str(type(y)).startswith('<class \'jax'):
+            y_prime = y_prime.at[idx].add(rate)
+        else:
+            y_prime[idx] += rate
 
     return y_prime
 
