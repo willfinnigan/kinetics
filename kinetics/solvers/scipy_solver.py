@@ -10,7 +10,7 @@ class SciPy_Solver(ODESolver):
         self.mxsteps = mxsteps
 
         # Run the model
-    def deriv(self, y, t, reactions, species_names, parameters):
+    def deriv(self, y, t, reactions, species_names, parameter_values):
         """
         deriv function called by integrate.odeint(self.deriv, y0, self.time)
 
@@ -28,11 +28,11 @@ class SciPy_Solver(ODESolver):
         yprime = np.zeros(len(y))
 
         for reaction_class in reactions:
-            yprime += reaction_class.reaction(y, species_names)
+            yprime += reaction_class.reaction(y, species_names, parameter_values)
 
         return yprime
 
-    def run(self, reactions, species, parameters, time):
+    def run(self, reactions, species_names, species_values, parameter_values, time):
         """
         Runs the model and outputs y
 
@@ -43,9 +43,8 @@ class SciPy_Solver(ODESolver):
         """
 
 
-        y0 = np.array(list(species.values()), dtype=float)
-        species_names = list(species.keys())
-        y = integrate.odeint(self.deriv, y0, time, args=(reactions, species_names, parameters), mxstep=self.mxsteps)
+        y0 = np.array(species_values, dtype=float)
+        y = integrate.odeint(self.deriv, y0, time, args=(reactions, species_names, parameter_values), mxstep=self.mxsteps)
         return y
 
 

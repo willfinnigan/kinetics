@@ -10,7 +10,7 @@ class Uni(Reaction):
         super().__init__()
 
         self.reaction_substrate_names = [a, enz]
-        self.parameter_names=[kcat, kma]
+        self.parameter_names = [kcat, kma]
 
         self.substrates = substrates
         self.products = products

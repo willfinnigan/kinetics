@@ -7,25 +7,6 @@ from diffrax import diffeqsolve, ODETerm, Dopri5, SaveAt, PIDController
 
 class JaxSolver(ODESolver):
     
-    def __init__(self, use_gpu=True):
-        super().__init__()
-        self.use_gpu = use_gpu
-        if self.use_gpu:
-            # Check for GPU devices (CUDA/ROCm, not Metal)
-            available_devices = devices()
-            gpu_devices = [d for d in available_devices if d.device_kind == 'gpu']
-            
-            if gpu_devices:
-                print(f"GPU acceleration enabled. Available GPUs: {len(gpu_devices)}")
-                print(f"Using device: {gpu_devices[0]}")
-                self.device = gpu_devices[0]
-            else:
-                print("GPU requested but not available. Falling back to CPU.")
-                self.use_gpu = False
-                self.device = devices('cpu')[0]
-        else:
-            self.device = devices('cpu')[0]
-
     # Run the model
     def deriv(self, t, y, args):
         """
@@ -42,18 +23,18 @@ class JaxSolver(ODESolver):
         Returns:
             y_prime (jax.numpy.ndarray): ordered array the same shape as y, y_prime is the new set of dy/dt for this timepoint.
         """
-        (reactions, species_names, parameters) = args
+        (reactions, species_names, parameter_values) = args
 
         # y is now a JAX array, and reaction_class.reaction is expected to handle it.
         # Initialize yprime as a JAX array.
         yprime = jnp.zeros_like(y)
 
         for reaction_class in reactions:
-            yprime += reaction_class.reaction(y, species_names)
+            yprime += reaction_class.reaction(y, species_names, parameter_values)
 
         return yprime
 
-    def run(self, reactions, species, parameters, time):
+    def run(self, reactions, species_names, species_values, parameter_values, time):
         """
         Runs the model and outputs y
 
@@ -62,22 +43,12 @@ class JaxSolver(ODESolver):
 
         Outputs saved to self.y
         """
-
-        # y0 = np.array(list(species.values()), dtype=float)
-        # species_names = list(species.keys())
-        # y = integrate.odeint(self.deriv, y0, time, args=(reactions, species_names, parameters), mxstep=self.mxsteps)
-
-        # Create arrays and move to GPU if available
-        y0 = jnp.array(list(species.values()))
-        time = jnp.asarray(time)
         
-        if self.use_gpu:
-            y0 = device_put(y0, self.device)
-            time = device_put(time, self.device)
+        y0 = jnp.array(species_values)
+        time = jnp.asarray(time)
 
         # Package arguments for the derivative function
-        species_names = list(species.keys())
-        deriv_args = (reactions, species_names, parameters)
+        deriv_args = (reactions, species_names, parameter_values)
 
         term = ODETerm(self.deriv)
         solver = Dopri5()

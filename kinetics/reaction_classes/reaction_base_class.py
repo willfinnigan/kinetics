@@ -63,14 +63,21 @@ class Reaction():
 
     def __init__(self):
 
-        self.reaction_substrate_names = []
-        self.substrate_indexes = []
-        self.substrates = []
-        self.products = []
+        # These are set by the user
         self.parameters = {}
         self.parameter_distributions = {}
+
+        # indexes used to access values during model run
+        self.substrate_indexes = []
+        self.parameter_indexes = []
+
+        # These are set when the reaction is set up
+        self.reaction_substrate_names = []
         self.parameter_names = []
-        self.run_model_parameters = []
+        self.substrates = []
+        self.products = []
+
+        # These are added as needed
         self.modifiers = []
         self.check_positive = False
         self.check_limits_functions = []
@@ -83,21 +90,20 @@ class Reaction():
                 else:
                     self.parameters[name] = self.parameter_distributions[name].mean()
 
-    def get_indexes(self, substrate_names):
+    def setup_reaction(self, species_names, parameter_names):
+
+        # get indexes
         self.substrate_indexes = []
         for name in self.reaction_substrate_names:
-            self.substrate_indexes.append(substrate_names.index(name))
-
-    def get_parameters(self, parameter_dict):
-        """Look up the parameters in the parameter_dict and return them in the order of self.parameter_names."""
-        self.run_model_parameters = []
+            self.substrate_indexes.append(species_names.index(name))
+        self.parameter_indexes = []
         for name in self.parameter_names:
-            self.run_model_parameters.append(parameter_dict[name])
+            self.parameter_indexes.append(parameter_names.index(name))
 
-
-    def reset_reaction(self):
-        self.substrate_indexes = []
-        self.run_model_parameters = []
+        # set up modifiers
+        for modifier in self.modifiers:
+            modifier.get_substrate_indexes(self.reaction_substrate_names)
+            modifier.get_parameter_indexes(self.parameter_names)
 
     def add_modifier(self, modifier):
         for name in modifier.parameter_names:
@@ -113,7 +119,7 @@ class Reaction():
     def calculate_rate(self, substrates, parameters):
         return 0
 
-    def reaction(self, y, substrate_names):
+    def reaction(self, y, substrate_names, parameter_values):
         """Calculate the rate of the reaction and return the change in substrate concentrations (y_prime)."""
 
         # Get the substrates from y using the substrate indexes
@@ -121,14 +127,19 @@ class Reaction():
         for index in self.substrate_indexes:
             substrates.append(y[index])
 
-        parameters = self.run_model_parameters
+        # Get the parameters using the parameter indexes
+        parameters = []
+        for index in self.parameter_indexes:
+            parameters.append(parameter_values[index])
 
         # calculate the effects of any modifiers
         for modifier in self.modifiers:
             substrates, parameters = modifier.calc_modifier(substrates, parameters)
 
+        # calculate the rate (this function is modified by the user)
         rate = self.calculate_rate(substrates, parameters)
 
+        # calculate the change in substrate concentrations (y_prime)
         y_prime = calculate_yprime(y, rate, self.substrates, self.products, substrate_names)
         y_prime = self.modify_product(y_prime, substrate_names)
 
