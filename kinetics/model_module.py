@@ -23,40 +23,7 @@ class TimeSeries(object):
         self.t = np.linspace(self.start, self.end, self.steps)
         self.mxsteps = mxsteps
 
-
-
 class Model(object):
-    """
-    The model class is central.  It inherits from a list.  Reactions are appended to this list to build the model.
-    Upon creating a new object logging can be turned off by passing in logging=False
-
-    1.  Create model, append reactions and set time and species.
-    2.  setup_model()
-    3.  run_model()
-
-    Attributes:
-        species (dict): The starting species concentrations.  For example {'Substrate_1' : 100}
-
-        species_distributions (dict): The starting species concentrations, with uncertainty using probability distributions from scipy.
-                                      For example {'Substrate_1' : norm(100, 10)}
-
-        parameters (dict): Parameters.  These are loaded from the appended reactions upon running setup_model(). For example {'param_1' : 100}
-        parameter_distributions (dict):  Parameter scipy distributions.  These are loaded from the appended reactions upon running setup_model(). For example {'param_1' : norm(100, 10)}
-
-        y (numpy array): a numpy array of 2 dimensions. Time by substrate.  Filled upon running run_model()
-                         The first dimension gives a list of all the substrate concentrations at that timepoint.
-                         The first dimension is the same size as self.time.
-                         Each index in self.time relates to an index in the first dimension of y.
-
-        logging (bool): True gives text feedback upon running some commands
-
-        start (int): Model start time
-        end (int): Model end time
-        steps (int): The number of timpoints in the model output
-        mxsteps (int): mxsteps used by scipy.integrate.odeint
-        time (np.linspace(self.start, self.end, self.steps)):  The timepoints of the model
-
-    """
 
     def __init__(self):
 
@@ -64,17 +31,10 @@ class Model(object):
         self.reactions = []
         self.species = {}
         self.parameters = {}
-        self.timeseries: TimeSeries = None
-
-        """ Species and parameters used when the model is ran. These are changed each run when doing ua/sa """
-        self.run_model_species = {}
-        self.run_model_species_names = []
-        self.run_model_species_starting_values = []
-        self.run_model_parameters = {}
-
+        self.timeseries: TimeSeries = TimeSeries(0, 100, 100)
         self.y = []
 
-    def set_time(self, start: int, end: int, steps: int, mxsteps=10000):
+    def set_time(self, start: int, end: int, steps: int, mxsteps=5000):
         self.timeseries = TimeSeries(start, end, steps, mxsteps)
 
     def set_species(self, species):
