@@ -103,7 +103,7 @@ class Metrics(object):
 
         total = 0
         for enzyme in self.enzyme_mws:
-            conc = self.model.species[enzyme]
+            conc = self.model._species[enzyme]
             mol_enzyme = (conc / 1000000) * self.reaction_volume
             g_enzyme = mol_enzyme * self.enzyme_mws[enzyme]
             total += g_enzyme
@@ -200,7 +200,7 @@ class Metrics(object):
 
         total_g_enzyme = 0
         for enzyme in self.enzyme_mws:
-            conc = self.model.species[enzyme]
+            conc = self.model._species[enzyme]
             mol_enzyme = (conc / 1000000) * self.reaction_volume
             g_enzyme = mol_enzyme * self.enzyme_mws[enzyme]
             total_g_enzyme += g_enzyme

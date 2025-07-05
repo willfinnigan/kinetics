@@ -24,7 +24,7 @@ def test_distributions_model():
     model.set_time(0, 120, 1000)
 
     # Set starting concentrations
-    model.species = {"A": 10000}
+    model._species = {"A": 10000}
     model.species_distributions = {"enz_1": norm(4, 4 * 0.05),
                                    "enz_2": norm(10, 10 * 0.05)}
     model.setup_model()

@@ -18,13 +18,13 @@ def test_simple_model():
 
     model.set_species({"A": 10000, "enz_1": 5})
 
-    model.run_model()
-    df = model.results_dataframe()
+    result = model.run_model(mode='jax')
+    df = result.results_dataframe()
 
     start = df['A'][0]
     end = df['B'][99]
 
-    expected = np.array([10000.0,10000.0])
+    expected = np.array([10000.0, 10000.0])
     actual = np.array([start, end])
 
     assert_allclose(expected, actual, atol=1, rtol=1)

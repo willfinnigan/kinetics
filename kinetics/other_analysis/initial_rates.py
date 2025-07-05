@@ -28,7 +28,7 @@ def calc_initial_rates_ua(model, substrate_name, enzyme_name, substrate_concs,
         end = timecourse.iloc[-1]
         difference = start - end
         difference = difference / time  # This will give rates in uM / min
-        difference = difference / model.species[enzyme_name]  # This will give rates in uM / min / uM_enz
+        difference = difference / model._species[enzyme_name]  # This will give rates in uM / min / uM_enz
 
         rate_quartiles = rate_quartiles.append({'Substrate': conc,
                                                  'Low': difference['High'],
@@ -41,7 +41,7 @@ def calc_initial_rates_ua(model, substrate_name, enzyme_name, substrate_concs,
         end = timecourse_all.iloc[-1]
         difference = start - end
         difference = difference / time  # This will give rates in uM / min
-        difference = difference / model.species[enzyme_name]  # This will give rates in uM / min / uM_enz
+        difference = difference / model._species[enzyme_name]  # This will give rates in uM / min / uM_enz
 
         rate_all = rate_all.append(difference, ignore_index=True)
 
@@ -76,7 +76,7 @@ def calc_initial_rates_single(model, substrate_name, enzyme_name, substrate_conc
         end = timecourse.iloc[-1][substrate_name]
         difference = start - end
         difference = difference / time  # This will give rates in uM / min
-        difference = difference / model.species[enzyme_name]  # This will give rates in uM / min / uM_enz
+        difference = difference / model._species[enzyme_name]  # This will give rates in uM / min / uM_enz
         rates.append(difference)
 
     if verbose == True:

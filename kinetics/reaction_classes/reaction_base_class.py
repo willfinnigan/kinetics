@@ -70,19 +70,12 @@ class Reaction():
         for name in self.reaction_substrate_names:
             self.substrate_indexes.append(substrate_names.index(name))
 
-    def get_substrates(self, y):
-        substrates = []
-        for index in self.substrate_indexes:
-            substrates.append(y[index])
-
-        return substrates
-
     def get_parameters(self, parameter_dict):
-        parameters = []
+        """Look up the parameters in the parameter_dict and return them in the order of self.parameter_names."""
+        self.run_model_parameters = []
         for name in self.parameter_names:
-            parameters.append(parameter_dict[name])
+            self.run_model_parameters.append(parameter_dict[name])
 
-        return parameters
 
     def reset_reaction(self):
         self.substrate_indexes = []
@@ -99,33 +92,22 @@ class Reaction():
 
         self.modifiers.append(modifier)
 
-    def calculate_modifiers(self, substrates, parameters):
-        for modifier in self.modifiers:
-            substrates, parameters = modifier.calc_modifier(substrates, parameters)
-
-        return substrates, parameters
-
     def calculate_rate(self, substrates, parameters):
         return 0
 
-    def reaction(self, y, substrate_names, parameter_dict):
-        if self.substrate_indexes == []:
-            self.get_indexes(substrate_names) # need to move this to the model
+    def reaction(self, y, substrate_names):
+        """Calculate the rate of the reaction and return the change in substrate concentrations (y_prime)."""
 
-        if self.run_model_parameters == []:
-            self.run_model_parameters = self.get_parameters(parameter_dict)
+        # Get the substrates from y using the substrate indexes
+        substrates = []
+        for index in self.substrate_indexes:
+            substrates.append(y[index])
 
+        parameters = self.run_model_parameters
+
+        # calculate the effects of any modifiers
         for modifier in self.modifiers:
-            if modifier.substrate_indexes == []:
-                modifier.get_substrate_indexes(self.reaction_substrate_names)
-            if modifier.parameter_indexes == []:
-                modifier.get_parameter_indexes(self.parameter_names)
-
-        substrates = self.get_substrates(y)
-        parameters = copy.copy(self.run_model_parameters)
-
-        if len(self.modifiers) != 0:
-            substrates, parameters = self.calculate_modifiers(substrates, parameters)
+            substrates, parameters = modifier.calc_modifier(substrates, parameters)
 
         rate = self.calculate_rate(substrates, parameters)
 

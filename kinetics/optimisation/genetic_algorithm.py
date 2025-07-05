@@ -91,10 +91,10 @@ class GA_Base_Class(object):
                 self.model.set_end_time(ind[i])
             elif 'Parameter_' in name:
                 parameter_name = name[10:]
-                self.model.parameters[parameter_name] = ind[i]
+                self.model._parameters[parameter_name] = ind[i]
                 self.model.run_model_parameters[parameter_name] = ind[i]
             else:
-                self.model.species[name] = ind[i]
+                self.model._species[name] = ind[i]
 
         self.metrics.refresh_metrics(model=self.model, flow_rate=self.flow)
 

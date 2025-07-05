@@ -40,7 +40,7 @@ def run_all_models(model, samples, logging=True):
 def return_ys_for_a_single_substrate(model, output, substrate_name):
 
     collected_output = []
-    species_names = list(model.species.keys())
+    species_names = list(model._species.keys())
 
     for i in range(len(model.time)):
         timepoint = [model.time[i]]
@@ -71,7 +71,7 @@ def dataframes_all_runs(model, output, substrates=[]):
     all_runs_substrate_dataframes = {}
 
     if substrates == []:
-        substrates = list(model.species.keys())
+        substrates = list(model._species.keys())
 
     for name in substrates:
         # format: [[t0, r1, r2, r3], [t1, r1, r2, r3]..]
@@ -113,7 +113,7 @@ def dataframes_quartiles(model, output, substrates=[], quartile=95, logging=Fals
     dataframes = {}
 
     if substrates == []:
-        substrates = list(model.species.keys())
+        substrates = list(model._species.keys())
 
     for name in substrates:
 
