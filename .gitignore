@@ -1,0 +1,33 @@
+# JetBrains IDEs
+.idea/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.so
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# Test and coverage reports
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Sphinx documentation build output
+docs/_build/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+build/
+dist/
+notebooks/
+
