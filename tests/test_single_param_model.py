@@ -5,6 +5,9 @@ import kinetics
 import numpy as np
 from numpy.testing import assert_allclose
 
+solvers = {'scipy': kinetics.SciPySolver(),
+           'jax': kinetics.JaxSolver()}
+
 @pytest.mark.parametrize("solver_mode", ['jax', 'scipy'])
 def test_simple_one_enzyme_model(solver_mode):
     model = kinetics.Model()
@@ -18,9 +21,11 @@ def test_simple_one_enzyme_model(solver_mode):
 
     model.add_reaction(enzyme_1)
 
-    result = model.run_model({"A": 10000, "enz_1": 5},
-                             mode=solver_mode)
-    df = result.results_dataframe()
+    solver = solvers[solver_mode]
+
+    result = model.run_single({"A": 10000, "enz_1": 5},
+                             solver)
+    df = result.dataframe()
 
     start = df['A'][0]
     end = df['B'][99]
@@ -51,9 +56,12 @@ def test_simple_two_enzyme_model(solver_mode):
 
     model.add_reaction(enzyme_2)
 
-    result = model.run_model({"A": 10000, "enz_1": 5, "enz_2": 5},
-                             mode=solver_mode)
-    df = result.results_dataframe()
+    solver = solvers[solver_mode]
+
+    result = model.run_single({"A": 10000, "enz_1": 5, "enz_2": 5},
+                             solver)
+
+    df = result.dataframe()
 
     start = df['A'][0]
     end = df['C'][99]

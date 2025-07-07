@@ -100,3 +100,41 @@ def analyse_sobal_sensitivity(salib_problem, output_to_analyse,
     dataframe_output = pd.DataFrame(analysis, index=rows)
 
     return dataframe_output
+
+""" -- Plotting sensivitivity analysis -- """
+
+"""Satelli"""
+def remove_st_less_than(dataframe, column='ST', less_than=0.001):
+    """
+    Remove any entry with an ST less than specified
+
+    Args:
+        dataframe (pandas.Dataframe): dataframe containing sensitivity analysis output
+        column (str): Column name, default is 'ST'
+        less_than (float): Remove anything less than this
+
+    Returns:
+        New dataframe.
+    """
+
+    new_df = dataframe[dataframe[column] > less_than]
+
+    return new_df
+
+def plot_sa_total_sensitivity(df):
+    """
+    Plot the sensitivity analysis
+
+    Args:
+        df: Dataframe containing output of sensitivity analysis.
+    """
+    df.sort_values("ST", inplace=True, ascending=False)
+
+    x_names = df.index.values
+    x = np.arange(len(x_names))
+    st = df['ST']
+    st_err = df['ST_conf']
+
+    plt.bar(x, st, align='center', yerr=st_err, edgecolor='black', color='#000090')
+    plt.xticks(x, x_names, rotation=90)
+    plt.ylabel("ST")

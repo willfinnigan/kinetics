@@ -1,14 +1,14 @@
 from __future__ import annotations
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from kinetics import Model
+    from kinetics.models.model_class import Model
 
 
-class ModelResult(object):
-
+class SingleModelResult(object):
     def __init__(self, model: Model, y: np.ndarray, species_names):
         """
         This class is used to store the results of a model run.
@@ -23,7 +23,7 @@ class ModelResult(object):
         self.species_names = species_names
 
     # Export results as dataframe and plot
-    def results_dataframe(self):
+    def dataframe(self):
         """
         Gives the results of a model run as a dataframe
 
@@ -42,3 +42,24 @@ class ModelResult(object):
         df = pd.DataFrame(ys_at_t)
 
         return df
+
+    def plot(self, substrate, units=['', '']):
+        """
+        Plot a graph of substrate concentration vs time.
+
+        Need to call plt.show() afterwards
+
+        Args:
+            substrate (str): Name of substrate to plot
+            plot (bool): Default False.  If True calls plt.show()
+        """
+
+        ys_at_t = []
+        i = self.species_names.index(substrate)
+        for t in range(len(self.ts)):
+            ys_at_t.append(self.y[t][i])
+
+        plt.plot(self.ts, ys_at_t, label=substrate)
+        plt.ylabel(units[0])
+        plt.xlabel(units[1])
+        plt.legend()
