@@ -7,6 +7,35 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from kinetics.models.model_class import Model
 
+def plot_data(substrates, data_df,
+              alpha=0.5, size=35, colours=['black'], symbols=["o", "s", '^', 'v']):
+    """
+    Add experimental data to a plot.
+
+    Args:
+        substrates (list): A list of substrate names
+        data_df (Dataframe): A pandas dataframe containing experimental data
+        alpha (int): Alpha argument for matplotlib, default = 0.1
+        size (int): Size argument for matplotlib, default = 35
+        colours (list): List of colours for matplotlib. Default=['black']
+        symbols (list): Symbols for matpltlib. Defaut=["o", "s", '^', 'v']
+    """
+
+    time_data = data_df["Time"]
+
+    for substrate in substrates:
+        color = colours.pop(0)
+        colours.append(color)
+
+        symbol = symbols.pop(0)
+        symbols.append(symbol)
+
+        for column in data_df:
+            if substrate in column:
+                data_to_plot = data_df[column]
+                plt.scatter(time_data, data_to_plot,
+                            c=color, alpha=alpha, s=size,
+                            marker=symbol)
 
 class SingleModelResult(object):
     def __init__(self, model: Model, y: np.ndarray, species_names):
@@ -63,3 +92,10 @@ class SingleModelResult(object):
         plt.ylabel(units[0])
         plt.xlabel(units[1])
         plt.legend()
+
+    def plot_data(self, substrates, data_df,
+              alpha=0.5, size=35, colours=['black'], symbols=["o", "s", '^', 'v']):
+        return plot_data(substrates, data_df,
+                            alpha=alpha, size=size, colours=colours, symbols=symbols)
+
+

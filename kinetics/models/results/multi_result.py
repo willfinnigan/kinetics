@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 
 from matplotlib import pyplot as plt
 
+from kinetics.models.results.single_result import plot_data
+
 if TYPE_CHECKING:
     from kinetics.models.model_class import Model
 
@@ -28,6 +30,15 @@ class MultiModelResult(object):
         self.multi_ys = multi_ys
         self.ts = model.ts
         self.species_names = species_names
+        self.color_palette = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
+        self.substrate_colors = {}
+        
+    def _get_substrate_color(self, substrate_name):
+        """Get or assign a color for a substrate."""
+        if substrate_name not in self.substrate_colors:
+            color_index = len(self.substrate_colors) % len(self.color_palette)
+            self.substrate_colors[substrate_name] = self.color_palette[color_index]
+        return self.substrate_colors[substrate_name]
 
     def _return_ys_for_a_single_substrate(self, substrate_name):
 
@@ -105,8 +116,8 @@ class MultiModelResult(object):
 
         return dataframes
 
-    def plot(self, substrate, units=['', ''],
-             colour='blue', alpha=0.1, linewidth=0.1, y_min=True):
+    def plot_all(self, substrate, units=['', ''],
+             colour=None, alpha=0.1, linewidth=0.1, y_min=True):
         """
         Plot every model run for a single substrate.
 
@@ -126,6 +137,9 @@ class MultiModelResult(object):
 
         ylabel = units[0]
         xlabel = units[1]
+        
+        if colour is None:
+            colour = self._get_substrate_color(substrate)
 
         df = dataframes[substrate]
         for i in range(1, len(df.columns)):
@@ -138,9 +152,9 @@ class MultiModelResult(object):
         if y_min != True:
             plt.ylim(bottom=y_min)
 
-    def plot_ci(self,
-                substrate, ci=95,
-                colour='darkblue', alpha=0.1, units=['', '']):
+    def plot(self,
+                substrate, quartile=95,
+                colour=None, alpha=0.1, units=['', '']):
         """
         Plot every model run for a single substrate.
 
@@ -153,9 +167,12 @@ class MultiModelResult(object):
             plot (bool):  If true plots the graph using plt.plot()
         """
 
-        dataframes = self.dataframe_quartiles(ci=ci)
+        dataframes = self.dataframe_quartiles(quartile=quartile)
 
         df = dataframes[substrate]
+        
+        if colour is None:
+            colour = self._get_substrate_color(substrate)
 
         time = df['Time']
         high = df['High']
@@ -169,3 +186,8 @@ class MultiModelResult(object):
 
         plt.ylabel(units[0])
         plt.xlabel(units[1])
+
+    def plot_data(self, substrates, data_df,
+              alpha=0.5, size=35, colours=['black'], symbols=["o", "s", '^', 'v']):
+        return plot_data(substrates, data_df,
+                            alpha=alpha, size=size, colours=colours, symbols=symbols)

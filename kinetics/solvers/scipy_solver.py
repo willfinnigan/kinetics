@@ -1,10 +1,10 @@
 import numpy as np
 from scipy import integrate
 
-from kinetics.solvers.solver_base_class import ODESolver
+from kinetics.solvers.solver_interface import ODESolver
 
 
-class SciPy_Solver(ODESolver):
+class SciPySolver(ODESolver):
 
     def __init__(self, mxsteps=5000):
         self.mxsteps = mxsteps

@@ -1,15 +1,19 @@
-from typing import Callable
+from abc import ABC, abstractmethod
+from typing import Callable, List, Tuple
 
-SamplingMethod = Callable
+class Sampler(ABC):
+    @abstractmethod
+    def __init__(self, num_samples):
+        self.num_samples = num_samples
 
-def random_sample(species_distributions: dict,
-                  parameter_distributions: dict,
-                  num: int):
-    """Take random samples from scipy distributions."""
+    @abstractmethod
+    def sample(self,
+               parameter_distributions: dict,
+               species_distributions: dict) -> List[Tuple[dict, dict]]:
+        pass
 
-    samples = []
-    for i in range(num):  # make samples
-        parameter_dict, species_dict = {}, {}  # Initialize empty dicts for this sample
+
+
 
 
 

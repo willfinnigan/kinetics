@@ -24,7 +24,7 @@ def test_simple_one_enzyme_model(solver_mode):
     solver = solvers[solver_mode]
 
     result = model.run_single({"A": 10000, "enz_1": 5},
-                             solver)
+                              solver=solver)
     df = result.dataframe()
 
     start = df['A'][0]
@@ -59,7 +59,7 @@ def test_simple_two_enzyme_model(solver_mode):
     solver = solvers[solver_mode]
 
     result = model.run_single({"A": 10000, "enz_1": 5, "enz_2": 5},
-                             solver)
+                              solver=solver)
 
     df = result.dataframe()
 

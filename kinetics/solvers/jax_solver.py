@@ -1,4 +1,4 @@
-from kinetics.solvers.solver_base_class import ODESolver
+from kinetics.solvers.solver_interface import ODESolver
 import numpy as np
 import pandas as pd
 import jax.numpy as jnp

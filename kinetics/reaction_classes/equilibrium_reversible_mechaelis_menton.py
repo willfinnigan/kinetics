@@ -1,4 +1,4 @@
-from kinetics.reaction_classes.reaction_base_class import Reaction
+from kinetics.models.reaction_class import Reaction
 
 class BiBi_Ordered_rev_eq(Reaction):
 

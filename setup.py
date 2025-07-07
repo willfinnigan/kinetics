@@ -1,18 +1,13 @@
-import setuptools
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
   name = 'kinetics',
-  packages = ['kinetics',
-              'kinetics.optimisation',
-              'kinetics.other_analysis',
-              'kinetics.reaction_classes',
-              'kinetics.ua_and_sa'],
+  packages = find_packages(),
   setup_requires=['wheel'],
-  version = '1.4.5',
+  version = '2.0.0',
   license='MIT',
   description = 'Python code to run kinetic models of enzyme reactions',
   long_description=long_description,
@@ -20,11 +15,18 @@ setup(
   author = 'William Finnigan',
   author_email = 'wjafinnigan@gmail.com',
   url = 'https://github.com/willfinnigan/kinetics',
-  download_url = 'https://github.com/willfinnigan/kinetics/archive/1.4.5.tar.gz',
+  download_url = 'https://github.com/willfinnigan/kinetics/archive/v2.0.0.tar.gz',
   keywords = ['enzyme', 'kinetics', 'modelling'],
-  install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas', 'deap', 'seaborn'],
+  install_requires=['scipy', 'numpy', 'SALib', 'tqdm', 'matplotlib', 'pandas', 'deap', 'seaborn', 'jax', 'diffrax'],
+  python_requires='>=3.8',
   classifiers=[
     'Development Status :: 3 - Alpha',
+    'Intended Audience :: Science/Research',
     'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3'],
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Topic :: Scientific/Engineering :: Chemistry'],
 )

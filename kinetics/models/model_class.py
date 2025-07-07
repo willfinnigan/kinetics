@@ -1,17 +1,19 @@
 from __future__ import annotations
-import numpy as np
-
-from kinetics.model_single_result import ModelResult
-from kinetics.sampling.sampling_interface import Sampler
-from kinetics.solvers.jax_solver import JaxSolver
-from kinetics.solvers.scipy_solver import SciPySolver
 
 from typing import TYPE_CHECKING
 
-from kinetics.solvers.solver_base_class import ODESolver
+import numpy as np
+from tqdm import tqdm
+
+from kinetics.sampling.scipy_sampling import ScipyDist_Sampler
+from kinetics.solvers.scipy_solver import SciPySolver
+
+from kinetics.models.results.single_result import SingleModelResult
+from kinetics.models.results.multi_result import MultiModelResult
 
 if TYPE_CHECKING:
-    from kinetics.model_single_result import ModelResult
+    from kinetics.sampling.sampling_interface import Sampler
+    from kinetics.solvers.solver_interface import ODESolver
 
 class Model(object):
 
@@ -77,14 +79,26 @@ class Model(object):
         for reaction in self._reactions:
             reaction.setup_reaction(species_names, parameter_names)
 
+    def _set_default_species(self, species):
+        """Any species which are distributions, convert to the mean"""
+        for name, value in species.items():
+            if hasattr(value, 'rvs'):
+                species[name] = value.mean()
+            if isinstance(value, tuple) and len(value) == 2:
+                # If its a tuple, take the value directly in the middle of the two values
+                species[name] = (value[0] + value[1]) / 2
+        return species
+
     def run_single(self,
                    starting_concentrations: dict,
-                   solver: ODESolver) -> ModelResult:
+                   solver: ODESolver = SciPySolver()) -> SingleModelResult:
 
         # Get the default values for all parameters and species (which is 0)
         species, parameters = self._parameters_and_species_from_reactions()
 
+
         # Set the starting concentrations
+        starting_concentrations = self._set_default_species(starting_concentrations)
         species.update(starting_concentrations)
 
         # Extract species and parameters into ordered lists
@@ -95,13 +109,13 @@ class Model(object):
         self._setup_model(species_names, parameter_names)
 
         y = solver.run(self._reactions, species_names, species_values, parameter_values, self.ts)
-        result = ModelResult(self, y, species_names)
+        result = SingleModelResult(self, y, species_names)
         return result
 
     def run_multi(self,
                   starting_concentrations: dict,
-                  sampler: Sampler,
-                  solver: ODESolver):
+                  sampler: Sampler = ScipyDist_Sampler(num_samples=1000),
+                  solver: ODESolver = SciPySolver()) -> MultiModelResult:
         """
         Run the model sampling parameter distributions
         """
@@ -124,7 +138,7 @@ class Model(object):
         # Ok here is where I think we can vectorize
         # But for now we're just run one at a time (which is the existing implementation)
         results = []
-        for parameter_dict, species_dict in samples:
+        for parameter_dict, species_dict in tqdm(samples):
             # Update the species and parameters with the sampled values
             # Note - this is important to maintain the correct ordering
             species.update(species_dict)
@@ -137,12 +151,11 @@ class Model(object):
             y = solver.run(self._reactions, species_names, species_values, parameter_values, self.ts)
             results.append(y)
 
-        return results
+        return MultiModelResult(self, results, list(species.keys()))
 
 
     # TODO
-    ## Test run_multi using the scipy sampler
-    ## Set up salib sampler
+    ## Multi output
     ## Look into vectorisation and gpu acceleration
 
 

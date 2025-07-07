@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from SALib.analyze import sobol
 
 
-
 """ --- Sensitivity analysis --- """
 def get_concentrations_at_timepoint(model, output, timepoint, substrate):
     """
