@@ -15,7 +15,8 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../'))
+
+import kinetics
 
 # -- Project information -----------------------------------------------------
 
@@ -24,9 +25,9 @@ copyright = '2019, William Finnigan'
 author = 'William Finnigan'
 
 # The short X.Y version
-version = '2.0.0'
+version = '.'.join(kinetics.__version__.split('.')[:2])
 # The full version, including alpha/beta/rc tags
-release = '2.0.0'
+release = kinetics.__version__
 
 
 # -- General configuration ---------------------------------------------------
