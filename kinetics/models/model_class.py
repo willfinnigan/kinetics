@@ -8,8 +8,8 @@ from tqdm import tqdm
 from kinetics.sampling.scipy_sampling import ScipyDist_Sampler
 from kinetics.solvers.scipy_solver import SciPySolver
 
-from kinetics.models.results.single_result import SingleModelResult
-from kinetics.models.results.multi_result import MultiModelResult
+from kinetics.models.result_classes.single_result import SingleModelResult
+from kinetics.models.result_classes.multi_result import MultiModelResult
 
 if TYPE_CHECKING:
     from kinetics.sampling.sampling_interface import Sampler

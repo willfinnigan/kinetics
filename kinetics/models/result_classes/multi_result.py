@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from matplotlib import pyplot as plt
 
-from kinetics.models.results.single_result import plot_data
+from kinetics.models.result_classes.single_result import plot_data
 
 if TYPE_CHECKING:
     from kinetics.models.model_class import Model
