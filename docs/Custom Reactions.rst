@@ -19,7 +19,6 @@ An example which models a UniUni enzyme
 .. code:: python
 
     import kinetics
-    import kinetics.Uncertainty as ua
     import matplotlib.pyplot as plt
     from scipy.stats import norm
 
@@ -44,28 +43,29 @@ An example which models a UniUni enzyme
                                      'k_2' : norm(0.1, 0.01)}
 
     model = kinetics.Model()
+    model.add_reaction(step1)
+    model.add_reaction(step2)
+    model.set_time(0, 100, 1000)
+    
+    starting_concentrations = {'e': 1, 'a': 100}
 
-    model.append(step1)
-    model.append(step2)
-    model.species = {'e' : 1,
-                     'a' : 100}
-
-    model.setup_model()
-
-    model.run_model()
-    model.plot_substrate('a')
-    model.plot_substrate('e')
-    model.plot_substrate('ea')
-    model.plot_substrate('p')
+    # Run single model
+    result = model.run_single(starting_concentrations)
+    result.plot('a')
+    result.plot('e')
+    result.plot('ea')
+    result.plot('p')
     plt.show()
 
-    samples = ua.make_samples_from_distributions(model, num_samples=1000)
-    outputs = ua.run_all_models(model, samples, logging=True)
-    all_runs_dataframes = ua.dataframes_all_runs(model, outputs)
-    ua.plot_substrate('a', all_runs_dataframes, colour='blue', alpha=0.01, linewidth=5)
-    ua.plot_substrate('e', all_runs_dataframes, colour='darkorange', alpha=0.01, linewidth=5)
-    ua.plot_substrate('ea', all_runs_dataframes, colour='green', alpha=0.01, linewidth=5)
-    ua.plot_substrate('p', all_runs_dataframes, colour='purple', alpha=0.01, linewidth=5)
+    # For uncertainty analysis, use the sampling functionality
+    sampler = kinetics.ScipyDist_Sampler(num_samples=1000)
+    multi_result = model.run_multi(starting_concentrations, sampler)
+    
+    # Plot results with uncertainty bands
+    multi_result.plot('a', quartile=95)
+    multi_result.plot('e', quartile=95)
+    multi_result.plot('ea', quartile=95)
+    multi_result.plot('p', quartile=95)
     plt.show()
 
 2.  Make your own reaction class.

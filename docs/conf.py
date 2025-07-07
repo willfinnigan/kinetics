@@ -24,9 +24,9 @@ copyright = '2019, William Finnigan'
 author = 'William Finnigan'
 
 # The short X.Y version
-version = '1.4.5'
+version = '2.0.0'
 # The full version, including alpha/beta/rc tags
-release = '1.4.5'
+release = '2.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -64,7 +64,7 @@ html_logo = 'images/logo1.png'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

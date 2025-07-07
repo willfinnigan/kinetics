@@ -14,9 +14,21 @@ kinetics uses [scipy's probability distributions](https://docs.scipy.org/doc/sci
 
 **Github:** [kinetics](https://github.com/willfinnigan/kinetics)
 
-**Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/), [matplotlib](http://matplotlib.org/), [tqdm](https://tqdm.github.io), [pandas](http://pandas.pydata.org), [SALib](https://salib.readthedocs.io), [seaborn](http://seaborn.pydata.org), and [deap](https://deap.readthedocs.io/en/master/).
+**Requirements:** [NumPy](http://www.numpy.org/), [SciPy](http://www.scipy.org/), [matplotlib](http://matplotlib.org/), [tqdm](https://tqdm.github.io), [pandas](http://pandas.pydata.org), [SALib](https://salib.readthedocs.io), [seaborn](http://seaborn.pydata.org), [pytest](https://docs.pytest.org/), [JAX](https://jax.readthedocs.io/), [diffrax](https://docs.kidger.site/diffrax/), [deap](https://deap.readthedocs.io/en/master/)
 
-**Installation:** `pip install kinetics`
+## Installation
+
+**Installation:**
+```bash
+pip install kinetics
+```
+
+**Development installation:**
+```bash
+git clone https://github.com/willfinnigan/kinetics.git
+cd kinetics
+pip install -e .
+```
 
 **Citation:** [Finnigan, W., Cutlan, R., Snajdrova, R., Adams, J., Littlechild, J. and Harmer, N. (2019), Engineering a seven enzyme biotransformation using mathematical modelling and characterized enzyme parts. ChemCatChem.](https://doi.org/10.1002/cctc.201900646)
 

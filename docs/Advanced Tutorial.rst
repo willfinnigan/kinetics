@@ -57,8 +57,8 @@ Next we define our model as before.
 
     # Set up the model
     model = kinetics.Model()
-    model.append(enzyme_1)
-    model.append(enzyme_2)
+    model.add_reaction(enzyme_1)
+    model.add_reaction(enzyme_2)
     model.set_time(0, 120, 1000)
 
 We can include uncertainty in some or all of the starting species concentrations.
@@ -67,11 +67,10 @@ We have specified no uncertainty in the starting concentration of A.
 
 .. code:: python
 
-    # Set starting concentrations
-    model.species = {"A" : 10000}
-    model.species_distributions = {"enz_1" : norm(4, 4*0.05),
-                                   "enz_2" : norm(10, 10*0.05)}
-    model.setup_model()
+    # Set starting concentrations (mix of fixed values and distributions)
+    species_dict = {"A": 10000,
+                    "enz_1": norm(4, 4*0.05),
+                    "enz_2": norm(10, 10*0.05)}
 
 Running the model with a single set of parameter values
 -------------------------------------------------------
@@ -80,10 +79,10 @@ Running the model this way will use the mean of each probability distribution sp
 
 .. code:: python
 
-    model.run_model()
-    model.plot_substrate('A')
-    model.plot_substrate('B')
-    model.plot_substrate('C', plot=True)
+    result = model.run_single(species_dict)
+    result.plot('A')
+    result.plot('B')
+    result.plot('C')
 
 .. image:: images/simple_example1.png
    :scale: 25
@@ -93,26 +92,23 @@ Running the model by sampling within the probability distributions
 ------------------------------------------------------------------
 However we would like to run lots of models, sampling within our probability distributions.
 
-To generate samples from within the distributions we have defined, run ``kinetics.sample_distributions(model, num_samples=1000)``.
-This returns a set of samples which can be used by ``kinetics.run_all_models(model, samples)``.
-
-``kinetics.run_all_models(model, samples)`` will return a list of outputs.  Each entry in this list is equivalent to ``model.y`` after running ``model.run_model()``.
+In the new API, we use a sampler class to generate samples from distributions and then run multiple models using ``model.run_multi()``.
 
 .. code:: python
 
-    # Run the model 1000 times, sampling from distributions
-    samples = kinetics.sample_distributions(model, num_samples=1000)
-    outputs = kinetics.run_all_models(model, samples, logging=True)
+    # Create a sampler and run the model 1000 times, sampling from distributions
+    sampler = kinetics.ScipyDist_Sampler(num_samples=1000)
+    result = model.run_multi({"A": 10000, "enz_1": 4, "enz_2": 10}, sampler)
 
 Plotting the data
 -----------------
-To deal with the large amount of data this generates, two functions are available to generate a dictionary containing dataframes for each species in the model.
+The result object from ``model.run_multi()`` provides methods to access and plot the data.
 
-``dataframes_all_runs(model, output)`` will return dataframes containing every single run.
+``result.dataframe()`` returns a dictionary containing dataframes for each species showing all runs.
 
-``dataframes_quartiles(model, output, quartile=95)`` will return dataframes containing a High, Low and Mean value, based on whatever quartile is specified (default=95%).
+``result.dataframe_quartiles(quartile=95)`` returns dataframes with confidence intervals (High, Low, Mean).
 
-These dataframes can then be exported for further use, or can be used to generate plots.
+These dataframes can be exported for further use, or the result object provides built-in plotting methods.
 
 Plotting graphs with confidence intervals
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -121,9 +117,10 @@ Plotting the 95% confidence intervals can look neater, but we lose some informat
 
 .. code:: python
 
-    # Plot model runs at 95% CI
-    ci_dataframes = kinetics.dataframes_quartiles(model, outputs)
-    kinetics.plot_ci_intervals(['A', 'B', 'C'], ci_dataframes, colours=['blue', 'darkorange', 'green'], plot=True)
+    # Plot model runs with 95% confidence intervals
+    result.plot('A', quartile=95)
+    result.plot('B', quartile=95)  
+    result.plot('C', quartile=95)
 
 .. image:: images/advanced_example1.png
    :scale: 25
@@ -133,15 +130,13 @@ Plotting graphs showing all runs (spagetti plots)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Alternatively we can plot every single run.  With 1000 runs this can look a bit chaotic, and it may be clearer to plot each substrate on its own graph.
-Also, altering the alpha and linewidth values allows the graphs to be tweaked to preference.
 
 .. code:: python
 
-    # Plot all model runs
-    all_runs_dataframes = kinetics.dataframes_all_runs(model, outputs)
-    kinetics.plot_substrate('A', all_runs_dataframes, colour='blue', alpha=0.01, linewidth=5)
-    kinetics.plot_substrate('B', all_runs_dataframes, colour='darkorange', alpha=0.01, linewidth=5)
-    kinetics.plot_substrate('C', all_runs_dataframes, colour='green', alpha=0.01, linewidth=5, plot=True)
+    # Plot all individual model runs
+    result.plot_all('A')
+    result.plot_all('B')
+    result.plot_all('C')
 
 .. image:: images/advanced_example2.png
    :scale: 25
@@ -149,9 +144,8 @@ Also, altering the alpha and linewidth values allows the graphs to be tweaked to
 
 Of course the dataframes are also available to be used as the output, possibly to create your own graphs or for other analysis.
 
-
 Complete code
--------------
+----------------------------------------
 
 .. code:: python
 
@@ -174,36 +168,36 @@ Complete code
                                         'enz2_km' : reciprocal(1,10000)}
 
     # Set up the model
-    model = kinetics.Model(logging=False)
-    model.append(enzyme_1)
-    model.append(enzyme_2)
+    model = kinetics.Model()
+    model.add_reaction(enzyme_1)
+    model.add_reaction(enzyme_2)
     model.set_time(0, 120, 1000)
 
-    # Set starting concentrations
-    model.species = {"A" : 10000}
-    model.species_distributions = {"enz_1" : norm(4, 4*0.05),
-                                   "enz_2" : norm(10, 10*0.05)}
-    model.setup_model()
+    # Set starting concentrations (fixed values and distributions)
+    species_dict = {"A": 10000,
+                    "enz_1": norm(4, 4*0.05),
+                    "enz_2": norm(10, 10*0.05)}
+
+    # Run a single model first with mean values
+    single_result = model.run_single(species_dict)
+    single_result.plot('A')
+    single_result.plot('B')
+    single_result.plot('C')
 
     # Run the model 1000 times, sampling from distributions
-    samples = kinetics.sample_distributions(model, num_samples=1000)
-    outputs = kinetics.run_all_models(model, samples, logging=True)
+    sampler = kinetics.ScipyDist_Sampler(num_samples=1000)
+    multi_result = model.run_multi(species_dict, sampler)
 
-    model.run_model()
-    model.plot_substrate('A')
-    model.plot_substrate('B')
-    model.plot_substrate('C', plot=True)
-
-    # Plot model runs at 95% CI
-    ci_dataframes = kinetics.dataframes_quartiles(model, outputs)
-    kinetics.plot_ci_intervals(['A', 'B', 'C'], ci_dataframes, colours=['blue', 'darkorange', 'green'])
+    # Plot model runs with 95% confidence intervals
+    multi_result.plot('A', quartile=95)
+    multi_result.plot('B', quartile=95)
+    multi_result.plot('C', quartile=95)
     plt.show()
 
-    # Plot all model runs
-    all_runs_dataframes = kinetics.dataframes_all_runs(model, outputs)
-    kinetics.plot_substrate('A', all_runs_dataframes, colour='blue', alpha=0.01, linewidth=5)
-    kinetics.plot_substrate('B', all_runs_dataframes, colour='darkorange', alpha=0.01, linewidth=5)
-    kinetics.plot_substrate('C', all_runs_dataframes, colour='green', alpha=0.01, linewidth=5)
+    # Plot all individual model runs
+    multi_result.plot_all('A')
+    multi_result.plot_all('B')
+    multi_result.plot_all('C')
     plt.show()
 
 

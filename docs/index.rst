@@ -47,6 +47,8 @@ Features
    Why What and How
    Simple Tutorial
    Advanced Tutorial
+   Advanced Tutorial 2
+   Sensitivity Analysis
    Reactions
    Custom Reactions
    API

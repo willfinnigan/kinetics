@@ -7,12 +7,26 @@ It is highly recommended to use a distribution such as anaconda, which already c
 Installing kinetics
 -------------------
 
-To install the latest stable version of kinetics using pip, together with all the
-dependencies, run the following command:
+Installation
+~~~~~~~~~~~~
+
+To install kinetics with all functionality:
 
 ::
 
     pip install kinetics
+
+
+Development Installation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+To install for development:
+
+::
+
+    git clone https://github.com/willfinnigan/kinetics.git
+    cd kinetics
+    pip install -e .
 
 
 Running in google colab
@@ -36,43 +50,42 @@ Try this block of code in a `google colab <https://colab.research.google.com/>`_
                            'enz1_km' : 8000}
 
     # Set up the model
-    model = kinetics.Model(logging=False)
-    model.append(enzyme_1)
+    model = kinetics.Model()
+    model.add_reaction(enzyme_1)
     model.set_time(0, 120, 1000) # 120 mins, 1000 timepoints.
 
     # Set starting concentrations
-    model.species = {"A" : 10000,
-                     "enz_1" : 4,}
-    model.setup_model()
+    starting_concentrations = {"A": 10000, "enz_1": 4}
 
     # Run the model
-    model.run_model()
-    model.plot_substrate('A')
-    model.plot_substrate('B', plot=True)
+    result = model.run_single(starting_concentrations)
+    result.plot('A')
+    result.plot('B')
 
 
-Prerequisite Software
----------------------
-You shouldn't need to worry about this if using the **anaconda** python distribution, and ``pip install kinetics``.
+Dependencies
+------------
 
+All Dependencies Included
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-kinetics requires `NumPy <http://www.numpy.org/>`_, `SciPy <http://www.scipy.org/>`_,
-`matplotlib <http://matplotlib.org/>`_, `tqdm <https://tqdm.github.io>`_, `pandas <http://pandas.pydata.org>`_,
-`SALib <https://salib.readthedocs.io>`_, `seaborn <http://seaborn.pydata.org>`_, and `deap <https://deap.readthedocs.io/en/master/>`_,installed on your computer.
-Using `pip <https://pip.pypa.io/en/stable/installing/>`_, these libraries can be installed with the following command:
+kinetics installs all these packages automatically:
 
-::
+- `NumPy <http://www.numpy.org/>`_ - numerical computing
+- `SciPy <http://www.scipy.org/>`_ - scientific computing  
+- `matplotlib <http://matplotlib.org/>`_ - plotting
+- `pandas <http://pandas.pydata.org>`_ - data structures
+- `tqdm <https://tqdm.github.io>`_ - progress bars
+- `SALib <https://salib.readthedocs.io>`_ - sensitivity analysis
+- `seaborn <http://seaborn.pydata.org>`_ - statistical plotting
+- `pytest <https://docs.pytest.org/>`_ - testing framework
+- `JAX <https://jax.readthedocs.io/>`_ - high-performance numerical computing
+- `diffrax <https://docs.kidger.site/diffrax/>`_ - JAX-based differential equation solver
+- `deap <https://deap.readthedocs.io/en/master/>`_ - genetic algorithms and optimization
 
-    pip install numpy
-    pip install scipy
-    pip install matplotlib
-    pip install tqdm
-    pip install pandas
-    pip install salib
-    pip install deap
-    pip install seaborn
+Modern Package Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The packages are normally included with most Python bundles, such as Anaconda.
-In any case, they are installed automatically when using pip or setuptools to install
-kinetics.
+kinetics now uses modern Python packaging with ``pyproject.toml`` configuration. 
+The project follows PEP 517/518 standards for build systems and dependency management.
 

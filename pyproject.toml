@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kinetics"
+dynamic = ["version"]
+description = "Python code to run kinetic models of enzyme reactions"
+readme = "README.md"
+license = {text = "MIT"}
+license-files = ["LICENSE"]
+authors = [
+    {name = "William Finnigan", email = "wjafinnigan@gmail.com"}
+]
+keywords = ["enzyme", "kinetics", "modelling"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Chemistry"
+]
+requires-python = ">=3.8"
+dependencies = [
+    "scipy",
+    "numpy",
+    "matplotlib",
+    "pandas",
+    "tqdm",
+    "SALib",
+    "seaborn",
+    "pytest",
+    "jax",
+    "diffrax",
+    "deap"
+]
+
+[project.urls]
+Homepage = "https://github.com/willfinnigan/kinetics"
+Repository = "https://github.com/willfinnigan/kinetics"
+Download = "https://github.com/willfinnigan/kinetics/archive/v2.0.0.tar.gz"
+
+[tool.setuptools]
+packages = {find = {}}
+package-dir = {""="."}
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "kinetics.__version__"}
+
+[tool.setuptools.package-data]
+kinetics = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

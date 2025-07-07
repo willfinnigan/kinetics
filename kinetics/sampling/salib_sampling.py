@@ -116,19 +116,20 @@ class SalibSaltelliSampler(Sampler):
         self.num_samples = num_samples
         self.second_order = second_order
         self.log_parameters = log_parameters if log_parameters is not None else []
+        self.problem = None  # Store the problem for sensitivity analysis
     
     def sample(self,
                parameter_distributions: dict,
                species_distributions: dict) -> List[Tuple[dict, dict]]:
         
         # Build SALib problem
-        problem = build_salib_problem(parameter_distributions, species_distributions, self.log_parameters)
+        self.problem = build_salib_problem(parameter_distributions, species_distributions, self.log_parameters)
         
         # Generate samples
-        samples = saltelli.sample(problem, self.num_samples, calc_second_order=self.second_order)
+        samples = saltelli.sample(self.problem, self.num_samples, calc_second_order=self.second_order)
         
         # Convert log space back to normal space
-        samples = samples_to_normal_space(samples, problem, self.log_parameters)
+        samples = samples_to_normal_space(samples, self.problem, self.log_parameters)
         
         # Parse samples into parameter and species dictionaries
         return parse_samples(samples, parameter_distributions, species_distributions)

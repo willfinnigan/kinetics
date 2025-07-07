@@ -24,7 +24,7 @@ For example:
                                         'kma1': uniform(25,50)}
 
     model = kinetics.Model()
-    model.append(enzyme1)
+    model.add_reaction(enzyme_1)
 
 
 
@@ -36,6 +36,7 @@ Uni
 ~~~
 
 .. autoclass:: kinetics.Uni
+   :members:
 
 The classic Miachelis-Menton equation for a single substrate.
 
@@ -46,6 +47,7 @@ Bi
 ~~
 
 .. autoclass:: kinetics.Bi
+   :members:
 
 Not strictly a true Miachaelis-Menton equation.
 Use with caution.  Will give a reasonable prediction if one substrate is saturating, otherwise is likely wrong.
@@ -57,6 +59,7 @@ Bi Ternary Complex
 ~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: kinetics.Bi_ternary_complex
+   :members:
 
 For reactions with two substrates which have an sequential mechanism (either ordered or random).
 
@@ -67,6 +70,7 @@ Bi Ping Pong
 ~~~~~~~~~~~~
 
 .. autoclass:: kinetics.Bi_ping_pong
+   :members:
 
 For reactions with two substrates which have a ping-pong mechanism
 
@@ -78,6 +82,7 @@ Ter seq redam
 ~~~~~~~~~~~~~
 
 .. autoclass:: kinetics.Ter_seq_redam
+   :members:
 
 A three substrate rate equation which can be used for Reductive Aminase enzymes.
 
@@ -96,6 +101,7 @@ Ter seq car
 ~~~~~~~~~~~
 
 .. autoclass:: kinetics.Ter_seq_car
+   :members:
 
 A three substrate rate equation which can be used for Carboxylic Acid Reductase enzymes.
 
@@ -112,6 +118,7 @@ Bi ternary complex small kma
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: kinetics.Bi_ternary_complex_small_kma
+   :members:
 
 A special case of Bi Ternary Complex where kma << kia.
 
@@ -130,6 +137,7 @@ UniUni Reversible
 ~~~~~~~~~~~~~~~~~
 
 .. autoclass:: kinetics.UniUni_rev
+   :members:
 
 .. math::
     rate = \frac{([E] * \frac{k_f}{K^m_s} * [S]) - ([E] * \frac{k_r}{K^m_p} * [P]}{1 + \frac{[S]}{K^m_s} + \frac{[P]}{K^m_p}}
@@ -141,39 +149,41 @@ BiBi Ordered Rev
 ~~~~~~~~~~~~~~~~
 
 .. autoclass:: kinetics.BiBi_Ordered_rev
+   :members:
 
 BiBi Random Rev
 ~~~~~~~~~~~~~~~
 
 .. autoclass:: kinetics.BiBi_Random_rev
+   :members:
 
 BiBi Pingpong Rev
 ~~~~~~~~~~~~~~~~~
 
 .. autoclass:: kinetics.BiBi_Pingpong_rev
+   :members:
 
 
 Equilibrium based reversible Michaelis-Menten kinetics
 ------------------------------------------------------
 
 BiBi Ordered rev eq
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: kinetics.BiBi_Ordered_rev_eq
+   :members:
 
 UniUni Ordered rev eq
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: kinetics.UniUni_rev_eq
+   :members:
 
 
 Equilibrium based mass action
 ------------------------------------------------------
 
-UniUni Ordered rev eq
-~~~~~~~~~~~~~~~~~
-
-.. autoclass:: kinetics.UniUni_rev_eq
+Mass action kinetics are available through the equilibrium-based reaction classes described above.
 
 
 
@@ -194,12 +204,16 @@ This feature allows the easy modification of the pre-defined rate equations.
 
 
 .. autoclass:: kinetics.SubstrateInhibition
+   :members:
 
 .. autoclass:: kinetics.CompetitiveInhibition
+   :members:
 
 .. autoclass:: kinetics.MixedInhibition
+   :members:
 
 .. autoclass:: kinetics.FirstOrder_Modifier
+   :members:
 
 
 
@@ -210,6 +224,7 @@ This reaction class could in theory be the only one you ever need.
 It allows you to specify your own rate equation.
 
 .. autoclass:: kinetics.Generic
+   :members:
 
 
 

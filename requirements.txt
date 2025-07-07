@@ -1,0 +1,11 @@
+scipy
+numpy
+matplotlib
+pandas
+tqdm
+SALib
+seaborn
+pytest
+jax
+diffrax
+deap

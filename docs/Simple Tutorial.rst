@@ -45,22 +45,21 @@ This example is then explained step by step in the rest of this tutorial.
                            'enz2_km' : 2000}
 
     # Set up the model
-    model = kinetics.Model(logging=False)
-    model.append(enzyme_1)
-    model.append(enzyme_2)
+    model = kinetics.Model()
+    model.add_reaction(enzyme_1)
+    model.add_reaction(enzyme_2)
     model.set_time(0, 120, 1000) # 120 mins, 1000 timepoints.
 
     # Set starting concentrations
-    model.species = {"A" : 10000,
-                     "enz_1" : 4,
-                     "enz_2" : 10}
-    model.setup_model()
+    starting_concentrations = {"A" : 10000,
+                               "enz_1" : 4,
+                               "enz_2" : 10}
 
     # Run the model
-    model.run_model()
-    model.plot_substrate('A')
-    model.plot_substrate('B')
-    model.plot_substrate('C', plot=True)
+    result = model.run_single(starting_concentrations)
+    result.plot('A')
+    result.plot('B')
+    result.plot('C')
 
     # Now try altering the enzyme concentration, km or kcat, and re-running the model to see the effects this has....
 
@@ -114,13 +113,13 @@ It is essentially a list to which we append our reactions, with some extra varia
 
 Add reactions to the model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-The reactions we defined above are appended to the model.
+The reactions we defined above are added to the model.
 
 .. code:: python
 
-    # Append our reactions.
-    model.append(enzyme_1)
-    model.append(enzyme_2)
+    # Add our reactions.
+    model.add_reaction(enzyme_1)
+    model.add_reaction(enzyme_2)
 
 Set how long the model will simulate
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,26 +140,25 @@ Only species which are greater than 0 need to be defined here.
 .. code:: python
 
     # Set starting concentrations
-    model.species = {"A" : 10000,
-                    "enz_1" : 4,
-                    "enz_2" : 10}
+    starting_concentrations = {"A" : 10000,
+                               "enz_1" : 4,
+                               "enz_2" : 10}
 
 Run the model
 ~~~~~~~~~~~~~
-Once everything is set, run ``model_one.setup_model()`` followed by ``model_one.run_model()``.
-A dataframe containing the simulation results is then available using ``model_one.results_dataframe()``.
-Alternatively, results can plotted directly using an in-built plot function ``model_one.plot_substrate('A')``.
+Once everything is set, run ``model.run_single(starting_concentrations)``.
+A dataframe containing the simulation results is then available using ``result.dataframe()``.
+Alternatively, results can plotted directly using an in-built plot function ``result.plot('A')``.
 
 .. code:: python
 
-    # Setup and run the model
-    model.setup_model()
-    model.run_model()
+    # Run the model
+    result = model.run_single(starting_concentrations)
 
     # Plot the results
-    model.plot_substrate('A')
-    model.plot_substrate('B')
-    model.plot_substrate('C', plot=True)
+    result.plot('A')
+    result.plot('B')
+    result.plot('C')
 
 .. image:: images/simple_example1.png
    :scale: 25
