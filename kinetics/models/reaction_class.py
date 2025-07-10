@@ -11,7 +11,7 @@ except ImportError:
     jnp = None
     HAS_JAX = False
 
-def calculate_yprime(y: np.ndarray, rate: float, substrates: list[str], products: list[str], substrate_names: list[str]) -> np.ndarray:
+def calculate_yprime_old(y: np.ndarray, rate: float, substrates: list[str], products: list[str], substrate_names: list[str]) -> np.ndarray:
     """Calculate derivative array for ODE integration.
 
     Args:
@@ -44,6 +44,25 @@ def calculate_yprime(y: np.ndarray, rate: float, substrates: list[str], products
             y_prime = y_prime.at[idx].add(rate)
         else:
             y_prime[idx] += rate
+
+    return y_prime
+
+
+def calculate_yprime(y: np.ndarray,
+                     rate: float,
+                     substrate_indices: list[int],
+                     product_indices: list[int]) -> np.ndarray:
+    """Calculate derivative array using pre-computed indices."""
+
+    # Create zeros array compatible with input array type (JAX or NumPy)
+    if HAS_JAX and hasattr(y, 'shape') and str(type(y)).startswith('<class \'jax'):
+        y_prime = jnp.zeros_like(y)
+        y_prime = y_prime.at[substrate_indices].add(-rate)
+        y_prime = y_prime.at[product_indices].add(rate)
+    else:
+        y_prime = np.zeros(len(y))
+        y_prime[substrate_indices] -= rate
+        y_prime[product_indices] += rate
 
     return y_prime
 
@@ -88,14 +107,17 @@ class Reaction:
         self.parameter_distributions = {}
 
         # indexes used to access values during model run
-        self.substrate_indexes = []
+        self.reaction_substrate_indexes = []
         self.parameter_indexes = []
+
 
         # These are set when the reaction is set up
         self.reaction_substrate_names = []
         self.parameter_names = []
         self.substrates = []
         self.products = []
+        self.substrate_indexes = []
+        self.product_indexes = []
 
         # These are added as needed
         self.modifiers = []
@@ -120,12 +142,10 @@ class Reaction:
         """
 
         # get indexes
-        self.substrate_indexes = []
-        for name in self.reaction_substrate_names:
-            self.substrate_indexes.append(species_names.index(name))
-        self.parameter_indexes = []
-        for name in self.parameter_names:
-            self.parameter_indexes.append(parameter_names.index(name))
+        self.reaction_substrate_indexes = [species_names.index(name) for name in self.reaction_substrate_names]
+        self.substrate_indexes = [species_names.index(name) for name in self.reaction_substrate_names]
+        self.product_indexes = [species_names.index(name) for name in self.products]
+        self.parameter_indexes = [parameter_names.index(name) for name in self.parameter_names]
 
         # set up modifiers
         for modifier in self.modifiers:
@@ -199,7 +219,7 @@ class Reaction:
 
         # Get the substrates from y using the substrate indexes
         substrates = []
-        for index in self.substrate_indexes:
+        for index in self.reaction_substrate_indexes:
             substrates.append(y[index])
 
         # Get the parameters using the parameter indexes
@@ -215,7 +235,7 @@ class Reaction:
         rate = self.calculate_rate(substrates, parameters)
 
         # calculate the change in substrate concentrations (y_prime)
-        y_prime = calculate_yprime(y, rate, self.substrates, self.products, substrate_names)
+        y_prime = calculate_yprime(y, rate, self.substrate_indexes, self.product_indexes)
         y_prime = self.modify_product(y_prime, substrate_names)
 
         if self.check_positive == True:
@@ -256,16 +276,14 @@ class Reaction:
         
         # Calculate derivatives for all samples
         y_prime_batch = np.zeros((n_samples, n_species))
-        
-        # Apply rate to substrates (subtract)
-        for name in self.substrates:
-            idx = substrate_names.index(name)
-            y_prime_batch[:, idx] -= rates_batch
-        
-        # Apply rate to products (add)
-        for name in self.products:
-            idx = substrate_names.index(name)
-            y_prime_batch[:, idx] += rates_batch
+
+        # Compute indices once during initialization or setup
+        substrate_indices = [substrate_names.index(name) for name in self.substrates]
+        product_indices = [substrate_names.index(name) for name in self.products]
+
+        # Then use the pre-computed indices
+        y_prime_batch[:, substrate_indices] -= rates_batch
+        y_prime_batch[:, product_indices] += rates_batch
         
         return y_prime_batch
 
