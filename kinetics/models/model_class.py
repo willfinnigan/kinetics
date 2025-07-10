@@ -202,7 +202,7 @@ class Model(object):
         # Now we sample
         samples = sampler.sample(parameter_distributions, species)
 
-        # Ok here is where I think we can vectorize
+        # Ok here is where I think we can vectorize (actually this turned out to be slower?)
         # But for now we're just run one at a time (which is the existing implementation)
         results = []
         for parameter_dict, species_dict in tqdm(samples):
