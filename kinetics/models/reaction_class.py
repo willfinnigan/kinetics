@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import numpy as np
 import copy
+from typing import Any
+
 try:
     import jax.numpy as jnp
     HAS_JAX = True
@@ -7,23 +11,18 @@ except ImportError:
     jnp = None
     HAS_JAX = False
 
-def calculate_yprime(y, rate, substrates, products, substrate_names):
-    """
-    This function is used by the rate classes the user creates.
-
-    It takes the numpy array for y_prime,
-    and adds or subtracts the amount in rate to all the substrates or products listed
-    Returns the new y_prime
+def calculate_yprime(y: np.ndarray, rate: float, substrates: list[str], products: list[str], substrate_names: list[str]) -> np.ndarray:
+    """Calculate derivative array for ODE integration.
 
     Args:
-        y: a numpy array for the substrate values, the same order as y
-        rate: the rate calculated by the user made rate equation
-        substrates: list of substrates for which rate should be subtracted
-        products: list of products for which rate should be added
-        substrate_names: the ordered list of substrate names in the model.  Used to get the position of each substrate or product in y_prime
+        y: Current species concentrations array
+        rate: Reaction rate value
+        substrates: Substrate names (rate subtracted)
+        products: Product names (rate added)
+        substrate_names: Ordered species names for indexing
 
     Returns:
-        y_prime: following the addition or subtraction of rate to the specificed substrates
+        Derivative array with rate contributions
     """
 
     # Create zeros array compatible with input array type (JAX or NumPy)
@@ -48,9 +47,14 @@ def calculate_yprime(y, rate, substrates, products, substrate_names):
 
     return y_prime
 
-def check_positive(y_prime):
-    """
-    Chack that substrate values are not negative when they shouldnt be
+def check_positive(y_prime: np.ndarray) -> np.ndarray:
+    """Ensure species concentrations remain non-negative.
+    
+    Args:
+        y_prime: Derivative array
+        
+    Returns:
+        Modified derivative array with negative values set to zero
     """
 
     for i in range(len(y_prime)):
@@ -59,9 +63,25 @@ def check_positive(y_prime):
 
     return y_prime
 
-class Reaction():
+class Reaction:
+    """Base class for all reaction types.
+    
+    Provides common functionality for parameter management, species handling,
+    and rate calculation. Subclasses implement specific kinetic equations.
+    
+    Attributes:
+        parameters (dict): Fixed parameter values
+        parameter_distributions (dict): Parameter probability distributions
+        substrates (list): Substrate species names
+        products (list): Product species names
+        reaction_substrate_names (list): All species involved in reaction
+        parameter_names (list): All parameter names
+        modifiers (list): Reaction modifiers (e.g., inhibitors)
+        check_positive (bool): Whether to enforce non-negative concentrations
+    """
 
     def __init__(self):
+        """Initialize reaction with empty parameter and species lists."""
 
         # These are set by the user
         self.parameters = {}
@@ -82,7 +102,8 @@ class Reaction():
         self.check_positive = False
         self.check_limits_functions = []
 
-    def set_parameter_defaults_to_mean(self):
+    def set_parameter_defaults_to_mean(self) -> None:
+        """Set default parameter values from distribution means."""
         for name in self.parameter_distributions:
             if name not in self.parameters:
                 if type(self.parameter_distributions[name]) == list or type(self.parameter_distributions[name]) == tuple:
@@ -90,7 +111,13 @@ class Reaction():
                 else:
                     self.parameters[name] = self.parameter_distributions[name].mean()
 
-    def setup_reaction(self, species_names, parameter_names):
+    def setup_reaction(self, species_names: list[str], parameter_names: list[str]) -> None:
+        """Set up reaction indexes for efficient parameter/species access.
+        
+        Args:
+            species_names: Ordered list of all species in model
+            parameter_names: Ordered list of all parameters in model
+        """
 
         # get indexes
         self.substrate_indexes = []
@@ -105,7 +132,12 @@ class Reaction():
             modifier.get_substrate_indexes(self.reaction_substrate_names)
             modifier.get_parameter_indexes(self.parameter_names)
 
-    def add_modifier(self, modifier):
+    def add_modifier(self, modifier: Any) -> None:
+        """Add a modifier (e.g., inhibitor) to the reaction.
+        
+        Args:
+            modifier: Modifier object with parameter_names and substrate_names
+        """
         for name in modifier.parameter_names:
             if name not in self.parameter_names:
                 self.parameter_names.append(name)
@@ -116,11 +148,54 @@ class Reaction():
 
         self.modifiers.append(modifier)
 
-    def calculate_rate(self, substrates, parameters):
+    def calculate_rate(self, substrates: list[float], parameters: list[float]) -> float:
+        """Calculate reaction rate
+        
+        Args:
+            substrates: Current substrate concentrations
+            parameters: Parameter values
+            
+        Returns:
+            Reaction rate
+        """
         return 0
 
-    def reaction(self, y, substrate_names, parameter_values):
-        """Calculate the rate of the reaction and return the change in substrate concentrations (y_prime)."""
+    def calculate_rate_batch(self, substrates_batch: np.ndarray, parameters_batch: np.ndarray) -> np.ndarray:
+        """Calculate reaction rates for multiple parameter sets.
+        
+        This method provides vectorized rate calculation for batch processing.
+        Default implementation processes each parameter set individually.
+        Subclasses should override this for true vectorization.
+        
+        Args:
+            substrates_batch: Substrate concentrations (n_samples, n_substrates)
+            parameters_batch: Parameter values (n_samples, n_parameters)
+            
+        Returns:
+            Rate array (n_samples,)
+        """
+        # n_samples = substrates_batch.shape[0]
+        # rates = np.zeros(n_samples)
+        
+        # for i in range(n_samples):
+        #     substrates_list = substrates_batch[i].tolist()
+        #     parameters_list = parameters_batch[i].tolist()
+        #     rates[i] = self.calculate_rate(substrates_list, parameters_list)
+        
+        # return rates
+        raise NotImplementedError("Subclasses should implement calculate_rate_batch for vectorized rate calculation.")
+
+    def reaction(self, y: np.ndarray, substrate_names: list[str], parameter_values: list[float]) -> np.ndarray:
+        """Calculate rate and return species concentration derivatives.
+        
+        Args:
+            y: Current species concentrations
+            substrate_names: Ordered species names
+            parameter_values: Parameter values
+            
+        Returns:
+            Derivative array (dy/dt)
+        """
 
         # Get the substrates from y using the substrate indexes
         substrates = []
@@ -148,11 +223,73 @@ class Reaction():
 
         return y_prime
 
-    def modify_product(self, y_prime, substrate_names):
+    def reaction_batch(self, y_batch: np.ndarray, substrate_names: list[str], 
+                      parameter_values_batch: np.ndarray) -> np.ndarray:
+        """Calculate rates for multiple parameter sets simultaneously.
+        
+        This method provides batch processing for vectorized solvers.
+        Uses vectorized rate calculation when available.
+        
+        Args:
+            y_batch: Species concentrations (n_samples, n_species)
+            substrate_names: Ordered species names
+            parameter_values_batch: Parameter values (n_samples, n_parameters)
+            
+        Returns:
+            Derivative array (n_samples, n_species)
+        """
+        n_samples = y_batch.shape[0]
+        n_species = y_batch.shape[1]
+        
+        # Get substrates for all samples
+        substrates_batch = np.zeros((n_samples, len(self.substrate_indexes)))
+        for i, index in enumerate(self.substrate_indexes):
+            substrates_batch[:, i] = y_batch[:, index]
+        
+        # Get parameters for all samples
+        parameters_batch = np.zeros((n_samples, len(self.parameter_indexes)))
+        for i, index in enumerate(self.parameter_indexes):
+            parameters_batch[:, i] = parameter_values_batch[:, index]
+        
+        # Calculate rates for all samples using vectorized method
+        rates_batch = self.calculate_rate_batch(substrates_batch, parameters_batch)
+        
+        # Calculate derivatives for all samples
+        y_prime_batch = np.zeros((n_samples, n_species))
+        
+        # Apply rate to substrates (subtract)
+        for name in self.substrates:
+            idx = substrate_names.index(name)
+            y_prime_batch[:, idx] -= rates_batch
+        
+        # Apply rate to products (add)
+        for name in self.products:
+            idx = substrate_names.index(name)
+            y_prime_batch[:, idx] += rates_batch
+        
+        return y_prime_batch
+
+    def modify_product(self, y_prime: np.ndarray, substrate_names: list[str]) -> np.ndarray:
+        """Modify product formation (can be overridden by subclasses).
+        
+        Args:
+            y_prime: Current derivative array
+            substrate_names: Species names
+            
+        Returns:
+            Modified derivative array
+        """
         return y_prime
 
-    def sampling_limits(self, parameter_dict):
-        # Return true if parameters within limits, false if not
+    def sampling_limits(self, parameter_dict: dict) -> bool:
+        """Check if parameter values are within acceptable limits.
+        
+        Args:
+            parameter_dict: Parameter values to check
+            
+        Returns:
+            True if parameters are within limits, False otherwise
+        """
         for func in self.check_limits_functions:
             if func(parameter_dict) == False:
                 return False

@@ -7,18 +7,19 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from kinetics.models.model_class import Model
 
-def plot_data(substrates, data_df,
-              alpha=0.5, size=35, colours=['black'], symbols=["o", "s", '^', 'v']):
-    """
-    Add experimental data to a plot.
-
+def plot_data(substrates: list[str], data_df: pd.DataFrame,
+              alpha: float = 0.5, size: int = 35, 
+              colours: list[str] = ['black'], 
+              symbols: list[str] = ["o", "s", '^', 'v']) -> None:
+    """Add experimental data points to current matplotlib plot.
+    
     Args:
-        substrates (list): A list of substrate names
-        data_df (Dataframe): A pandas dataframe containing experimental data
-        alpha (int): Alpha argument for matplotlib, default = 0.1
-        size (int): Size argument for matplotlib, default = 35
-        colours (list): List of colours for matplotlib. Default=['black']
-        symbols (list): Symbols for matpltlib. Defaut=["o", "s", '^', 'v']
+        substrates: List of substrate names to plot
+        data_df: DataFrame containing experimental data with 'Time' column
+        alpha: Transparency for data points (0-1)
+        size: Size of data points
+        colours: List of colors for different substrates
+        symbols: List of symbols for different substrates
     """
 
     time_data = data_df["Time"]
@@ -37,27 +38,36 @@ def plot_data(substrates, data_df,
                             c=color, alpha=alpha, s=size,
                             marker=symbol)
 
-class SingleModelResult(object):
-    def __init__(self, model: Model, y: np.ndarray, species_names):
-        """
-        This class is used to store the results of a model run.
-
+class SingleModelResult:
+    """Results container for single model run with fixed parameters.
+    
+    Stores simulation results and provides methods for data export and visualization.
+    
+    Attributes:
+        model: The model that was run
+        y: Solution array with shape (n_timepoints, n_species)
+        ts: Time points array
+        species_names: Ordered list of species names
+    """
+    
+    def __init__(self, model: Model, y: np.ndarray, species_names: list[str]):
+        """Initialize result container.
+        
         Args:
-            model (Model): the model that was run
-            y (np.ndarray): the output of the model run
+            model: The model that was run
+            y: Solution array from ODE solver
+            species_names: Ordered list of species names
         """
         self.model = model
         self.y = y
         self.ts = model.ts
         self.species_names = species_names
 
-    # Export results as dataframe and plot
-    def dataframe(self):
-        """
-        Gives the results of a model run as a dataframe
-
+    def dataframe(self) -> pd.DataFrame:
+        """Export results as a pandas DataFrame.
+        
         Returns:
-            Pandas dataframe of results
+            DataFrame with time column and one column per species
         """
         ys_at_t = {'Time': self.ts}
 
@@ -72,15 +82,12 @@ class SingleModelResult(object):
 
         return df
 
-    def plot(self, substrate, units=['', '']):
-        """
-        Plot a graph of substrate concentration vs time.
-
-        Need to call plt.show() afterwards
-
+    def plot(self, substrate: str, units: list[str] = ['', '']) -> None:
+        """Plot substrate concentration vs time.
+        
         Args:
-            substrate (str): Name of substrate to plot
-            plot (bool): Default False.  If True calls plt.show()
+            substrate: Name of substrate to plot
+            units: List of [y_label, x_label] for axis labels
         """
 
         ys_at_t = []
@@ -93,9 +100,21 @@ class SingleModelResult(object):
         plt.xlabel(units[1])
         plt.legend()
 
-    def plot_data(self, substrates, data_df,
-              alpha=0.5, size=35, colours=['black'], symbols=["o", "s", '^', 'v']):
+    def plot_data(self, substrates: list[str], data_df: pd.DataFrame,
+                  alpha: float = 0.5, size: int = 35, 
+                  colours: list[str] = ['black'], 
+                  symbols: list[str] = ["o", "s", '^', 'v']) -> None:
+        """Add experimental data points to current plot.
+        
+        Args:
+            substrates: List of substrate names to plot
+            data_df: DataFrame containing experimental data
+            alpha: Transparency for data points
+            size: Size of data points
+            colours: List of colors for different substrates
+            symbols: List of symbols for different substrates
+        """
         return plot_data(substrates, data_df,
-                            alpha=alpha, size=size, colours=colours, symbols=symbols)
+                        alpha=alpha, size=size, colours=colours, symbols=symbols)
 
 

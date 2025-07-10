@@ -1,27 +1,39 @@
+from __future__ import annotations
+
 from kinetics.solvers.solver_interface import ODESolver
 import numpy as np
 import pandas as pd
 import jax.numpy as jnp
 from jax import jit, devices, device_put
 from diffrax import diffeqsolve, ODETerm, Dopri5, SaveAt, PIDController
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from kinetics.models.reaction_class import Reaction
+
 
 class JaxSolver(ODESolver):
+    """JAX-based ODE solver using Diffrax for high-performance computation.
     
-    # Run the model
-    def deriv(self, t, y, args):
-        """
-        deriv function called by diffrax.diffeqsolve.
-
-        For each step when the model is run, the rate for each reaction is calculated and changes in substrates and products calculated.
-        These are returned by this function as y_prime, which are added to y which is returned by run_model
-
+    Uses JAX for automatic differentiation and GPU acceleration,
+    with the Diffrax library for numerical integration.
+    
+    This solver is optimized for performance-critical applications
+    and supports vectorized operations.
+    """
+    def deriv(self, t: float, y: jnp.ndarray, args: tuple) -> jnp.ndarray:
+        """Calculate derivatives for JAX-based ODE integration.
+        
+        Called by diffrax.diffeqsolve at each integration step.
+        Computes the rate of change for each species using JAX arrays.
+        
         Args:
-            t: current time (required by Diffrax, not always used by underlying reaction kinetics).
-            y (jax.numpy.ndarray): ordered array of substrate values at this current timepoint. Has the same order as self.run_model_species_names.
-            args (tuple): Contains (run_model_species_names, run_model_parameters).
-
+            t: Current time
+            y: Current species concentrations (JAX array)
+            args: Tuple containing (reactions, species_names, parameter_values)
+            
         Returns:
-            y_prime (jax.numpy.ndarray): ordered array the same shape as y, y_prime is the new set of dy/dt for this timepoint.
+            JAX array of derivatives (dy/dt) for each species
         """
         (reactions, species_names, parameter_values) = args
 
@@ -34,14 +46,20 @@ class JaxSolver(ODESolver):
 
         return yprime
 
-    def run(self, reactions, species_names, species_values, parameter_values, time):
-        """
-        Runs the model and outputs y
-
-        Uses self.run_model_species, run_model_species_names, self.run_model_species_starting_values and self.run_model_parameters.
-        These are loaded by calling self.setup_model() before running.
-
-        Outputs saved to self.y
+    def run(self, reactions: list['Reaction'], species_names: list[str], 
+            species_values: list[float], parameter_values: list[float], 
+            time: np.ndarray) -> np.ndarray:
+        """Solve the ODE system using JAX and Diffrax.
+        
+        Args:
+            reactions: List of reaction objects
+            species_names: Ordered species names
+            species_values: Initial species concentrations
+            parameter_values: Parameter values
+            time: Time points for integration
+            
+        Returns:
+            Solution array with shape (n_timepoints, n_species)
         """
         
         y0 = jnp.array(species_values)
@@ -79,7 +97,6 @@ class JaxSolver(ODESolver):
                                saveat=saveat,
                                stepsize_controller=stepsize_controller)
 
-        # Convert JAX array solution to NumPy array for compatibility with existing methods
+        # Convert JAX array solution to NumPy array for compatibility
         y = np.asarray(solution.ys)
-
         return y

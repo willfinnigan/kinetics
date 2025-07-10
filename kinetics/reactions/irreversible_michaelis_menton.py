@@ -1,6 +1,6 @@
 from kinetics.models.reaction_class import Reaction
+import numpy as np
 
-""" Michaelis-Menten irreversible equations """
 class Uni(Reaction):
 
     def __init__(self,
@@ -28,7 +28,31 @@ class Uni(Reaction):
 
         return rate
 
+    def calculate_rate_batch(self, substrates_batch, parameters_batch):
+        """Vectorized rate calculation for multiple parameter sets.
+        
+        Args:
+            substrates_batch: Substrate concentrations (n_samples, n_substrates)
+            parameters_batch: Parameter values (n_samples, n_parameters)
+            
+        Returns:
+            Rate array (n_samples,)
+        """
+        # Substrates - vectorized
+        a = substrates_batch[:, 0]
+        enz = substrates_batch[:, 1]
+
+        # Parameters - vectorized
+        kcat = parameters_batch[:, 0]
+        kma = parameters_batch[:, 1]
+
+        # Vectorized Michaelis-Menten equation
+        rate = kcat * enz * (a / (kma + a))
+        
+        return rate
+
 class Bi(Reaction):
+    
     def __init__(self,
                  kcat=None, kma=None, kmb=None,
                  a=None, b=None, enz=None,
@@ -122,8 +146,6 @@ class Bi_ping_pong(Reaction):
         return rate
 
 class Ter_seq_redam(Reaction):
-    r"""
-    """
 
     def __init__(self,
                  kcat=None, kma=None, kmb=None, kmc=None, kia=None, kib=None,
@@ -162,9 +184,6 @@ class Ter_seq_redam(Reaction):
         return rate
 
 class Ter_seq_car(Reaction):
-    r"""
-
-    """
 
     def __init__(self,
                  kcat=None,
@@ -200,8 +219,6 @@ class Ter_seq_car(Reaction):
         return rate
 
 class Bi_ternary_complex_small_kma(Reaction):
-    r"""
-    """
 
     def __init__(self,
                  kcat=None, kmb=None, kia=None,

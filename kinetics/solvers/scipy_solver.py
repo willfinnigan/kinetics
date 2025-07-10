@@ -1,28 +1,49 @@
+from __future__ import annotations
+
 import numpy as np
 from scipy import integrate
+from typing import TYPE_CHECKING
 
 from kinetics.solvers.solver_interface import ODESolver
 
+if TYPE_CHECKING:
+    from kinetics.models.reaction_class import Reaction
+
 
 class SciPySolver(ODESolver):
+    """SciPy-based ODE solver using scipy.integrate.odeint.
+    
+    Uses the LSODA algorithm for efficient integration of stiff and non-stiff
+    ordinary differential equations.
+    
+    Args:
+        mxsteps: Maximum number of steps allowed during integration
+    """
 
-    def __init__(self, mxsteps=5000):
+    def __init__(self, mxsteps: int = 5000):
+        """Initialize solver with maximum step limit.
+        
+        Args:
+            mxsteps: Maximum number of integration steps
+        """
         self.mxsteps = mxsteps
 
-        # Run the model
-    def deriv(self, y, t, reactions, species_names, parameter_values):
-        """
-        deriv function called by integrate.odeint(self.deriv, y0, self.time)
-
-        For each step when the model is run, the rate for each reaction is calculated and changes in substrates and products calculated.
-        These are returned by this function as y_prime, which are added to y which is returned by run_model
-
+    def deriv(self, y: np.ndarray, t: float, reactions: list['Reaction'], 
+              species_names: list[str], parameter_values: list[float]) -> np.ndarray:
+        """Calculate derivatives for ODE integration.
+        
+        Called by scipy.integrate.odeint at each integration step.
+        Computes the rate of change for each species based on all reactions.
+        
         Args:
-            y (list): ordered list of substrate values at this current timepoint. Has the same order as self.run_model_species_names
-            t (): time, not used in this function but required for some reason
-
+            y: Current species concentrations
+            t: Current time (required by odeint)
+            reactions: List of reaction objects
+            species_names: Ordered species names
+            parameter_values: Parameter values
+            
         Returns:
-            y_prime - ordered list the same as y, y_prime is the new set of y's for this timepoint.
+            Array of derivatives (dy/dt) for each species
         """
 
         yprime = np.zeros(len(y))
@@ -32,19 +53,27 @@ class SciPySolver(ODESolver):
 
         return yprime
 
-    def run(self, reactions, species_names, species_values, parameter_values, time):
-        """
-        Runs the model and outputs y
-
-        Uses self.run_model_species, run_model_species_names, self.run_model_species_starting_values and self.run_model_parameters.
-        These are loaded by calling self.setup_model() before running.
-
-        Outputs saved to self.y
+    def run(self, reactions: list['Reaction'], species_names: list[str], 
+            species_values: list[float], parameter_values: list[float], 
+            time: np.ndarray) -> np.ndarray:
+        """Solve the ODE system using scipy.integrate.odeint.
+        
+        Args:
+            reactions: List of reaction objects
+            species_names: Ordered species names
+            species_values: Initial species concentrations
+            parameter_values: Parameter values
+            time: Time points for integration
+            
+        Returns:
+            Solution array with shape (n_timepoints, n_species)
         """
 
 
         y0 = np.array(species_values, dtype=float)
-        y = integrate.odeint(self.deriv, y0, time, args=(reactions, species_names, parameter_values), mxstep=self.mxsteps)
+        y = integrate.odeint(self.deriv, y0, time, 
+                           args=(reactions, species_names, parameter_values), 
+                           mxstep=self.mxsteps)
         return y
 
 

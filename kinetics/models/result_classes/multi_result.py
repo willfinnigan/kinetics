@@ -15,16 +15,28 @@ if TYPE_CHECKING:
     from kinetics.models.model_class import Model
 
 
-class MultiModelResult(object):
+class MultiModelResult:
+    """Results container for multiple model runs with parameter uncertainty.
+    
+    Stores ensemble simulation results and provides methods for statistical
+    analysis and uncertainty visualization.
+    
+    Attributes:
+        model: The model that was run
+        multi_ys: List of solution arrays from each run
+        ts: Time points array
+        species_names: Ordered list of species names
+        color_palette: Default colors for plotting
+        substrate_colors: Color assignments for each species
+    """
 
-    def __init__(self, model: Model, multi_ys: List[np.ndarray], species_names):
-        """
-        This class is used to store the results of multiple model runs where samples have been used.
-
+    def __init__(self, model: Model, multi_ys: List[np.ndarray], species_names: list[str]):
+        """Initialize multi-run result container.
+        
         Args:
-            model (Model): the model that was run
-            ys (List[np.ndarray]): the outputs of the model runs
-            species_names (List[str]): names of the species
+            model: The model that was run
+            multi_ys: List of solution arrays from each run
+            species_names: Ordered list of species names
         """
         self.model = model
         self.multi_ys = multi_ys
@@ -33,14 +45,29 @@ class MultiModelResult(object):
         self.color_palette = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
         self.substrate_colors = {}
         
-    def _get_substrate_color(self, substrate_name):
-        """Get or assign a color for a substrate."""
+    def _get_substrate_color(self, substrate_name: str) -> str:
+        """Get or assign a color for a substrate.
+        
+        Args:
+            substrate_name: Name of the substrate
+            
+        Returns:
+            Color string for the substrate
+        """
         if substrate_name not in self.substrate_colors:
             color_index = len(self.substrate_colors) % len(self.color_palette)
             self.substrate_colors[substrate_name] = self.color_palette[color_index]
         return self.substrate_colors[substrate_name]
 
-    def _return_ys_for_a_single_substrate(self, substrate_name):
+    def _return_ys_for_a_single_substrate(self, substrate_name: str) -> list:
+        """Extract time series data for a single substrate across all runs.
+        
+        Args:
+            substrate_name: Name of the substrate
+            
+        Returns:
+            List of [time, run1_value, run2_value, ...] for each timepoint
+        """
 
         collected_output = []
         for i in range(len(self.ts)):
@@ -55,7 +82,12 @@ class MultiModelResult(object):
 
     @cache
     def dataframe(self) -> Dict[str, pd.DataFrame]:
-        """Returns a dictionary of {'species_name': dataframe} for each species in the model."""
+        """Export all run results as DataFrames.
+        
+        Returns:
+            Dictionary mapping species names to DataFrames containing
+            time column and one column per simulation run
+        """
 
         all_runs_substrate_dataframes = {}
 
@@ -81,19 +113,15 @@ class MultiModelResult(object):
         return all_runs_substrate_dataframes
 
     @cache
-    def dataframe_quartiles(self, quartile=95):
-        """
-        Gives a dictionary of dataframes - {'Substrate' : dataframe'}
-        Each dataframe has columns ['Time', 'High', 'Low', 'Mean']
-
+    def dataframe_quartiles(self, quartile: int = 95) -> Dict[str, dict]:
+        """Calculate confidence intervals for all species.
+        
         Args:
-            model (Model): Model object
-            output (list): The output from run_all_models. [y1, y2, y3 ect]
-            substrates (list): Substrate names to include. If empty returns all (default).
-            quartile (int): The percentile to take.  Default is 95 which gives with 95% and 5% quartiles.
-
+            quartile: Percentile for confidence intervals (default 95%)
+            
         Returns:
-            Dictionary of dataframes containing confidence intervals from the uncertainty analysis.
+            Dictionary mapping species names to dictionaries with
+            'Time', 'High', 'Low', 'Mean' keys containing arrays
         """
 
         dataframes = {}
@@ -116,21 +144,18 @@ class MultiModelResult(object):
 
         return dataframes
 
-    def plot_all(self, substrate, units=['', ''],
-             colour=None, alpha=0.1, linewidth=0.1, y_min=True):
-        """
-        Plot every model run for a single substrate.
-
+    def plot_all(self, substrate: str, units: list[str] = ['', ''],
+                 colour: str = None, alpha: float = 0.1, 
+                 linewidth: float = 0.1, y_min: bool = True) -> None:
+        """Plot every model run for a single substrate.
+        
         Args:
-            substrate (str): Substrate name
-            dataframes (dict): A dictionary of dataframes made using dataframes_all_runs
-            colour: Colour argument for matplotlib, default = 'blue'
-            xlabel (str): Label for x axis, default = 'Time (mins)'
-            ylabel (str): Label for y axis, default = 'μM'
-            alpha: Alpha argument for matplotlib, default = 0.1
-            linewidth: Linewidth argument for matplotlib, defualt = 0.1
-            y_min (int): If a number sets the bottom of the axis to this. Default is True
-
+            substrate: Substrate name to plot
+            units: List of [y_label, x_label] for axis labels
+            colour: Color for lines (auto-assigned if None)
+            alpha: Line transparency
+            linewidth: Width of lines
+            y_min: Whether to auto-set y-axis minimum
         """
 
         dataframes = self.dataframe()
@@ -152,19 +177,17 @@ class MultiModelResult(object):
         if y_min != True:
             plt.ylim(bottom=y_min)
 
-    def plot(self,
-                substrate, quartile=95,
-                colour=None, alpha=0.1, units=['', '']):
-        """
-        Plot every model run for a single substrate.
-
+    def plot(self, substrate: str, quartile: int = 95,
+             colour: str = None, alpha: float = 0.1, 
+             units: list[str] = ['', '']) -> None:
+        """Plot confidence intervals for a substrate.
+        
         Args:
-            substrates_to_add (list): List of substrate names
-            dataframes (dict): A dictionary of dataframes made using dataframes_quartiles
-            colours (list): Colour arguments for matplotlib, each substrate will cycle through this list.
-            alpha (int): Alpha argument for matplotlib, default = 0.1
-            units (list): Units for the axis [yaxis_lable, xaxis_lable]
-            plot (bool):  If true plots the graph using plt.plot()
+            substrate: Substrate name to plot
+            quartile: Percentile for confidence intervals
+            colour: Color for plot (auto-assigned if None)
+            alpha: Fill transparency
+            units: List of [y_label, x_label] for axis labels
         """
 
         dataframes = self.dataframe_quartiles(quartile=quartile)
@@ -187,7 +210,19 @@ class MultiModelResult(object):
         plt.ylabel(units[0])
         plt.xlabel(units[1])
 
-    def plot_data(self, substrates, data_df,
-              alpha=0.5, size=35, colours=['black'], symbols=["o", "s", '^', 'v']):
+    def plot_data(self, substrates: list[str], data_df: pd.DataFrame,
+                  alpha: float = 0.5, size: int = 35, 
+                  colours: list[str] = ['black'], 
+                  symbols: list[str] = ["o", "s", '^', 'v']) -> None:
+        """Add experimental data points to current plot.
+        
+        Args:
+            substrates: List of substrate names to plot
+            data_df: DataFrame containing experimental data
+            alpha: Transparency for data points
+            size: Size of data points
+            colours: List of colors for different substrates
+            symbols: List of symbols for different substrates
+        """
         return plot_data(substrates, data_df,
-                            alpha=alpha, size=size, colours=colours, symbols=symbols)
+                        alpha=alpha, size=size, colours=colours, symbols=symbols)
