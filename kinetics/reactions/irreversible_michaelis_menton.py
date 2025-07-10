@@ -28,28 +28,6 @@ class Uni(Reaction):
 
         return rate
 
-    def calculate_rate_batch(self, substrates_batch, parameters_batch):
-        """Vectorized rate calculation for multiple parameter sets.
-        
-        Args:
-            substrates_batch: Substrate concentrations (n_samples, n_substrates)
-            parameters_batch: Parameter values (n_samples, n_parameters)
-            
-        Returns:
-            Rate array (n_samples,)
-        """
-        # Substrates - vectorized
-        a = substrates_batch[:, 0]
-        enz = substrates_batch[:, 1]
-
-        # Parameters - vectorized
-        kcat = parameters_batch[:, 0]
-        kma = parameters_batch[:, 1]
-
-        # Vectorized Michaelis-Menten equation
-        rate = kcat * enz * (a / (kma + a))
-        
-        return rate
 
 class Bi(Reaction):
     

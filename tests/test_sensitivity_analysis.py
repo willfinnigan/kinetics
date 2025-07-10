@@ -30,7 +30,7 @@ def two_enzyme_model_result():
     model.add_reaction(enzyme_1)
     model.add_reaction(enzyme_2)
     
-    solver = kinetics.SciPySolver()
+    solver = kinetics.JaxSolver()
     sampler = SalibSaltelliSampler(num_samples=100, log_parameters=['enz2_km'])
     
     result = model.run_multi({"A": 10000, "enz_1": 5, "enz_2": 2},

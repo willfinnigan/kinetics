@@ -95,7 +95,8 @@ class JaxSolver(ODESolver):
                                y0=y0,
                                args=deriv_args,
                                saveat=saveat,
-                               stepsize_controller=stepsize_controller)
+                               stepsize_controller=stepsize_controller,
+                               max_steps=100_000)  # Increased max_steps for stiff/long problems
 
         # Convert JAX array solution to NumPy array for compatibility
         y = np.asarray(solution.ys)
