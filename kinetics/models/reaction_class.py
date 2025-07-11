@@ -82,6 +82,36 @@ def check_positive(y_prime: np.ndarray) -> np.ndarray:
 
     return y_prime
 
+
+""" Modifiers (eg inhibtion) """
+class Modifier():
+
+    def __init__(self):
+        self.substrate_names = []
+        self.substrate_indexes = []
+
+        self.parameter_names = []
+        self.parameter_indexes = []
+
+    def get_substrate_indexes(self, substrate_names):
+        self.substrate_indexes = []
+        for name in self.substrate_names:
+            self.substrate_indexes.append(substrate_names.index(name))
+
+    def get_parameter_indexes(self, parameter_names):
+        self.parameter_indexes = []
+        for name in self.parameter_names:
+            self.parameter_indexes.append(parameter_names.index(name))
+
+    def calc_modifier(self, substrates, parameters):
+        # the substrate indexes will be stored in self.substrate_indexes,
+        # in the order that they are named in self.substrate_names
+        # same for parameters
+        # use these indexes to write the equation here.
+
+        return substrates, parameters
+    
+
 class Reaction:
     """Base class for all reaction types.
     
@@ -123,7 +153,9 @@ class Reaction:
         self.check_limits_functions = []
 
     def set_parameter_defaults_to_mean(self) -> None:
-        """Set default parameter values from distribution means."""
+        """Set default parameter values from distribution means.
+        This function is called once by the model at the start of a run
+        """
         for name in self.parameter_distributions:
             if name not in self.parameters:
                 if type(self.parameter_distributions[name]) == list or type(self.parameter_distributions[name]) == tuple:
@@ -134,12 +166,14 @@ class Reaction:
     def setup_reaction(self, species_names: list[str], parameter_names: list[str]) -> None:
         """Set up reaction indexes for efficient parameter/species access.
         
+        This function is called once by the model at the start of a run
+        
         Args:
-            species_names: Ordered list of all species in model
-            parameter_names: Ordered list of all parameters in model
+            species_names: List of all species in model in the order they will be passed in
+            parameter_names: List of all parameters in model in the order they will be passed in
         """
 
-        # get indexes
+        # get indexes for rate calculation
         self.substrate_indexes = [species_names.index(name) for name in self.reaction_substrate_names]
         self.parameter_indexes = [parameter_names.index(name) for name in self.parameter_names]
 
@@ -148,7 +182,7 @@ class Reaction:
             modifier.get_substrate_indexes(self.reaction_substrate_names)
             modifier.get_parameter_indexes(self.parameter_names)
 
-    def add_modifier(self, modifier: Any) -> None:
+    def add_modifier(self, modifier: Modifier) -> None:
         """Add a modifier (e.g., inhibitor) to the reaction.
         
         Args:
@@ -189,6 +223,8 @@ class Reaction:
         """
 
         # Get the substrates from y using the substrate indexes
+        ## These are in the order they are defined in the subclassed reaction in self.reaction_substrate_names
+        ## The indexes are set up in self.setup_reaction from self.reaction_substrate_names
         substrates = []
         for index in self.substrate_indexes:
             substrates.append(y[index])

@@ -1,30 +1,7 @@
-""" Modifiers (eg inhibtion) """
-class Modifier():
 
-    def __init__(self):
-        self.substrate_names = []
-        self.substrate_indexes = []
 
-        self.parameter_names = []
-        self.parameter_indexes = []
+from kinetics.models.reaction_class import Modifier
 
-    def get_substrate_indexes(self, substrate_names):
-        self.substrate_indexes = []
-        for name in self.substrate_names:
-            self.substrate_indexes.append(substrate_names.index(name))
-
-    def get_parameter_indexes(self, parameter_names):
-        self.parameter_indexes = []
-        for name in self.parameter_names:
-            self.parameter_indexes.append(parameter_names.index(name))
-
-    def calc_modifier(self, substrates, parameters):
-        # the substrate indexes will be stored in self.substrate_indexes,
-        # in the order that they are named in self.substrate_names
-        # same for parameters
-        # use these indexes to write the equation here.
-
-        return substrates, parameters
 
 class SubstrateInhibition(Modifier):
 
