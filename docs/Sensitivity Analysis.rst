@@ -1,6 +1,6 @@
-===================
+====================
 Sensitivity Analysis
-===================
+====================
 
 This tutorial demonstrates how to perform sensitivity analysis on enzyme kinetic models using the kinetics package. Sensitivity analysis helps identify which parameters have the most influence on your model outputs.
 
@@ -79,12 +79,21 @@ Let's analyze a simple two-enzyme pathway: A → B → C
 
     result = model.run_multi(initial_conditions, sampler, solver)
 
-    print(f"Completed {len(result.results)} simulations")
+    result.plot('A')
+    result.plot('B')
+    result.plot('C')
+    plt.show()
+
+.. image:: images/sensitivity_run.png
+   :scale: 35
+   :alt: sensitivity run plot
+
+
 
 Analysis 1: Sensitivity at Specific Timepoint
 ----------------------------------------------
 
-Analyze which parameters most influence the concentration of species B at t=500 seconds:
+Analyze which parameters most influence the concentration of species B at t=200 seconds:
 
 .. code-block:: python
 
@@ -93,12 +102,12 @@ Analyze which parameters most influence the concentration of species B at t=500 
         result=result,
         sampler=sampler,
         species='B',
-        timepoint=500,
-        threshold=0.01  # Only show parameters with >1% sensitivity
+        timepoint=200,
+        threshold=0
     )
 
     # Display results
-    print("Sensitivity Analysis for [B] at t=500s:")
+    print("Sensitivity Analysis for [B] at t=200s:")
     print(sa_result.data)
 
     # Visualize results
@@ -106,34 +115,53 @@ Analyze which parameters most influence the concentration of species B at t=500 
 
 Expected output::
 
-    Sensitivity Analysis for [B] at t=500s:
-              S1    ST    S1_conf    ST_conf
-    enz1_kcat  0.45  0.48      0.03      0.04
-    enz1_km    0.32  0.35      0.02      0.03
-    enz2_kcat  0.15  0.18      0.02      0.02
+    Sensitivity Analysis for [B] at t=200s:
+                    S1   S1_conf        ST   ST_conf
+    enz1_kcat -0.000038  0.000539  0.000034  0.000006
+    enz1_km   -0.000071  0.000922  0.000136  0.000024
+    enz2_kcat  0.017103  0.017343  0.041190  0.006786
+    enz2_km    0.954835  0.107375  0.979004  0.064452
+
+.. image:: images/sensitivity_1.png
+   :scale: 35
+   :alt: sensitivity analysis plot
+
 
 Analysis 2: Time to Reach Target Concentration
 -----------------------------------------------
 
-Analyze which parameters most influence the time to reach 5000 µM of species B:
+Analyze which parameters most influence the time to reach 50 µM or less of species A:
 
 .. code-block:: python
 
-    # Analyze sensitivity for time to reach [B] = 5000 µM
-    sa_result = analyze_sensitivity_time_to_concentration(
+    # Analyze sensitivity for time to reach [A] = 50 µM
+    sa_result = kinetics.analyze_sensitivity_time_to_concentration(
         result=result,
         sampler=sampler,
-        species='B',
-        concentration=5000,
-        mode='>=',       # Time to reach or exceed concentration
-        threshold=0.01
+        species='A',
+        concentration=50,
+        mode='<=',       # Time to reach or be less than concentration
+        threshold=0
     )
 
-    print("Sensitivity Analysis for time to reach [B] = 5000 µM:")
+    print("Sensitivity Analysis for time to reach [A] = 50 µM:")
     print(sa_result.data)
 
     # Visualize results
     sa_result.plot()
+
+Expected output::
+
+    Sensitivity Analysis for time to reach [A] = 50 µM:
+                    S1   S1_conf        ST   ST_conf
+    enz1_kcat  0.081237  0.032020  0.129793  0.010073
+    enz1_km    0.866165  0.078412  0.929434  0.062554
+
+.. image:: images/sensitivity_2.png
+   :scale: 35
+   :alt: sensitivity analysis plot
+
+
 
 Interpreting Results
 --------------------
@@ -173,28 +201,3 @@ a Python library for performing global sensitivity analysis. SALib provides robu
 * **Parameter Space Exploration**: Comprehensive parameter uncertainty analysis
 
 For more information on sensitivity analysis methods and theory, visit the `SALib documentation <https://salib.readthedocs.io/>`_.
-
-
-Performance Tips
-----------------
-
-1. **Start with fewer samples** (100-500) for initial exploration
-2. **Use log-scale sampling** for parameters spanning multiple orders of magnitude
-3. **Increase samples** (1000-5000) for publication-quality results
-4. **Use thresholds** to focus on important parameters
-5. **Consider computational cost** - sensitivity analysis requires many model runs
-
-Troubleshooting
----------------
-
-**Error: "Not enough samples"**
-    * Increase ``num_samples`` in the sampler
-    * SALib requires sufficient samples for robust Sobol analysis
-
-**Error: "Parameter not found"**
-    * Check parameter names match those in reaction definitions
-    * Verify parameter_distributions keys are correct
-
-**Warning: "High confidence intervals"**
-    * Increase ``num_samples`` for better statistical precision
-    * Check if parameter ranges are appropriate

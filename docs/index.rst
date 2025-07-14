@@ -11,12 +11,14 @@ Home
 kinetics is a package for modelling reactions using ordinary differential equations.
 It's primarily aimed at modelling enzyme reactions, although can be used for other purposes.
 
-kinetics uses scipy.integrate.odeint to solve ordinary differential equations,
+kinetics uses configurable ODE solvers (currently SciPy and JAX) to solve ordinary differential equations,
 but extends upon this to allow the use of parameter distributions rather than single parameter values.
 This allows error to be incorporated into the modelling.
 
-kinetics uses `scipy's probability distributions <https://docs.scipy.org/doc/scipy/reference/stats.html/>`_, with a large number of distributions to choose from.
-Typically uniform , normal, log-uniform or log-normal distributions are used.
+kinetics supports two approaches for parameter sampling:
+
+- **SciPy distributions**: Uses `scipy's probability distributions <https://docs.scipy.org/doc/scipy/reference/stats.html/>`_ with a large number of distributions to choose from. Typically uniform, normal, log-uniform or log-normal distributions are used.
+- **SALib sampling**: Uses `SALib (Sensitivity Analysis Library) <https://salib.readthedocs.io>`_ for parameter sampling, which is particularly useful for sensitivity analysis but offers a more limited range of probability distributions.
 
 **Documentation:** `ReadTheDocs <http://kinetics.readthedocs.org>`__
 
@@ -24,7 +26,8 @@ Typically uniform , normal, log-uniform or log-normal distributions are used.
 
 **Requirements:**   `NumPy <http://www.numpy.org/>`_, `SciPy <http://www.scipy.org/>`_,
 `matplotlib <http://matplotlib.org/>`_, `tqdm <https://tqdm.github.io>`_, `pandas <http://pandas.pydata.org>`_,
-`SALib <https://salib.readthedocs.io>`_, `seaborn <http://seaborn.pydata.org>`_, and `deap <https://deap.readthedocs.io/en/master/>`_.
+`SALib <https://salib.readthedocs.io>`_, `seaborn <http://seaborn.pydata.org>`_, `JAX <https://jax.readthedocs.io>`_, 
+`diffrax <https://docs.kidger.site/diffrax/>`_, and `deap <https://deap.readthedocs.io/en/master/>`_.
 
 **Installation:** ``pip install kinetics``
 
@@ -45,9 +48,9 @@ Features
 
    Installation
    Why What and How
-   Simple Tutorial
-   Advanced Tutorial
-   Advanced Tutorial 2
+   Single Parameter Tutorial
+   Uncertain parameters - SciPy Distribution tutorial
+   Uncertain parameters - SALib bounds tutorial
    Sensitivity Analysis
    Reactions
    Custom Reactions

@@ -171,7 +171,7 @@ class Model(object):
     def run_multi(self,
                   starting_concentrations: dict,
                   sampler: 'Sampler' = None,
-                  solver: 'ODESolver' = None) -> MultiModelResult:
+                  solver: 'ODESolver' = SciPySolver()) -> MultiModelResult:
         """Run model with parameter distributions for uncertainty analysis.
         
         Args:
@@ -183,9 +183,7 @@ class Model(object):
             MultiModelResult containing ensemble simulation results
         """
         if sampler is None:
-            sampler = ScipyDist_Sampler(num_samples=1000)
-        if solver is None:
-            solver = SciPySolver()
+            raise ValueError("Sampler must be provided for multi-parameter simulations.")
 
         # Get the default values for all parameters and species (which is 0)
         species, parameters = self._parameters_and_species_from_reactions()

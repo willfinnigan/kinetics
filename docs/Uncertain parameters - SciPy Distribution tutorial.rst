@@ -1,6 +1,6 @@
-=================
-Advanced Tutorial
-=================
+==================================================
+Uncertain parameters - SciPy Distribution tutorial
+==================================================
 
 This tutorial uses the same example as the simple tutorial, but demonstrates the use of probability distributions rather than single parameter values.
 
@@ -83,6 +83,7 @@ Running the model this way will use the mean of each probability distribution sp
     result.plot('A')
     result.plot('B')
     result.plot('C')
+    plt.show()
 
 .. image:: images/simple_example1.png
    :scale: 25
@@ -121,6 +122,7 @@ Plotting the 95% confidence intervals can look neater, but we lose some informat
     result.plot('A', quartile=95)
     result.plot('B', quartile=95)  
     result.plot('C', quartile=95)
+    plt.show()
 
 .. image:: images/advanced_example1.png
    :scale: 25
@@ -137,6 +139,7 @@ Alternatively we can plot every single run.  With 1000 runs this can look a bit 
     result.plot_all('A')
     result.plot_all('B')
     result.plot_all('C')
+    plt.show()
 
 .. image:: images/advanced_example2.png
    :scale: 25

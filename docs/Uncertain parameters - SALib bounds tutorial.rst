@@ -1,6 +1,6 @@
-==========================
-Advanced Tutorial 2 - SALib
-==========================
+============================================
+Uncertain parameters - SALib bounds tutorial
+============================================
 
 This tutorial demonstrates an alternative approach to parameter uncertainty using SALib bounds instead of scipy probability distributions. This method is particularly useful for sensitivity analysis and when you want to explore parameter space without making distributional assumptions.
 
@@ -113,11 +113,13 @@ The plotting and analysis methods are identical to the scipy distribution approa
     result.plot('A', quartile=95)
     result.plot('B', quartile=95)
     result.plot('C', quartile=95)
+    plt.show()
 
     # Plot all individual model runs
     result.plot_all('A')
     result.plot_all('B')
     result.plot_all('C')
+    plt.show()
 
 .. image:: images/advanced_example1.png
    :scale: 25

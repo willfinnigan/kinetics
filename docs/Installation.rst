@@ -39,7 +39,7 @@ Try this block of code in a `google colab <https://colab.research.google.com/>`_
 
 .. code:: python
 
-    !pip install kinetics
+    # In Jupyter notebook, run: !pip install kinetics
     import kinetics
 
     # Define reactions
