@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class JaxSolver(ODESolver):
     """JAX-based ODE solver using Diffrax for high-performance computation.
     
-    Uses JAX for automatic differentiation and GPU acceleration,
+    Uses JAX for automatic differentiation and GPU acceleration (not yet supported),
     with the Diffrax library for numerical integration.
     
     This solver is optimized for performance-critical applications
