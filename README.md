@@ -4,6 +4,8 @@
 
 kinetics is a package for modelling reactions using ordinary differential equations. It's primarily aimed at modelling enzyme reactions, although can be used for other purposes.
 
+![Graphical Abstract](docs/images/title_diagram.png)
+
 See the [Documentation](http://kinetics.readthedocs.org) for more information.
 
 kinetics uses scipy.integrate.odeint to solve ordinary differential equations, but extends upon this to allow the use of parameter distributions rather than single parameter values. This allows error to be incorporated into the modelling.
@@ -32,7 +34,7 @@ pip install -e .
 
 **Citation:** [Finnigan, W., Cutlan, R., Snajdrova, R., Adams, J., Littlechild, J. and Harmer, N. (2019), Engineering a seven enzyme biotransformation using mathematical modelling and characterized enzyme parts. ChemCatChem.](https://doi.org/10.1002/cctc.201900646)
 
-![Graphical Abstract](docs/images/title_diagram.png)
+
 
 ## Features
 - Construct systems of ODEs simply by selecting suitable rate equations and naming parameters and species
