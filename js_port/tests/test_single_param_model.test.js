@@ -1,12 +1,8 @@
-const {
-    Model
-} = require('../src/models/Model');
+const Model = require('../src/models/Model');
 const {
     Uni
 } = require('../src/reactions/IrreversibleMichaelisMenten');
-const {
-    Solver
-} = require('../src/solvers/Solver');
+const Solver = require('../src/solvers/Solver');
 
 // Helper function to check if two arrays are close enough
 function assert_allclose(actual, expected, atol = 1e-8, rtol = 1e-5) {

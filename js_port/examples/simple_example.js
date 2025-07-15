@@ -1,6 +1,4 @@
-const {
-    Model
-} = require('../src/models/Model');
+const Model = require('../src/models/Model');
 const {
     Uni
 } = require('../src/reactions/IrreversibleMichaelisMenten');

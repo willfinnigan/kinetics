@@ -1,23 +1,23 @@
 class Modifier {
     constructor() {
-        this.substrate_names = [];
-        this.substrate_indexes = [];
+        this.substrateNames = [];
+        this.substrateIndexes = [];
 
-        this.parameter_names = [];
-        this.parameter_indexes = [];
+        this.parameterNames = [];
+        this.parameterIndexes = [];
     }
 
     getSubstrateIndexes(substrate_names) {
-        this.substrate_indexes = [];
-        for (const name of this.substrate_names) {
-            this.substrate_indexes.push(substrate_names.indexOf(name));
+        this.substrateIndexes = [];
+        for (const name of this.substrateNames) {
+            this.substrateIndexes.push(substrate_names.indexOf(name));
         }
     }
 
     getParameterIndexes(parameter_names) {
-        this.parameter_indexes = [];
-        for (const name of this.parameter_names) {
-            this.parameter_indexes.push(parameter_names.indexOf(name));
+        this.parameterIndexes = [];
+        for (const name of this.parameterNames) {
+            this.parameterIndexes.push(parameter_names.indexOf(name));
         }
     }
 

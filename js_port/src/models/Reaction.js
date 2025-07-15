@@ -74,7 +74,7 @@ class Reaction {
 
         // calculate the effects of any modifiers
         for (const modifier of this.modifiers) {
-            [substrates, parameters] = modifier.calcModifier(substrates, parameters);
+            [substrates, parameters] = modifier.calc_modifier(substrates, parameters);
         }
 
         // calculate the rate (this function is modified by the user)

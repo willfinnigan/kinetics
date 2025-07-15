@@ -3,8 +3,8 @@ const Reaction = require('../models/Reaction');
 class Uni extends Reaction {
     constructor(kcat, kma, a, enz, substrates = [], products = []) {
         super();
-        this.reaction_substrate_names = [a, enz];
-        this.parameter_names = [kcat, kma];
+        this.reactionSubstrateNames = [a, enz];
+        this.parameterNames = [kcat, kma];
         this.substrates = substrates;
         this.products = products;
     }
@@ -27,8 +27,8 @@ class Uni extends Reaction {
 class Bi extends Reaction {
     constructor(kcat, kma, kmb, a, b, enz, substrates = [], products = []) {
         super();
-        this.reaction_substrate_names = [a, b, enz];
-        this.parameter_names = [kcat, kma, kmb];
+        this.reactionSubstrateNames = [a, b, enz];
+        this.parameterNames = [kcat, kma, kmb];
         this.substrates = substrates;
         this.products = products;
     }
@@ -54,8 +54,8 @@ class Bi extends Reaction {
 class Bi_ternary_complex extends Reaction {
     constructor(kcat, kma, kmb, kia, a, b, enz, substrates = [], products = []) {
         super();
-        this.reaction_substrate_names = [a, b, enz];
-        this.parameter_names = [kcat, kma, kmb, kia];
+        this.reactionSubstrateNames = [a, b, enz];
+        this.parameterNames = [kcat, kma, kmb, kia];
         this.substrates = substrates;
         this.products = products;
     }
@@ -84,8 +84,8 @@ class Bi_ternary_complex extends Reaction {
 class Bi_ping_pong extends Reaction {
     constructor(kcat, kma, kmb, a, b, enz, substrates = [], products = []) {
         super();
-        this.reaction_substrate_names = [a, b, enz];
-        this.parameter_names = [kcat, kma, kmb];
+        this.reactionSubstrateNames = [a, b, enz];
+        this.parameterNames = [kcat, kma, kmb];
         this.substrates = substrates;
         this.products = products;
     }
@@ -110,8 +110,8 @@ class Bi_ping_pong extends Reaction {
 class Ter_seq_redam extends Reaction {
     constructor(kcat, kma, kmb, kmc, kia, kib, enz, a, b, c, substrates = [], products = []) {
         super();
-        this.reaction_substrate_names = [a, b, c, enz];
-        this.parameter_names = [kcat, kma, kmb, kmc, kia, kib];
+        this.reactionSubstrateNames = [a, b, c, enz];
+        this.parameterNames = [kcat, kma, kmb, kmc, kia, kib];
         this.substrates = substrates;
         this.products = products;
     }
@@ -142,8 +142,8 @@ class Ter_seq_redam extends Reaction {
 class Ter_seq_car extends Reaction {
     constructor(kcat, kma, kmb, kmc, kia, enz, a, b, c, substrates = [], products = []) {
         super();
-        this.reaction_substrate_names = [a, b, c, enz];
-        this.parameter_names = [kcat, kma, kmb, kmc, kia];
+        this.reactionSubstrateNames = [a, b, c, enz];
+        this.parameterNames = [kcat, kma, kmb, kmc, kia];
         this.substrates = substrates;
         this.products = products;
     }
@@ -171,8 +171,8 @@ class Ter_seq_car extends Reaction {
 class Bi_ternary_complex_small_kma extends Reaction {
     constructor(kcat, kmb, kia, a, b, enz, substrates = [], products = []) {
         super();
-        this.reaction_substrate_names = [a, b, enz];
-        this.parameter_names = [kcat, kmb, kia];
+        this.reactionSubstrateNames = [a, b, enz];
+        this.parameterNames = [kcat, kmb, kia];
         this.substrates = substrates;
         this.products = products;
     }

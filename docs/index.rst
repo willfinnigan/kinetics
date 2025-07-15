@@ -52,6 +52,7 @@ Features
    Uncertain parameters - SciPy Distribution tutorial
    Uncertain parameters - SALib bounds tutorial
    Sensitivity Analysis
+   initial_rates
    Reactions
    Custom Reactions
    API

@@ -45,7 +45,7 @@ class Model {
                 }
             }
 
-            for (const substrate of [...reaction.substrates, ...reaction.products, ...reaction.reaction_substrate_names]) {
+            for (const substrate of [...reaction.substrates, ...reaction.products, ...reaction.reactionSubstrateNames]) {
                 if (!species.hasOwnProperty(substrate)) {
                     species[substrate] = 0;
                 }
