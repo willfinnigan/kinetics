@@ -31,3 +31,6 @@ build/
 dist/
 notebooks/
 
+# JavaScript port node_modules
+js_port/node_modules/
+
