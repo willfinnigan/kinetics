@@ -4,7 +4,7 @@
 
 kinetics is a package for modelling reactions using ordinary differential equations. It's primarily aimed at modelling enzyme reactions, although can be used for other purposes.
 
-> [!WARNING] July 2025 - Major refactor for version 2, code is now cleaner but there are breaking changes between version 1.
+> [!WARNING] July 2025 - Major refactor for version 2, code is now cleaner but there are breaking changes for version 1. Please see the examples folder.
 
 ![Graphical Abstract](docs/images/title_diagram.png)
 
