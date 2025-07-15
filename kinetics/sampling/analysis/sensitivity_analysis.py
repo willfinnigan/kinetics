@@ -11,14 +11,40 @@ from kinetics.models.result_classes.multi_result import MultiModelResult
 # =============================================================================
 
 class SensitivityResult:
-    """Simple class to hold sensitivity analysis results and provide plotting"""
+    """Container for sensitivity analysis results with plotting capabilities.
+    
+    Stores the results of Sobol sensitivity analysis and provides methods
+    for visualization and further analysis.
+    
+    Attributes:
+        data: DataFrame containing sensitivity indices (S1, ST, confidence intervals)
+    """
     
     def __init__(self, data: pd.DataFrame):
+        """Initialize sensitivity result container.
+        
+        Args:
+            data: DataFrame with sensitivity indices and confidence intervals
+        """
         self.data = data
     
     def plot(self):
-        """Plot the sensitivity analysis results"""
-        plot_sa_total_sensitivity(self.data)
+        """Plot total sensitivity indices as a bar chart.
+        
+        Creates a bar plot showing the total sensitivity index (ST) for each
+        parameter, sorted by magnitude in descending order. Includes confidence
+        intervals as error bars.
+        """
+        self.df.sort_values("ST", inplace=True, ascending=False)
+
+        x_names = self.df.index.values
+        x = np.arange(len(x_names))
+        st = self.df['ST']
+        st_err = self.df['ST_conf']
+
+        plt.bar(x, st, align='center', yerr=st_err, edgecolor='black', color='#000090')
+        plt.xticks(x, x_names, rotation=90)
+        plt.ylabel("ST")
 
 
 def analyze_sensitivity_at_timepoint(result: MultiModelResult,
@@ -203,42 +229,3 @@ def _run_sobol_analysis(salib_problem,
     return dataframe_output
 
 
-# =============================================================================
-# PLOTTING UTILITIES
-# =============================================================================
-
-def remove_st_less_than(dataframe, column='ST', less_than=0.001):
-    """
-    Remove any entry with an ST less than specified
-
-    Args:
-        dataframe (pandas.Dataframe): dataframe containing sensitivity analysis output
-        column (str): Column name, default is 'ST'
-        less_than (float): Remove anything less than this
-
-    Returns:
-        New dataframe.
-    """
-
-    new_df = dataframe[dataframe[column] > less_than]
-
-    return new_df
-
-
-def plot_sa_total_sensitivity(df):
-    """
-    Plot the sensitivity analysis
-
-    Args:
-        df: Dataframe containing output of sensitivity analysis.
-    """
-    df.sort_values("ST", inplace=True, ascending=False)
-
-    x_names = df.index.values
-    x = np.arange(len(x_names))
-    st = df['ST']
-    st_err = df['ST_conf']
-
-    plt.bar(x, st, align='center', yerr=st_err, edgecolor='black', color='#000090')
-    plt.xticks(x, x_names, rotation=90)
-    plt.ylabel("ST")

@@ -83,32 +83,62 @@ def check_positive(y_prime: np.ndarray) -> np.ndarray:
     return y_prime
 
 
-""" Modifiers (eg inhibtion) """
-class Modifier():
+class Modifier:
+    """Base class for reaction modifiers (inhibitors, activators, etc.).
+    
+    Modifiers allow reactions to be influenced by additional species or
+    parameters beyond the basic substrate-product kinetics. Examples include
+    competitive inhibition, allosteric regulation, and cofactor requirements.
+    
+    Attributes:
+        substrate_names: List of substrate names involved in modification
+        substrate_indexes: List of substrate indexes for fast lookup
+        parameter_names: List of parameter names for the modifier
+        parameter_indexes: List of parameter indexes for fast lookup
+    """
 
     def __init__(self):
+        """Initialize modifier with empty substrate and parameter lists."""
         self.substrate_names = []
         self.substrate_indexes = []
 
         self.parameter_names = []
         self.parameter_indexes = []
 
-    def get_substrate_indexes(self, substrate_names):
+    def get_substrate_indexes(self, substrate_names: list[str]) -> None:
+        """Set substrate indexes for fast lookup during simulation.
+        
+        Args:
+            substrate_names: Ordered list of all substrate names in the model
+        """
         self.substrate_indexes = []
         for name in self.substrate_names:
             self.substrate_indexes.append(substrate_names.index(name))
 
-    def get_parameter_indexes(self, parameter_names):
+    def get_parameter_indexes(self, parameter_names: list[str]) -> None:
+        """Set parameter indexes for fast lookup during simulation.
+        
+        Args:
+            parameter_names: Ordered list of all parameter names in the model
+        """
         self.parameter_indexes = []
         for name in self.parameter_names:
             self.parameter_indexes.append(parameter_names.index(name))
 
-    def calc_modifier(self, substrates, parameters):
-        # the substrate indexes will be stored in self.substrate_indexes,
-        # in the order that they are named in self.substrate_names
-        # same for parameters
-        # use these indexes to write the equation here.
-
+    def calc_modifier(self, substrates: list[float], parameters: list[float]) -> tuple[list[float], list[float]]:
+        """Calculate modifier effects on substrates and parameters.
+        
+        This method should be overridden by subclasses to implement specific
+        modifier logic (e.g., competitive inhibition equations).
+        
+        Args:
+            substrates: Current substrate concentrations
+            parameters: Current parameter values
+            
+        Returns:
+            Tuple of (modified_substrates, modified_parameters)
+        """
+        # Default implementation: no modification
         return substrates, parameters
     
 

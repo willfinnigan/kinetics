@@ -14,6 +14,8 @@ pytest tests/                    # Run all tests
 pytest tests/test_single_param_model.py  # Run specific test file
 ```
 
+When writing code for a new feature, if possible write a failing test first.  When writing tests, please refer to the documentation and to existing tests for how code should be written.  Follow TTD - you should then make this test pass.  Once the test is passing, consider whether any refactoring would help (and ensure tests still pass once this is complete).  
+
 ### Installation and Setup
 ```bash
 pip install -e .                # Install package in development mode
@@ -26,6 +28,7 @@ python -m build                    # Build distribution packages
 ```
 
 ### Documentation
+Each time you modify any documentation, please check that it builds ok without errors - fix if necessary.
 ```bash
 cd docs/                           # Navigate to documentation directory
 make html                          # Build HTML documentation with Sphinx

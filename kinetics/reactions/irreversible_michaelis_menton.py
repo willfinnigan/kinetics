@@ -2,10 +2,40 @@ from kinetics.models.reaction_class import Reaction
 import numpy as np
 
 class Uni(Reaction):
+    """Irreversible unimolecular Michaelis-Menten reaction.
+    
+    Implements the standard Michaelis-Menten kinetics for a single substrate:
+    E + S ⇌ ES → E + P
+    
+    Rate equation: v = (kcat * E * S) / (Km + S)
+    
+    Where:
+    - kcat: Catalytic rate constant (turnover number)
+    - Km: Michaelis constant (substrate concentration at half-maximal rate)
+    - E: Enzyme concentration
+    - S: Substrate concentration
+    
+    Examples:
+        >>> # Create enzyme reaction A -> B
+        >>> enzyme = kinetics.Uni(kcat='k_cat', kma='K_m', enz='enzyme', a='A',
+        ...                       substrates=['A'], products=['B'])
+        >>> enzyme.parameters = {'k_cat': 100, 'K_m': 1000}
+        >>> model.add_reaction(enzyme)
+    """
 
     def __init__(self,
                  kcat=None, kma=None, a=None, enz=None,
                  substrates=[], products=[]):
+        """Initialize unimolecular Michaelis-Menten reaction.
+        
+        Args:
+            kcat: Parameter name for catalytic rate constant
+            kma: Parameter name for Michaelis constant for substrate A
+            a: Species name for substrate A
+            enz: Species name for enzyme
+            substrates: List of substrate species names
+            products: List of product species names
+        """
 
         super().__init__()
 
@@ -16,6 +46,15 @@ class Uni(Reaction):
         self.products = products
 
     def calculate_rate(self, substrates, parameters):
+        """Calculate reaction rate using Michaelis-Menten equation.
+        
+        Args:
+            substrates: List containing [substrate_concentration, enzyme_concentration]
+            parameters: List containing [kcat, Km]
+            
+        Returns:
+            Reaction rate (concentration/time)
+        """
         # Substrates
         a = substrates[0]
         enz = substrates[1]

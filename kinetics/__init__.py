@@ -1,5 +1,6 @@
 from kinetics.models.model_class import Model
-from kinetics.models.reaction_class import Reaction
+from kinetics.models.reaction_class import Reaction, Modifier
+from kinetics.models.result_classes import SingleModelResult, MultiModelResult
 
 from kinetics.reactions import *
 from kinetics.sampling import *

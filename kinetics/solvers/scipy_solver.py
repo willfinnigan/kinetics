@@ -53,8 +53,11 @@ class SciPySolver(ODESolver):
 
         return yprime
 
-    def run(self, reactions: list['Reaction'], species_names: list[str], 
-            species_values: list[float], parameter_values: list[float], 
+    def run(self, 
+            reactions: list['Reaction'], 
+            species_names: list[str], 
+            species_values: list[float], 
+            parameter_values: list[float], 
             time: np.ndarray) -> np.ndarray:
         """Solve the ODE system using scipy.integrate.odeint.
         
