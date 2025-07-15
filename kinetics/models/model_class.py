@@ -56,6 +56,23 @@ class Model(object):
             reaction: Reaction object to add
         """
         self._reactions.append(reaction)
+    
+    def append(self, reaction: 'Reaction') -> None:
+        """Deprecated: Use add_reaction() instead.
+        
+        Args:
+            reaction: Reaction object to add
+            
+        Raises:
+            DeprecationWarning: This method is deprecated
+        """
+        import warnings
+        warnings.warn(
+            "Model.append() is deprecated since version 2. Use Model.add_reaction() instead.  Note - other breaking changes may be present, please update your model code",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        self.add_reaction(reaction)
 
     def _parameters_and_species_from_reactions(self) -> tuple[dict, dict]:
         """Extract parameters and species from all reactions.
