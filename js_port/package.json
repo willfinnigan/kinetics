@@ -1,0 +1,21 @@
+{
+  "name": "js-kinetics",
+  "version": "1.0.0",
+  "description": "A javascript port of the python kinetics package",
+  "main": "src/models/Model.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jstat": "^1.9.5",
+    "ndarray": "^1.0.19",
+    "ode-rk4": "^1.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "webpack": "^5.82.1",
+    "webpack-cli": "^5.1.1"
+  }
+}
